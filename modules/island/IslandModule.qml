@@ -160,11 +160,11 @@ PanelWindow {
 
         function onPluggedChanged(): void {
             if (Battery.available && armed.ready)
-                root.glow({ kind: Battery.plugged ? "plugged" : "unplugged" }, 3200);
+                root.glow({ kind: Battery.plugged ? "plugged" : "unplugged", run: () => Actions.open("island") }, 3600);
         }
 
         function onDropped(critical: bool): void {
-            root.glow({ kind: critical ? "critical" : "low" }, 4500);
+            root.glow({ kind: critical ? "critical" : "low", run: () => Battery.setProfile(PowerProfile.PowerSaver) }, 4500);
         }
 
         // a battery moment already says when the saver kicked in
@@ -195,7 +195,7 @@ PanelWindow {
                 const came = now.find(d => !root.btSeen.includes(d.address));
                 const left = root.btSeen.filter(a => !ids.includes(a));
                 if (came)
-                    root.glow({ kind: "bluetooth", icon: root.btIcon(came.icon ?? ""), title: came.name || came.deviceName || "Device", sub: "Connected" + (came.batteryAvailable ? "  ·  " + Math.round(came.battery * 100) + "%" : ""), accent: "#0a84ff" }, 3000);
+                    root.glow({ kind: "bluetooth", icon: root.btIcon(came.icon ?? ""), title: came.name || came.deviceName || "Device", sub: "Connected" + (came.batteryAvailable ? "  ·  " + Math.round(came.battery * 100) + "%" : ""), accent: "#0a84ff", run: () => Actions.open("island") }, 3000);
                 else if (left.length > 0)
                     root.glow({ kind: "bluetooth", icon: "bluetooth_disabled", title: "Bluetooth device", sub: "Disconnected", accent: "#8e8e93" }, 2400);
             }
@@ -226,7 +226,7 @@ PanelWindow {
         id: nameWait
 
         interval: 600
-        onTriggered: root.glow(Network.connected ? { kind: "network", icon: Network.wired ? "lan" : "wifi", title: Network.name || "Connected", sub: "Connected", accent: "#30d158" } : { kind: "network", icon: "wifi_off", title: "Wi-Fi dropped", sub: "Offline", accent: "#ff453a" }, 2800)
+        onTriggered: root.glow(Network.connected ? { kind: "network", icon: Network.wired ? "lan" : "wifi", title: Network.name || "Connected", sub: "Connected", accent: "#30d158" } : { kind: "network", icon: "wifi_off", title: "Wi-Fi dropped", sub: "Offline", accent: "#ff453a", run: () => Actions.open("island") }, 2800)
     }
 
     Connections {
@@ -329,11 +329,11 @@ PanelWindow {
 
         function onActiveChanged(): void {
             if (Downloads.active && armed.ready)
-                root.glow({ kind: "download", icon: "download", title: "Downloading", sub: Downloads.name, accent: "#64d2ff" }, 2400);
+                root.glow({ kind: "download", icon: "download", title: "Downloading", sub: Downloads.name, accent: "#64d2ff", run: () => Quickshell.execDetached(["xdg-open", Downloads.folder]) }, 2400);
         }
 
         function onFinished(name: string): void {
-            root.glow({ kind: "download", icon: "download_done", title: "Downloaded", sub: name, accent: "#30d158" }, 3200);
+            root.glow({ kind: "download", icon: "download_done", title: "Downloaded", sub: name, accent: "#30d158", run: () => Quickshell.execDetached(["xdg-open", Downloads.folder + "/" + name]) }, 3600);
         }
 
         function onCancelled(name: string): void {
@@ -438,6 +438,25 @@ PanelWindow {
         moment: root.moment
         notif: root.notif
         onDismissNotification: flashTimer.triggered()
+        // a moment with somewhere to go runs it and folds away
+        onMomentClicked: {
+            const run = root.moment.run;
+            flashTimer.stop();
+            flashTimer.triggered();
+            if (typeof run === "function")
+                run();
+        }
+        // a hovered moment or notification stays until the pointer leaves
+        onHoveredChanged: {
+            if (root.flashing !== "glow" && root.flashing !== "notification")
+                return;
+            if (hovered)
+                flashTimer.stop();
+            else if (!Notifs.replying) {
+                flashTimer.interval = 1500;
+                flashTimer.restart();
+            }
+        }
     }
 
     IpcHandler {

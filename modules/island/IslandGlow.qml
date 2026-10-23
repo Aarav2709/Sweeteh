@@ -19,7 +19,10 @@ Item {
     readonly property color accent: moment.accent ?? (({ welcome: "#0a84ff", plugged: "#30d158", unplugged: "#ff9f0a" })[kind] ?? "#ff453a")
     readonly property string title: moment.title ?? (({ welcome: "Welcome back!", plugged: Battery.percent >= 100 ? "Fully charged" : "Charging", unplugged: "On battery", low: "Battery low", critical: "Battery critical" })[kind] ?? "")
     readonly property string icon: moment.icon ?? (kind === "welcome" ? "waving_hand" : "info")
-    readonly property string sub: moment.sub ?? (warning && Battery.autoSaver ? "Battery saver on" : battery && Battery.percent < 100 && Battery.timeText ? Battery.timeText + (Battery.charging ? " to full" : " left") : "")
+    // the charger moments say how fast power flows and how long it lasts, live while they show
+    readonly property string sub: moment.sub ?? (warning && Battery.autoSaver ? "Battery saver on" : battery ? [Battery.watts >= 0.5 ? Battery.watts.toFixed(Battery.watts < 10 ? 1 : 0) + " W" : "", Battery.percent < 100 && Battery.timeText ? Battery.timeText + (Battery.charging ? " to full" : " left") : ""].filter(t => t).join("  ·  ") : "")
+    // moments that can do something on click show a pointer
+    readonly property bool actionable: typeof moment.run === "function"
     // a stronger blush for moments that stand on their own
     readonly property real strength: moment.strength ?? (kind === "welcome" ? 0.6 : 0.4)
     // read by the surface, glow tints the notch and sweep moves the shine from 0 to 1
@@ -27,6 +30,8 @@ Item {
     property real sweep: -1
     property real fill: Battery.level
     property real bolt: 0
+
+    signal clicked
 
     implicitWidth: row.implicitWidth + Theme.spacing.small * 2
     implicitHeight: row.implicitHeight
@@ -229,5 +234,13 @@ Item {
             font.pixelSize: Theme.font.small
             color: Theme.color.inkMeta
         }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        anchors.margins: -Theme.spacing.medium
+        enabled: root.actionable
+        cursorShape: Qt.PointingHandCursor
+        onClicked: root.clicked()
     }
 }

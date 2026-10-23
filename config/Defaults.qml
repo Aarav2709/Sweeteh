@@ -97,6 +97,8 @@ Singleton {
             },
             island: {
                 height: 34,
+                // how much the wallpaper color shows through the island, 0 keeps it plain
+                wallpaperTint: 0.35,
                 messageTime: 3000
             },
             media: {

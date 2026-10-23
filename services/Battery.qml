@@ -16,6 +16,10 @@ Singleton {
     readonly property bool plugged: !UPower.onBattery
     readonly property bool charging: device?.state === UPowerDeviceState.Charging || device?.state === UPowerDeviceState.FullyCharged
     readonly property int percent: Math.round(level * 100)
+    // what is flowing in or out right now, in watts
+    readonly property real watts: Math.abs(device?.changeRate ?? 0)
+    readonly property bool saver: profile === PowerProfile.PowerSaver
+    readonly property bool low: available && !plugged && percent <= Config.options.power.lowBattery
     readonly property string icon: charging ? "battery_charging_full" : percent > 90 ? "battery_full" : "battery_" + Math.max(0, Math.min(6, Math.floor(level * 7))) + "_bar"
     readonly property string timeText: {
         const s = charging ? device?.timeToFull : device?.timeToEmpty;

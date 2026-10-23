@@ -24,6 +24,8 @@ Item {
     property var moment: ({ kind: "plugged" })
     property NotifEntry notif
     readonly property bool hovered: hover.hovered
+    // the wallpaper color, through the scheme, seeps into the plain island
+    readonly property color base: Theme.mix(Theme.color.panel, Qt.alpha(Theme.color.primaryContainer, Theme.color.panel.a), Math.max(0, Math.min(1, Config.options.island.wallpaperTint)))
     readonly property Item content: ({ idle: idle, peek: peek, message: message, glow: glow, osd: osd, track: track, notification: notification, media: media, launcher: launcher, clipboard: clipboard, monitor: monitor, dashboard: dashboard, auth: auth })[mode] ?? idle
     readonly property bool compact: mode === "idle" || mode === "message" || mode === "glow" || mode === "osd" || mode === "track"
     readonly property int pad: mode === "idle" ? 0 : compact ? Theme.spacing.medium : Theme.spacing.large
@@ -71,6 +73,7 @@ Item {
     }
 
     signal dismissNotification
+    signal momentClicked
 
     focus: true
     // escape folds whatever the island is showing back to rest, the player answers to space and arrows
@@ -127,7 +130,7 @@ Item {
         anchors.fill: parent
         // a hint that the resting island opens the dashboard
         // a moment blushes the notch with its state color
-        color: Theme.mix(Theme.mix(Theme.mix(Theme.color.panel, Theme.color.ink, 0.07 * root.hoverMix), Qt.alpha(Media.accent, 1), root.music * 0.3), Qt.alpha(glowView.accent, 1), glowView.glow * glowView.strength)
+        color: Theme.mix(Theme.mix(Theme.mix(root.base, Theme.color.ink, 0.07 * root.hoverMix), Qt.alpha(Media.accent, 1), root.music * 0.3), Qt.alpha(glowView.accent, 1), glowView.glow * glowView.strength)
         rimWidth: Math.max(Theme.depth.rim, root.music * 1.5)
         rim: Theme.mix(Theme.color.depthRim, Media.accent, root.music * 0.8)
         radius: root.compact ? Math.min(height / 2, Theme.radius.medium) : Theme.radius.xl
@@ -267,6 +270,7 @@ Item {
 
                 shown: glow.shown
                 moment: root.moment
+                onClicked: root.momentClicked()
             }
         }
 

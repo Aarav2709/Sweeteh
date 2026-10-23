@@ -14,6 +14,15 @@ RowLayout {
 
     spacing: Theme.spacing.medium
 
+    // scrolling anywhere on the player seeks five seconds at a time
+    WheelHandler {
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        onWheel: e => {
+            if (Media.length > 0)
+                Media.seek(Math.max(0, Math.min(Media.length, Media.position + (e.angleDelta.y > 0 ? 5 : -5))));
+        }
+    }
+
     ClippingRectangle {
         implicitWidth: 48
         implicitHeight: 48

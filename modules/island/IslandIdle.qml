@@ -15,6 +15,12 @@ Item {
     readonly property bool hovered: hover.hovered
     readonly property bool alone: !Modes.islands
     readonly property color tint: Media.hasAccent ? Media.accent : Theme.color.primary
+    // while a song plays the whole resting island takes the cover color, not only the meter
+    readonly property bool themed: Media.playing && Media.hasAccent
+    readonly property color accent: themed ? Media.accent : Theme.color.primary
+    readonly property color onAccent: themed ? "#111111" : Theme.color.fgPrimary
+    readonly property color ink: themed ? Theme.mix(Theme.color.ink, Qt.lighter(Media.accent, 1.35), 0.55) : Theme.color.ink
+    readonly property color batteryColor: Battery.charging ? "#30d158" : Battery.low ? "#ff453a" : Battery.saver ? "#ffd60a" : ink
     // a sideways swipe skips the track, the row follows the finger a little
     property real drag: 0
     property bool swiped: false
@@ -109,7 +115,13 @@ Item {
             implicitWidth: Math.max(implicitHeight, wsLabel.implicitWidth + Theme.spacing.small * 2)
             implicitHeight: 22
             radius: height / 2
-            color: Theme.color.primary
+            color: root.accent
+
+            Behavior on color {
+                ColorAnim {
+                    duration: Theme.anim.slow
+                }
+            }
 
             Label {
                 id: wsLabel
@@ -118,7 +130,7 @@ Item {
                 text: Hypr.activeWorkspace
                 font.pixelSize: Theme.font.small
                 font.weight: Font.DemiBold
-                color: Theme.color.fgPrimary
+                color: root.onAccent
             }
 
             MouseArea {
@@ -149,6 +161,7 @@ Item {
             Layout.leftMargin: Theme.spacing.xs
             Layout.rightMargin: Theme.spacing.xs
             Layout.maximumWidth: 300
+            color: root.ink
             text: !root.hovered ? Time.time : Media.active ? Media.title + (Media.artist ? ", " + Media.artist : "") : Time.shortDate + "   " + Time.time
             font.weight: Font.DemiBold
             font.features: ({
@@ -262,15 +275,71 @@ Item {
             color: Theme.color.inkMeta
         }
 
+        // a little battery that fills to the level, green on the charger, red when low, yellow on the saver
         Row {
             visible: root.alone
-            spacing: Theme.spacing.xxs
+            spacing: Theme.spacing.xs
 
             Icon {
                 anchors.verticalCenter: parent.verticalCenter
-                name: Battery.available ? Battery.icon : Network.icon
+                visible: !Battery.available
+                name: Network.icon
                 size: Theme.font.large
-                color: Battery.available && Battery.percent <= 15 && !Battery.charging ? Theme.color.error : Theme.color.ink
+                color: root.ink
+            }
+
+            Item {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: Battery.available
+                implicitWidth: 25
+                implicitHeight: 13
+
+                Rectangle {
+                    id: cell
+
+                    width: 22
+                    height: 13
+                    radius: 4
+                    color: "transparent"
+                    border.width: 1.5
+                    border.color: Qt.alpha(root.batteryColor, 0.55)
+
+                    Rectangle {
+                        x: 2.5
+                        y: 2.5
+                        height: parent.height - 5
+                        width: Math.max(2, (parent.width - 5) * Battery.level)
+                        radius: 1.5
+                        color: root.batteryColor
+
+                        Behavior on width {
+                            Anim {}
+                        }
+
+                        Behavior on color {
+                            ColorAnim {}
+                        }
+                    }
+                }
+
+                Rectangle {
+                    anchors.left: cell.right
+                    anchors.leftMargin: 1
+                    anchors.verticalCenter: cell.verticalCenter
+                    width: 2
+                    height: 5
+                    radius: 1
+                    color: Qt.alpha(root.batteryColor, 0.55)
+                }
+
+                Icon {
+                    anchors.centerIn: cell
+                    visible: Battery.charging
+                    name: "bolt"
+                    fill: 1
+                    size: 14
+                    color: "#ffffff"
+                }
             }
 
             Label {
@@ -282,6 +351,7 @@ Item {
                 font.features: ({
                         "tnum": 1
                     })
+                color: Battery.low || Battery.charging ? root.batteryColor : root.ink
             }
         }
     }
@@ -308,10 +378,18 @@ Item {
         }
     }
 
+    Timer {
+        id: single
+
+        interval: 220
+        onTriggered: Actions.toggle("island")
+    }
+
     MouseArea {
         id: mouse
 
         property real pressX: 0
+        property real pressY: 0
 
         anchors.fill: parent
         z: -1
@@ -319,6 +397,7 @@ Item {
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
         onPressed: e => {
             pressX = e.x;
+            pressY = e.y;
             root.swiped = false;
         }
         onPositionChanged: e => {
@@ -326,14 +405,36 @@ Item {
                 root.drag = Math.max(-28, Math.min(28, (e.x - pressX) / 2));
         }
         onReleased: e => {
-            const dx = e.x - pressX;
-            if (Media.active && Math.abs(dx) > 40) {
+            const dx = e.x - pressX, dy = e.y - pressY;
+            // pulling the island down opens the dashboard, a sideways swipe skips the track
+            if (dy > 24 && dy > Math.abs(dx)) {
+                root.swiped = true;
+                Actions.open("island");
+            } else if (Media.active && Math.abs(dx) > 40) {
                 root.swiped = true;
                 dx < 0 ? Media.next() : Media.previous();
             }
             root.drag = 0;
         }
-        onClicked: e => root.swiped ? undefined : e.button === Qt.RightButton ? Actions.open("modeswitcher") : e.button === Qt.MiddleButton ? Media.toggle() : Actions.toggle("island")
+        // with music loaded a double click plays or pauses, so a single click waits a beat to be sure
+        onClicked: e => {
+            if (root.swiped)
+                return;
+            if (e.button === Qt.RightButton)
+                Actions.open("modeswitcher");
+            else if (e.button === Qt.MiddleButton)
+                Media.toggle();
+            else if (Media.active)
+                single.restart();
+            else
+                Actions.toggle("island");
+        }
+        onDoubleClicked: e => {
+            if (e.button !== Qt.LeftButton || !Media.active)
+                return;
+            single.stop();
+            Media.toggle();
+        }
         onWheel: e => {
             const step = e.angleDelta.y > 0 ? 0.05 : -0.05;
             if (Media.playing && Media.volumeSupported)
