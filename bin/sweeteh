@@ -31,6 +31,11 @@ run() {
   fi
   local child status crashes=()
   rm -f "$stopflag"
+  # without the session bus the shell comes up with no battery, media, tray or notifications
+  local tries=0
+  while [[ ! -S "${XDG_RUNTIME_DIR:-/run/user/$UID}/bus" ]] && (( tries++ < 50 )); do
+    sleep 0.2
+  done
   trap 'stopping=1; kill "$child" 2>/dev/null' INT TERM
   stopping=0
   while true; do
@@ -127,16 +132,21 @@ usage: sweeteh [command]
 USAGE
 }
 
-cmd="${1:-run}"
-shift || true
+# one block ending in exit, so bash has read all of it before running and an
+# update that rewrites this file under a running shell cannot shift what runs next
+{
+  cmd="${1:-run}"
+  shift || true
 
-case "$cmd" in
-  run) run "$@" ;;
-  stop) stop ;;
-  restart) restart ;;
-  update) update ;;
-  check) check ;;
-  ipc) exec qs -c "$name" ipc call "$@" ;;
-  -h|--help|help) usage ;;
-  *) usage; exit 1 ;;
-esac
+  case "$cmd" in
+    run) run "$@" ;;
+    stop) stop ;;
+    restart) restart ;;
+    update) update ;;
+    check) check ;;
+    ipc) exec qs -c "$name" ipc call "$@" ;;
+    -h|--help|help) usage ;;
+    *) usage; exit 1 ;;
+  esac
+  exit
+}
