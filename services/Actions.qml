@@ -19,6 +19,8 @@ Singleton {
     signal message(string icon, string text)
     signal lockRequested
     signal unlocked
+    // settings asks the island to show a sample moment
+    signal momentPreview(string kind)
     signal screenshotRequested(string kind)
     signal desktopEditRequested
     signal settingsRequested(string page)

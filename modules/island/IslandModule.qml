@@ -28,6 +28,8 @@ PanelWindow {
     // hovering the resting island while music plays opens a small player
     property bool peeking: false
     property NotifEntry notif: null
+    // more notifications from the same app folded behind the one on screen
+    property int notifGroup: 0
     // panels that live in the island, first match wins
     readonly property string hosted: ["launcher", "clipboard", "monitor", "island", "media"].find(id => Actions.isOpen(id) && (id === "island" || Modes.enabled(id))) ?? ""
     readonly property bool typing: hosted === "launcher" || hosted === "clipboard" || Auth.active || (Notifs.replying && flashing === "notification")
@@ -43,7 +45,7 @@ PanelWindow {
     // a colored moment, a notification on screen keeps its turn and a newer moment replaces an older one
     // which moments switch a kind belongs to
     function category(kind: string): string {
-        return ["plugged", "unplugged", "low", "critical", "profile"].includes(kind) ? "battery" : kind.startsWith("bluetooth") ? "bluetooth" : kind === "network" ? "network" : kind.startsWith("privacy") ? "privacy" : kind === "download" ? "downloads" : kind === "welcome" ? "welcome" : "toggles";
+        return ["plugged", "unplugged", "low", "critical", "profile"].includes(kind) ? "battery" : kind === "clipboard" ? "clipboard" : kind === "audio" ? "audio" : kind.startsWith("bluetooth") ? "bluetooth" : kind === "network" ? "network" : kind.startsWith("privacy") ? "privacy" : kind === "download" ? "downloads" : kind === "welcome" ? "welcome" : "toggles";
     }
 
     function glow(m: var, ms: int): void {
@@ -88,12 +90,33 @@ PanelWindow {
         return icon.includes("audio") || icon.includes("headset") || icon.includes("headphone") ? "headphones" : icon.includes("keyboard") ? "keyboard" : icon.includes("mouse") || icon.includes("input") ? "mouse" : icon.includes("phone") ? "smartphone" : icon.includes("watch") ? "watch" : "bluetooth";
     }
 
+    // the oldest waiting notification goes next, with any others from its app folded into it
     function showNext(): void {
-        const next = Notifs.popups[Notifs.popups.length - 1];
-        if (!next || Notifs.dnd || !Modes.enabled("notifications"))
+        const oldest = Notifs.popups[Notifs.popups.length - 1];
+        if (!oldest || Notifs.dnd || !Modes.enabled("notifications"))
             return;
-        notif = next;
+        const same = Config.options.notifications.group ? Notifs.popups.filter(n => n.appName === oldest.appName) : [oldest];
+        for (const n of same.slice(1))
+            Notifs.hide(n);
+        notif = same[0];
+        notifGroup = same.length - 1;
         flash("notification", Config.options.notifications.timeout);
+    }
+
+    // sample moments for the settings preview, shown whatever the switches say
+    function preview(kind: string): void {
+        const samples = {
+            bluetooth: { kind: "bluetooth", icon: "headphones", title: "Headphones", sub: "Connected  ·  80%" },
+            network: { kind: "network", icon: "wifi", title: "Home", sub: "Connected" },
+            toggles: { kind: "toggle Caps Lock", icon: "keyboard_capslock", title: "Caps Lock", sub: "On" },
+            privacy: { kind: "privacy mic", icon: "mic", title: "Microphone in use", sub: "Discord" },
+            downloads: { kind: "download", icon: "download_done", title: "Downloaded", sub: "photo.png" },
+            clipboard: { kind: "clipboard", icon: "content_paste", title: "Copied", sub: "Hello from the clipboard" },
+            audio: { kind: "audio", icon: "headphones", title: "Headphones", sub: "Audio output" },
+            battery: { kind: "plugged" }
+        };
+        moment = samples[kind] ?? { kind: kind };
+        flash("glow", 3200);
     }
 
     screen: Hypr.screenFor(Hypr.focusedScreenName)
@@ -139,6 +162,7 @@ PanelWindow {
             Notifs.replying = false;
             root.flashing = "";
             root.notif = null;
+            root.notifGroup = 0;
             Qt.callLater(root.advance);
         }
     }
@@ -153,9 +177,17 @@ PanelWindow {
                 flashTimer.restart();
         }
 
+        // a newer one from the app on screen takes its place and adds to the count
         function onArrived(entry: NotifEntry): void {
-            if (root.flashing !== "notification")
+            if (root.flashing !== "notification") {
                 root.showNext();
+            } else if (Config.options.notifications.group && root.notif && entry.appName === root.notif.appName && entry !== root.notif) {
+                Notifs.hide(root.notif);
+                root.notif = entry;
+                root.notifGroup++;
+                if (!island.hovered && !Notifs.replying)
+                    flashTimer.restart();
+            }
         }
     }
 
@@ -198,6 +230,10 @@ PanelWindow {
 
         function onUnlocked(): void {
             root.glow({ kind: "welcome" }, 3500);
+        }
+
+        function onMomentPreview(kind: string): void {
+            root.preview(kind);
         }
     }
 
@@ -286,7 +322,25 @@ PanelWindow {
     }
 
     Connections {
+        target: Clipboard
+
+        function onCopied(preview: string, image: bool): void {
+            if (armed.ready)
+                root.glow({ kind: "clipboard", icon: image ? "image" : "content_paste", title: image ? "Image copied" : "Copied", sub: preview }, 1800);
+        }
+    }
+
+    Connections {
         target: Audio
+
+        // the output moving to headphones or speakers says where the sound went
+        function onSinkChanged(): void {
+            if (!armed.ready || !Audio.sink)
+                return;
+            const name = Audio.sink.description || Audio.sink.nickname || Audio.sink.name || "Speakers";
+            const ear = /head|ear|bud|pod|bluez/i.test(name + " " + (Audio.sink.name ?? ""));
+            root.glow({ kind: "audio", icon: ear ? "headphones" : "speaker", title: name, sub: "Audio output" }, 2400);
+        }
 
         function onMicMutedChanged(): void {
             if (armed.ready)
@@ -466,6 +520,7 @@ PanelWindow {
         osdKind: root.osdKind
         moment: root.moment
         notif: root.notif
+        notifGroup: root.notifGroup
         onDismissNotification: flashTimer.triggered()
         // a moment with somewhere to go runs it and folds away
         onMomentClicked: {
@@ -509,7 +564,7 @@ PanelWindow {
 
         // preview a moment, plugged, unplugged, low, critical or welcome
         function moment(kind: string): void {
-            root.glow({ kind: kind }, 3200);
+            root.preview(kind);
         }
     }
 }

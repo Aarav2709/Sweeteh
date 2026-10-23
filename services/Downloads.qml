@@ -90,7 +90,7 @@ Singleton {
     Timer {
         running: root.active
         repeat: true
-        interval: 1000
+        interval: 1500
         onTriggered: size.running = true
     }
 
@@ -101,7 +101,7 @@ Singleton {
         stdout: StdioCollector {
             onStreamFinished: {
                 const b = Number(text.trim()) || 0;
-                root.speed = root.bytes > 0 && b >= root.bytes ? b - root.bytes : 0;
+                root.speed = root.bytes > 0 && b >= root.bytes ? (b - root.bytes) / 1.5 : 0;
                 root.bytes = b;
             }
         }

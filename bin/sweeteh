@@ -129,6 +129,7 @@ usage: sweeteh [command]
   check       print the newest release if it is newer than this one
   update      move to the newest release and restart
   ipc ARGS    call the shell, for example sweeteh ipc launcher toggle
+  fingerprint enable|disable|status   use your finger for sudo and polkit prompts
 USAGE
 }
 
@@ -145,6 +146,7 @@ USAGE
     update) update ;;
     check) check ;;
     ipc) exec qs -c "$name" ipc call "$@" ;;
+    fingerprint) [[ "${1:-status}" == status ]] && exec "$repo/bin/sweeteh-pam" status || exec sudo "$repo/bin/sweeteh-pam" "$@" ;;
     -h|--help|help) usage ;;
     *) usage; exit 1 ;;
   esac

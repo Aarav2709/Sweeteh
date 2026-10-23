@@ -23,6 +23,7 @@ Item {
     property string osdKind
     property var moment: ({ kind: "plugged" })
     property NotifEntry notif
+    property int notifGroup: 0
     readonly property bool hovered: hover.hovered
     readonly property color base: Theme.color.island
     readonly property Item content: ({ idle: idle, peek: peek, message: message, glow: glow, osd: osd, track: track, notification: notification, media: media, launcher: launcher, clipboard: clipboard, monitor: monitor, dashboard: dashboard, auth: auth })[mode] ?? idle
@@ -83,6 +84,71 @@ Item {
             return;
         e.accepted = true;
     }
+
+    // squash and stretch, the island leans into growing and settles with a little spring
+    transform: Scale {
+        id: squash
+
+        origin.x: root.width / 2
+        origin.y: 0
+    }
+
+    property real lastWidth: 0
+
+    onModeChanged: {
+        const next = content.implicitWidth + pad * 2;
+        if (Config.options.island.squash && Theme.anim.speed > 0 && Math.abs(next - lastWidth) > 8) {
+            wobble.grow = next > lastWidth;
+            wobble.restart();
+        }
+        lastWidth = next;
+    }
+
+    SequentialAnimation {
+        id: wobble
+
+        property bool grow: true
+
+        ParallelAnimation {
+            NumberAnimation {
+                target: squash
+                property: "xScale"
+                to: wobble.grow ? 1.035 : 0.97
+                duration: 150
+                easing.type: Easing.OutQuad
+            }
+
+            NumberAnimation {
+                target: squash
+                property: "yScale"
+                to: wobble.grow ? 0.95 : 1.04
+                duration: 150
+                easing.type: Easing.OutQuad
+            }
+        }
+
+        ParallelAnimation {
+            NumberAnimation {
+                target: squash
+                property: "xScale"
+                to: 1
+                duration: 380
+                easing.type: Easing.OutBack
+                easing.overshoot: 2.2
+            }
+
+            NumberAnimation {
+                target: squash
+                property: "yScale"
+                to: 1
+                duration: 380
+                easing.type: Easing.OutBack
+                easing.overshoot: 2.2
+            }
+        }
+    }
+
+    Component.onCompleted: lastWidth = implicitWidth
 
     implicitWidth: content.implicitWidth + pad * 2
     implicitHeight: Math.max(idleHeight, content.implicitHeight + pad * 2)
@@ -330,6 +396,8 @@ Item {
                 implicitWidth: Theme.size.panelWidth
                 width: Theme.size.panelWidth
                 entry: root.notif
+                groupCount: root.notifGroup
+                onExpandGroup: Actions.open("island")
                 onEntryChanged: expanded = false
             }
         }

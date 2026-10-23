@@ -33,7 +33,7 @@ Singleton {
     Timer {
         running: root.capsPath !== ""
         repeat: true
-        interval: 250
+        interval: 300
         onTriggered: led.reload()
     }
 

@@ -12,6 +12,10 @@ Singleton {
     property var entries: []
     property bool available: false
     property bool watching: false
+    // a short look at what was just copied, empty for an image
+    property string lastCopy: ""
+
+    signal copied(string preview, bool image)
 
     function refresh(): void {
         if (available)
@@ -77,14 +81,38 @@ Singleton {
     }
 
     // store text and images as they are copied
+    // each store also prints a line, so the island can say what was copied without asking again
     Process {
         running: root.watching
-        command: ["wl-paste", "--watch", "sh", "-c", `cliphist -max-items ${Config.options.clipboard.maxItems} store`]
+        command: ["wl-paste", "--watch", "sh", "-c", `f=$(mktemp); cat > "$f"; cliphist -max-items ${Config.options.clipboard.maxItems} store < "$f"; head -c 120 "$f" | tr '\\n\\t\\r' '   '; echo; rm -f "$f"`]
+        stdout: SplitParser {
+            onRead: line => {
+                root.lastCopy = line.trim();
+                copiedWait.image = false;
+                copiedWait.restart();
+            }
+        }
     }
 
     Process {
         running: root.watching
-        command: ["wl-paste", "--type", "image", "--watch", "sh", "-c", `cliphist -max-items ${Config.options.clipboard.maxItems} store`]
+        command: ["wl-paste", "--type", "image", "--watch", "sh", "-c", `cliphist -max-items ${Config.options.clipboard.maxItems} store; echo`]
+        stdout: SplitParser {
+            onRead: () => {
+                copiedWait.image = true;
+                copiedWait.restart();
+            }
+        }
+    }
+
+    // an image copy wakes both watchers, wait a beat and report it once
+    Timer {
+        id: copiedWait
+
+        property bool image: false
+
+        interval: 250
+        onTriggered: root.copied(image ? "" : root.lastCopy, image)
     }
 
     Process {

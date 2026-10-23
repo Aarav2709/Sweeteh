@@ -211,7 +211,7 @@ Item {
             }
         }
 
-        // the level meter follows the real audio through cava, or dances without it, in the cover color
+        // the level meter follows the real audio through cava, in the accent color
         Row {
             visible: Media.active
             spacing: 2
@@ -223,11 +223,12 @@ Item {
                     id: bar
 
                     required property int index
-                    property real level: 0.3
+                    // without cava the meter rests in a fixed shape, an endless dance would redraw the island every frame
+                    readonly property real level: [0.45, 0.8, 0.6, 0.9, 0.5][index]
 
                     anchors.verticalCenter: parent.verticalCenter
                     width: 3
-                    height: 4 + 12 * (Cava.active ? Cava.values[index] ?? 0 : Media.playing ? level : 0.1)
+                    height: 4 + 12 * (Cava.active ? Cava.values[index] ?? 0 : Media.playing ? level : 0.15)
                     radius: 1.5
                     color: root.accent
 
@@ -236,23 +237,6 @@ Item {
 
                         NumberAnimation {
                             duration: 60
-                        }
-                    }
-
-                    SequentialAnimation on level {
-                        running: Media.playing && root.visible && !Cava.active && !Perf.active
-                        loops: Animation.Infinite
-
-                        NumberAnimation {
-                            to: 1
-                            duration: 260 + bar.index * 70
-                            easing.type: Easing.InOutSine
-                        }
-
-                        NumberAnimation {
-                            to: 0.2
-                            duration: 300 + bar.index * 50
-                            easing.type: Easing.InOutSine
                         }
                     }
                 }
@@ -368,13 +352,6 @@ Item {
         radius: 0.5
         color: root.accent
         opacity: 0.85
-
-        Behavior on width {
-            Anim {
-                duration: 1000
-                easing.bezierCurve: Theme.anim.standard
-            }
-        }
     }
 
     Timer {

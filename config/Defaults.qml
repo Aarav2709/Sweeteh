@@ -106,6 +106,8 @@ Singleton {
                 peekLyrics: true,
                 // swipe to skip, pull down for the dashboard, double click to play or pause
                 gestures: true,
+                // a little squash and stretch as the island changes shape
+                squash: true,
                 // camera, microphone and screen share dots
                 privacyDots: true,
                 // browser downloads, their progress across the island
@@ -158,7 +160,9 @@ Singleton {
                 toggles: true,
                 privacy: true,
                 downloads: true,
-                welcome: true
+                welcome: true,
+                clipboard: true,
+                audio: true
             },
             // warmer colors through hyprsunset between the two times
             nightLight: {

@@ -46,6 +46,31 @@ ColumnLayout {
 
     Section {
         Layout.fillWidth: true
+        title: "Preview moments"
+        icon: "play_circle"
+        subtitle: "See each island moment without waiting for it to happen."
+
+        Flow {
+            Layout.fillWidth: true
+            spacing: Theme.spacing.small
+
+            Repeater {
+                model: [["battery", "Charging"], ["unplugged", "Unplugged"], ["low", "Low"], ["critical", "Critical"], ["welcome", "Welcome"], ["bluetooth", "Bluetooth"], ["network", "Wi-Fi"], ["toggles", "Toggle"], ["privacy", "Privacy"], ["downloads", "Download"], ["clipboard", "Clipboard"], ["audio", "Audio output"]]
+
+                Button {
+                    required property var modelData
+
+                    implicitHeight: 32
+                    variant: "neutral"
+                    text: modelData[1]
+                    onClicked: Actions.momentPreview(modelData[0])
+                }
+            }
+        }
+    }
+
+    Section {
+        Layout.fillWidth: true
         title: "Arrange widgets"
         icon: "dashboard_customize"
         subtitle: "Place clock, dial, weather, calendar, media and tasks widgets on the desktop."

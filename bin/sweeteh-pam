@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# fingerprint sign in for sudo and polkit prompts, run as root: sweeteh-pam enable|disable|status
+# the password keeps working, a finger is just tried first
+set -euo pipefail
+
+mark="# sweeteh fingerprint"
+made="# sweeteh created this file"
+files=(/etc/pam.d/sudo /etc/pam.d/polkit-1)
+
+status() {
+  grep -qxF "$mark" /etc/pam.d/sudo 2>/dev/null && echo on || echo off
+}
+
+enable() {
+  [[ -e /usr/lib/security/pam_fprintd.so ]] || { echo "fprintd is not installed" >&2; exit 2; }
+  for f in "${files[@]}"; do
+    # polkit ships its file under /usr/lib, a copy in /etc takes over and is removed again on disable
+    if [[ ! -e "$f" ]]; then
+      src="/usr/lib/pam.d/$(basename "$f")"
+      [[ -e "$src" ]] || continue
+      { echo "$made"; cat "$src"; } > "$f"
+    fi
+    grep -qxF "$mark" "$f" && continue
+    cp -a "$f" "$f.sweeteh.bak"
+    # right after the pam header so the finger is asked before the password
+    awk -v m="$mark" 'NR == 1 && /^#%PAM/ { print; print m; print "auth       sufficient   pam_fprintd.so"; next } NR == 1 { print m; print "auth       sufficient   pam_fprintd.so" } { print }' "$f.sweeteh.bak" > "$f"
+  done
+}
+
+disable() {
+  for f in "${files[@]}"; do
+    [[ -e "$f" ]] || continue
+    if grep -qxF "$made" "$f"; then
+      rm -f "$f"
+      continue
+    fi
+    grep -qxF "$mark" "$f" || continue
+    awk -v m="$mark" '$0 == m { skip = 1; next } skip { skip = 0; next } { print }' "$f" > "$f.sweeteh.tmp" && cat "$f.sweeteh.tmp" > "$f" && rm -f "$f.sweeteh.tmp"
+  done
+}
+
+case "${1:-status}" in
+  enable) enable ;;
+  disable) disable ;;
+  status) status ;;
+  *) echo "usage: sweeteh-pam enable|disable|status" >&2; exit 1 ;;
+esac
