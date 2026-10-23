@@ -1,0 +1,2 @@
+# fingerprint only, used by the lockscreen beside the password
+auth required pam_fprintd.so

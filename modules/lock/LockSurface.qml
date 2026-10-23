@@ -218,8 +218,8 @@ Item {
         Label {
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredHeight: Theme.font.body * 2
-            text: root.context.error
-            color: Theme.color.error
+            text: root.context.error || (root.context.fingerprint ? root.context.fingerMessage || "Or touch the fingerprint sensor" : "")
+            color: root.context.error ? Theme.color.error : Theme.color.inkMeta
         }
     }
 
@@ -228,10 +228,10 @@ Item {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: Theme.spacing.xxl
         visible: Config.options.lock.showMedia && Media.active
-        implicitWidth: 380
+        implicitWidth: 420
         implicitHeight: 72
         radius: height / 2
-        color: Theme.color.panel
+        color: Theme.mix(Theme.color.panel, Qt.alpha(Media.accent, 1), Media.hasAccent ? 0.25 : 0)
         border.width: Theme.depth.rim
         border.color: Theme.color.depthRim
 
@@ -272,6 +272,11 @@ Item {
                     text: Media.artist
                     color: Theme.color.inkMeta
                 }
+            }
+
+            IconButton {
+                icon: "skip_previous"
+                onClicked: Media.previous()
             }
 
             IconButton {

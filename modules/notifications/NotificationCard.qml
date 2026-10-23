@@ -231,6 +231,60 @@ Item {
                         }
                     }
                 }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.topMargin: Theme.spacing.small
+                    visible: (root.entry?.progress ?? -1) >= 0
+                    implicitHeight: 6
+                    radius: 3
+                    color: Theme.color.layer2
+
+                    Rectangle {
+                        width: parent.width * (root.entry?.progress ?? 0) / 100
+                        height: parent.height
+                        radius: 3
+                        color: Theme.color.primary
+
+                        Behavior on width {
+                            Anim {}
+                        }
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.topMargin: Theme.spacing.small
+                    visible: root.entry?.canReply ?? false
+                    spacing: Theme.spacing.small
+
+                    Field {
+                        id: reply
+
+                        Layout.fillWidth: true
+                        implicitHeight: 36
+                        icon: "reply"
+                        placeholder: root.entry?.notification?.inlineReplyPlaceholder || "Reply"
+                        onAccepted: send.clicked()
+                        input.onActiveFocusChanged: Notifs.replying = input.activeFocus || text !== ""
+                    }
+
+                    IconButton {
+                        id: send
+
+                        icon: "send"
+                        size: 36
+                        enabled: reply.text !== ""
+                        onClicked: {
+                            if (reply.text === "")
+                                return;
+                            root.entry.reply(reply.text);
+                            reply.text = "";
+                            Notifs.replying = false;
+                            Notifs.dismiss(root.entry);
+                        }
+                    }
+                }
             }
         }
     }

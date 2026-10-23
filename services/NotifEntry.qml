@@ -18,6 +18,17 @@ QtObject {
     property Notification notification: null
 
     readonly property bool critical: urgency === NotificationUrgency.Critical
+    readonly property bool canReply: notification?.hasInlineReply ?? false
+    // apps copying or downloading send their progress as the value hint, live while the app updates it
+    readonly property int progress: {
+        const v = notification?.hints?.value;
+        return typeof v === "number" ? Math.max(0, Math.min(100, v)) : -1;
+    }
+
+    function reply(text: string): void {
+        if (notification?.hasInlineReply)
+            notification.sendInlineReply(text);
+    }
 
     function invoke(identifier: string): void {
         const action = notification?.actions.find(a => a.identifier === identifier);

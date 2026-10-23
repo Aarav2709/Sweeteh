@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
-import Quickshell
 import Quickshell.Widgets
 import qs.config
 import qs.theme
@@ -22,31 +21,19 @@ Item {
     property string messageIcon
     property string messageText
     property string osdKind
-    property string powerKind
+    property var moment: ({ kind: "plugged" })
     property NotifEntry notif
-    readonly property Item content: ({ idle: idle, message: message, power: power, osd: osd, track: track, notification: notification, media: media, launcher: launcher, clipboard: clipboard, monitor: monitor, dashboard: dashboard, auth: auth })[mode] ?? idle
-    readonly property bool compact: mode === "idle" || mode === "message" || mode === "power" || mode === "osd" || mode === "track"
+    readonly property Item content: ({ idle: idle, message: message, glow: glow, osd: osd, track: track, notification: notification, media: media, launcher: launcher, clipboard: clipboard, monitor: monitor, dashboard: dashboard, auth: auth })[mode] ?? idle
+    readonly property bool compact: mode === "idle" || mode === "message" || mode === "glow" || mode === "osd" || mode === "track"
     readonly property int pad: mode === "idle" ? 0 : compact ? Theme.spacing.medium : Theme.spacing.large
     readonly property int idleHeight: Config.options.island.height
-    // the cover of the playing track tints the island, kept dim enough for the text
-    readonly property color artTint: {
-        const c = quantizer.colors[0];
-        return c ? Qt.hsla(c.hslHue, Math.min(1, c.hslSaturation * 1.3 + 0.1), Theme.dark ? 0.42 : 0.6, 1) : Theme.color.panel;
-    }
-    property real music: Media.playing && Media.art !== "" && quantizer.colors.length > 0 && ["idle", "track", "media", "osd", "message"].includes(mode) ? 1 : 0
+    // the cover of the playing track tints the island and lights its rim
+    property real music: Media.playing && Media.hasAccent && ["idle", "track", "media", "osd", "message"].includes(mode) ? 1 : 0
 
     Behavior on music {
         Anim {
             duration: Theme.anim.extraSlow
         }
-    }
-
-    ColorQuantizer {
-        id: quantizer
-
-        source: Media.art
-        depth: 0
-        rescaleSize: 48
     }
 
     signal dismissNotification
@@ -105,9 +92,10 @@ Item {
 
         anchors.fill: parent
         // a hint that the resting island opens the dashboard
-        // a power flash blushes the notch with its state color
-        color: Theme.mix(Theme.mix(root.mode === "idle" && idle.hovered ? Theme.mix(Theme.color.panel, Theme.color.ink, 0.07) : Theme.color.panel, Qt.alpha(root.artTint, 1), root.music * 0.32), Qt.alpha(powerView.accent, 1), powerView.glow * (powerView.welcome ? 0.6 : 0.4))
-        rimWidth: Theme.depth.rim
+        // a moment blushes the notch with its state color
+        color: Theme.mix(Theme.mix(root.mode === "idle" && idle.hovered ? Theme.mix(Theme.color.panel, Theme.color.ink, 0.07) : Theme.color.panel, Qt.alpha(Media.accent, 1), root.music * 0.3), Qt.alpha(glowView.accent, 1), glowView.glow * glowView.strength)
+        rimWidth: Math.max(Theme.depth.rim, root.music * 1.5)
+        rim: Theme.mix(Theme.color.depthRim, Media.accent, root.music * 0.8)
         radius: root.compact ? Math.min(height / 2, Theme.radius.medium) : Theme.radius.xl
         flare: root.compact ? Theme.radius.flare / 2 : Theme.radius.flare
 
@@ -130,15 +118,15 @@ Item {
         }
     }
 
-    // the shine that sweeps across on a power flash, drawn in the notch outline so it keeps the corners
+    // the shine that sweeps across on a moment, drawn in the notch outline so it keeps the corners
     NotchShape {
         anchors.fill: parent
-        visible: powerView.sweep >= 0
+        visible: glowView.sweep >= 0
         radius: shape.radius
         flare: shape.flare
         gradient: LinearGradient {
             readonly property real band: 90
-            readonly property real at: -band + powerView.sweep * (root.width + band * 2)
+            readonly property real at: -band + glowView.sweep * (root.width + band * 2)
 
             x1: at - band
             x2: at + band
@@ -152,7 +140,7 @@ Item {
 
             GradientStop {
                 position: 0.5
-                color: Qt.alpha(powerView.accent, 0.55)
+                color: Qt.alpha(glowView.accent, 0.55)
             }
 
             GradientStop {
@@ -196,15 +184,15 @@ Item {
         }
 
         IslandSlot {
-            id: power
+            id: glow
 
-            shown: root.mode === "power"
+            shown: root.mode === "glow"
 
-            IslandPower {
-                id: powerView
+            IslandGlow {
+                id: glowView
 
-                shown: power.shown
-                kind: root.powerKind
+                shown: glow.shown
+                moment: root.moment
             }
         }
 

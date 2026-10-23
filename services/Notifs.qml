@@ -11,6 +11,8 @@ Singleton {
     id: root
 
     property list<NotifEntry> list: []
+    // a reply field has the keyboard, the island holds the card open meanwhile
+    property bool replying: false
     readonly property list<NotifEntry> popups: list.filter(n => n.popup)
     readonly property bool dnd: Config.options.notifications.dnd
     property int nextKey: 1
@@ -93,6 +95,7 @@ Singleton {
         bodyMarkupSupported: true
         bodyHyperlinksSupported: true
         actionsSupported: true
+        inlineReplySupported: true
         imageSupported: true
         persistenceSupported: true
         onNotification: n => root.add(n)

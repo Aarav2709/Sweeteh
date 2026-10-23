@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Pam
 
 // password state shared by every lock surface
@@ -11,6 +12,10 @@ Scope {
     property string error: ""
     // set once the password is accepted, the surfaces play their exit before the lock goes
     property bool leaving: false
+    // fingerprint runs beside the password once fprintd has a finger enrolled
+    property bool fingerprint: false
+    property string fingerMessage: ""
+    property int fingerTries: 0
 
     signal unlocked
 
@@ -19,6 +24,23 @@ Scope {
         password = "";
         error = "";
         busy = false;
+        fingerMessage = "";
+        fingerTries = 0;
+        if (fingerprint)
+            fingerRetry.restart();
+    }
+
+    function accept(): void {
+        watchdog.stop();
+        fingerRetry.stop();
+        if (pam.active)
+            pam.abort();
+        if (finger.active)
+            finger.abort();
+        busy = false;
+        password = "";
+        leaving = true;
+        exitDelay.restart();
     }
 
     function submit(): void {
@@ -55,6 +77,37 @@ Scope {
         }
     }
 
+    Process {
+        running: true
+        command: ["sh", "-c", "command -v fprintd-list >/dev/null && fprintd-list \"$USER\" 2>/dev/null | grep -q ' - #'"]
+        onExited: code => root.fingerprint = code === 0
+    }
+
+    // a missed or timed out scan starts listening again while the lock is up
+    Timer {
+        id: fingerRetry
+
+        interval: 600
+        onTriggered: {
+            if (!root.leaving && !finger.active)
+                finger.start();
+        }
+    }
+
+    PamContext {
+        id: finger
+
+        configDirectory: Quickshell.shellPath("assets/pam")
+        config: "fprint"
+        onMessageChanged: root.fingerMessage = message
+        onCompleted: result => {
+            if (result === PamResult.Success && !root.leaving)
+                root.accept();
+            else if (!root.leaving && ++root.fingerTries < 10)
+                fingerRetry.restart();
+        }
+    }
+
     PamContext {
         id: pam
 
@@ -67,9 +120,7 @@ Scope {
             watchdog.stop();
             root.busy = false;
             if (result === PamResult.Success) {
-                root.password = "";
-                root.leaving = true;
-                exitDelay.restart();
+                root.accept();
             } else {
                 root.password = "";
                 root.error = result === PamResult.MaxTries ? "Too many attempts, wait a moment." : "Wrong password, try again.";

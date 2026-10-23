@@ -33,12 +33,23 @@ Singleton {
 
     // 0 fine, 1 low, 2 critical, only rises while unplugged so each step warns once
     property int stage: 0
+    // battery saver switched on by the low battery step, undone by the charger
+    property bool autoSaver: false
+    property int savedProfile: PowerProfile.Balanced
 
     signal dropped(bool critical)
 
     function check(): void {
         const p = Config.options.power;
         const next = !available || plugged ? 0 : percent <= p.criticalBattery ? 2 : percent <= p.lowBattery ? 1 : 0;
+        if (next > 0 && stage === 0 && p.autoSaver && profile !== PowerProfile.PowerSaver) {
+            savedProfile = profile;
+            autoSaver = true;
+            setProfile(PowerProfile.PowerSaver);
+        } else if (plugged && autoSaver) {
+            autoSaver = false;
+            setProfile(savedProfile);
+        }
         if (next > stage)
             dropped(next === 2);
         stage = next;

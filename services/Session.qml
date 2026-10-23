@@ -76,6 +76,50 @@ Singleton {
         }
     }
 
+    // the screens fade out over the last half minute before idle sleep, any input brings them back
+    IdleMonitor {
+        id: dimIdle
+
+        enabled: root.sleepMinutes > 0 && !root.caffeine && !Media.playing
+        timeout: Math.max(30, root.sleepMinutes * 60 - 30)
+        respectInhibitors: true
+    }
+
+    LazyLoader {
+        active: dimIdle.enabled && dimIdle.isIdle
+
+        Variants {
+            model: Quickshell.screens
+
+            PanelWindow {
+                required property var modelData
+
+                screen: modelData
+                anchors.top: true
+                anchors.bottom: true
+                anchors.left: true
+                anchors.right: true
+                color: "transparent"
+                exclusionMode: ExclusionMode.Ignore
+                mask: Region {}
+                WlrLayershell.namespace: "sweeteh-dim"
+                WlrLayershell.layer: WlrLayer.Overlay
+
+                Rectangle {
+                    anchors.fill: parent
+                    color: "black"
+                    opacity: 0
+
+                    NumberAnimation on opacity {
+                        to: 0.85
+                        duration: 30000
+                        easing.type: Easing.InOutSine
+                    }
+                }
+            }
+        }
+    }
+
     // logind announces every sleep, lid or idle or menu, so the lock goes up before the screen comes back
     Process {
         id: sleepWatch

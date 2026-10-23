@@ -20,6 +20,20 @@ Singleton {
     readonly property string art: player?.trackArtUrl ?? ""
     readonly property real length: player?.length ?? 0
     property real position: 0
+    // the strongest color of the cover, evened out so it reads as a tint in either theme
+    readonly property bool hasAccent: art !== "" && quantizer.colors.length > 0
+    readonly property color accent: {
+        const c = quantizer.colors[0];
+        return c ? Qt.hsla(c.hslHue, Math.min(1, c.hslSaturation * 1.3 + 0.1), 0.55, 1) : "#7c9cff";
+    }
+
+    ColorQuantizer {
+        id: quantizer
+
+        source: root.art
+        depth: 0
+        rescaleSize: 48
+    }
 
     function toggle(): void {
         if (player?.canTogglePlaying)

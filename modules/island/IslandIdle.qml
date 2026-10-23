@@ -14,6 +14,10 @@ Item {
     property bool shown: true
     readonly property bool hovered: hover.hovered
     readonly property bool alone: !Modes.islands
+    readonly property color tint: Media.hasAccent ? Media.accent : Theme.color.primary
+    // a sideways swipe skips the track, the row follows the finger a little
+    property real drag: 0
+    property bool swiped: false
 
     implicitWidth: row.implicitWidth + Theme.spacing.medium * 2
     implicitHeight: Config.options.island.height
@@ -32,6 +36,16 @@ Item {
         id: row
 
         anchors.centerIn: parent
+        anchors.horizontalCenterOffset: root.drag
+
+        Behavior on anchors.horizontalCenterOffset {
+            enabled: !mouse.pressed
+
+            Anim {
+                duration: Theme.anim.slow
+                easing.bezierCurve: Theme.anim.spatialFast
+            }
+        }
         spacing: Theme.spacing.small
 
         // a recording in progress, click to stop it
@@ -142,13 +156,36 @@ Item {
                 })
         }
 
-        // a small level meter that dances while music plays
+        // a browser download in progress
+        Row {
+            visible: Downloads.active
+            spacing: Theme.spacing.xxs
+
+            Icon {
+                anchors.verticalCenter: parent.verticalCenter
+                name: "downloading"
+                size: Theme.font.large
+                color: "#64d2ff"
+            }
+
+            Label {
+                anchors.verticalCenter: parent.verticalCenter
+                text: Downloads.format(Downloads.bytes)
+                font.pixelSize: Theme.font.small
+                font.weight: Font.DemiBold
+                font.features: ({
+                        "tnum": 1
+                    })
+            }
+        }
+
+        // the level meter follows the real audio through cava, or dances without it, in the cover color
         Row {
             visible: Media.active
             spacing: 2
 
             Repeater {
-                model: 4
+                model: 5
 
                 Rectangle {
                     id: bar
@@ -158,12 +195,20 @@ Item {
 
                     anchors.verticalCenter: parent.verticalCenter
                     width: 3
-                    height: 4 + 10 * level
+                    height: 4 + 12 * (Cava.active ? Cava.values[index] ?? 0 : Media.playing ? level : 0.1)
                     radius: 1.5
-                    color: Theme.color.primary
+                    color: root.tint
+
+                    Behavior on height {
+                        enabled: Cava.active
+
+                        NumberAnimation {
+                            duration: 60
+                        }
+                    }
 
                     SequentialAnimation on level {
-                        running: Media.playing && root.visible
+                        running: Media.playing && root.visible && !Cava.active
                         loops: Animation.Infinite
 
                         NumberAnimation {
@@ -221,12 +266,54 @@ Item {
         }
     }
 
+    // how far the track has played, a thin line along the flat part of the bottom
+    Rectangle {
+        readonly property int inset: Theme.radius.medium
+
+        visible: Media.active && Media.length > 0
+        x: inset
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 2
+        width: (root.width - inset * 2) * Math.min(1, Media.position / Math.max(1, Media.length))
+        height: 2
+        radius: 1
+        color: root.tint
+        opacity: 0.85
+
+        Behavior on width {
+            Anim {
+                duration: 1000
+                easing.bezierCurve: Theme.anim.standard
+            }
+        }
+    }
+
     MouseArea {
+        id: mouse
+
+        property real pressX: 0
+
         anchors.fill: parent
         z: -1
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
-        onClicked: e => e.button === Qt.RightButton ? Actions.open("modeswitcher") : e.button === Qt.MiddleButton ? Media.toggle() : Actions.toggle("island")
+        onPressed: e => {
+            pressX = e.x;
+            root.swiped = false;
+        }
+        onPositionChanged: e => {
+            if (pressed && Media.active)
+                root.drag = Math.max(-28, Math.min(28, (e.x - pressX) / 2));
+        }
+        onReleased: e => {
+            const dx = e.x - pressX;
+            if (Media.active && Math.abs(dx) > 40) {
+                root.swiped = true;
+                dx < 0 ? Media.next() : Media.previous();
+            }
+            root.drag = 0;
+        }
+        onClicked: e => root.swiped ? undefined : e.button === Qt.RightButton ? Actions.open("modeswitcher") : e.button === Qt.MiddleButton ? Media.toggle() : Actions.toggle("island")
         onWheel: e => Audio.setVolume(Audio.volume + (e.angleDelta.y > 0 ? 0.05 : -0.05))
     }
 }

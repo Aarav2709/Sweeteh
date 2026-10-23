@@ -112,8 +112,17 @@ Singleton {
                 sleepMinutesPlugged: 30,
                 sleepAction: "suspend",
                 lockOnSleep: true,
+                // switch to battery saver at the low step and back on the charger
+                autoSaver: true,
                 lowBattery: 20,
                 criticalBattery: 10
+            },
+            // warmer colors through hyprsunset between the two times
+            nightLight: {
+                auto: true,
+                from: "19:00",
+                to: "06:30",
+                temperature: 4000
             },
             clipboard: {
                 maxItems: 200

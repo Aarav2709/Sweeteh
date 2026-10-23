@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
+import Quickshell.Services.UPower
 import qs.config
 import qs.theme
 import qs.services
@@ -16,11 +17,13 @@ PanelWindow {
     property string messageIcon: ""
     property string messageText: ""
     property string osdKind: "volume"
-    property string powerKind: "plugged"
+    property var moment: ({ kind: "plugged" })
+    // bluetooth devices seen connected, so a change can tell who came and who left
+    property var btSeen: []
     property NotifEntry notif: null
     // panels that live in the island, first match wins
     readonly property string hosted: ["launcher", "clipboard", "monitor", "island", "media"].find(id => Actions.isOpen(id) && (id === "island" || Modes.enabled(id))) ?? ""
-    readonly property bool typing: hosted === "launcher" || hosted === "clipboard" || Auth.active
+    readonly property bool typing: hosted === "launcher" || hosted === "clipboard" || Auth.active || (Notifs.replying && flashing === "notification")
     readonly property bool expanded: hosted !== "" || Auth.active
     readonly property string state: Auth.active ? "auth" : hosted === "island" ? "dashboard" : hosted !== "" ? hosted : flashing !== "" ? flashing : "idle"
 
@@ -30,12 +33,22 @@ PanelWindow {
         flashTimer.restart();
     }
 
-    // a notification on screen keeps its turn, a newer power state replaces an older one
-    function powerFlash(kind: string, ms: int): void {
+    // a colored moment, a notification on screen keeps its turn and a newer moment replaces an older one
+    function glow(m: var, ms: int): void {
         if (flashing === "notification")
             return;
-        powerKind = kind;
-        flash("power", ms);
+        moment = m;
+        flash("glow", ms);
+    }
+
+    // switches flipped by keybinds or toggles, ignored while the shell is still loading
+    function toggled(on: bool, icon: string, title: string, accent: string): void {
+        if (armed.ready)
+            glow({ kind: "toggle", icon: icon, title: title, sub: on ? "On" : "Off", accent: on ? accent : "#8e8e93" }, 2200);
+    }
+
+    function btIcon(icon: string): string {
+        return icon.includes("audio") || icon.includes("headset") || icon.includes("headphone") ? "headphones" : icon.includes("keyboard") ? "keyboard" : icon.includes("mouse") || icon.includes("input") ? "mouse" : icon.includes("phone") ? "smartphone" : icon.includes("watch") ? "watch" : "bluetooth";
     }
 
     function showNext(): void {
@@ -86,6 +99,7 @@ PanelWindow {
         onTriggered: {
             if (root.flashing === "notification" && root.notif)
                 Notifs.hide(root.notif);
+            Notifs.replying = false;
             root.flashing = "";
             root.notif = null;
             Qt.callLater(root.showNext);
@@ -94,6 +108,13 @@ PanelWindow {
 
     Connections {
         target: Notifs
+
+        function onReplyingChanged(): void {
+            if (Notifs.replying)
+                flashTimer.stop();
+            else if (root.flashing === "notification")
+                flashTimer.restart();
+        }
 
         function onArrived(entry: NotifEntry): void {
             if (root.flashing !== "notification")
@@ -112,18 +133,25 @@ PanelWindow {
         }
     }
 
-    // the charger going in or out and the battery running low each get a colored flash
+    // the charger going in or out and the battery running low each get a colored moment
     Connections {
         target: Battery
 
         function onPluggedChanged(): void {
-            if (!Battery.available || !armed.ready)
-                return;
-            root.powerFlash(Battery.plugged ? "plugged" : "unplugged", 3200);
+            if (Battery.available && armed.ready)
+                root.glow({ kind: Battery.plugged ? "plugged" : "unplugged" }, 3200);
         }
 
         function onDropped(critical: bool): void {
-            root.powerFlash(critical ? "critical" : "low", 4500);
+            root.glow({ kind: critical ? "critical" : "low" }, 4500);
+        }
+
+        // a battery moment already says when the saver kicked in
+        function onProfileChanged(): void {
+            if (!armed.ready || (root.flashing === "glow" && ["plugged", "low", "critical"].includes(root.moment.kind)))
+                return;
+            const p = Battery.profile;
+            root.glow(p === PowerProfile.PowerSaver ? { kind: "profile", icon: "energy_savings_leaf", title: "Battery saver", sub: "On", accent: "#30d158" } : p === PowerProfile.Performance ? { kind: "profile", icon: "speed", title: "Performance", sub: "Power mode", accent: "#ff6b3d" } : { kind: "profile", icon: "balance", title: "Balanced", sub: "Power mode", accent: "#0a84ff" }, 2400);
         }
     }
 
@@ -132,7 +160,128 @@ PanelWindow {
         target: Actions
 
         function onUnlocked(): void {
-            root.powerFlash("welcome", 4000);
+            root.glow({ kind: "welcome" }, 3500);
+        }
+    }
+
+    Connections {
+        target: BluetoothState
+
+        function onConnectedDevicesChanged(): void {
+            const now = BluetoothState.connectedDevices;
+            const ids = now.map(d => d.address);
+            if (armed.ready) {
+                const came = now.find(d => !root.btSeen.includes(d.address));
+                const left = root.btSeen.filter(a => !ids.includes(a));
+                if (came)
+                    root.glow({ kind: "bluetooth", icon: root.btIcon(came.icon ?? ""), title: came.name || came.deviceName || "Device", sub: "Connected" + (came.batteryAvailable ? "  ·  " + Math.round(came.battery * 100) + "%" : ""), accent: "#0a84ff" }, 3000);
+                else if (left.length > 0)
+                    root.glow({ kind: "bluetooth", icon: "bluetooth_disabled", title: "Bluetooth device", sub: "Disconnected", accent: "#8e8e93" }, 2400);
+            }
+            root.btSeen = ids;
+        }
+
+        function onEnabledChanged(): void {
+            root.toggled(BluetoothState.enabled, "bluetooth", "Bluetooth", "#0a84ff");
+        }
+    }
+
+    Connections {
+        target: Network
+
+        function onConnectedChanged(): void {
+            if (!armed.ready || !Network.wifiEnabled)
+                return;
+            nameWait.restart();
+        }
+
+        function onWifiEnabledChanged(): void {
+            root.toggled(Network.wifiEnabled, Network.wifiEnabled ? "wifi" : "wifi_off", "Wi-Fi", "#0a84ff");
+        }
+    }
+
+    // the network name lands a moment after the connection itself
+    Timer {
+        id: nameWait
+
+        interval: 600
+        onTriggered: root.glow(Network.connected ? { kind: "network", icon: Network.wired ? "lan" : "wifi", title: Network.name || "Connected", sub: "Connected", accent: "#30d158" } : { kind: "network", icon: "wifi_off", title: "Wi-Fi dropped", sub: "Offline", accent: "#ff453a" }, 2800)
+    }
+
+    Connections {
+        target: Audio
+
+        function onMicMutedChanged(): void {
+            if (armed.ready)
+                root.glow({ kind: "mic", icon: Audio.micMuted ? "mic_off" : "mic", title: Audio.micMuted ? "Microphone muted" : "Microphone on", accent: Audio.micMuted ? "#ff453a" : "#30d158" }, 2000);
+        }
+    }
+
+    Connections {
+        target: Session
+
+        function onCaffeineChanged(): void {
+            root.toggled(Session.caffeine, "coffee", "Caffeine", "#ffb74d");
+        }
+    }
+
+    Connections {
+        target: Notifs
+
+        function onDndChanged(): void {
+            root.toggled(Notifs.dnd, "do_not_disturb_on", "Do not disturb", "#bf5af2");
+        }
+    }
+
+    Connections {
+        target: NightLight
+
+        function onActiveChanged(): void {
+            root.toggled(NightLight.active, "nightlight", "Night light", "#ff9f43");
+        }
+    }
+
+    Connections {
+        target: Recorder
+
+        function onRecordingChanged(): void {
+            if (armed.ready)
+                root.glow({ kind: "record", icon: Recorder.recording ? "radio_button_checked" : "check_circle", title: Recorder.recording ? "Recording" : "Recording saved", accent: "#ff453a" }, 2200);
+        }
+    }
+
+    Connections {
+        target: Keyboard
+
+        function onCapsChanged(): void {
+            root.toggled(Keyboard.caps, "keyboard_capslock", "Caps Lock", "#64d2ff");
+        }
+
+        function onLayoutChanged(): void {
+            if (armed.ready && Keyboard.layout)
+                root.glow({ kind: "layout", icon: "keyboard", title: Keyboard.layout, sub: "Layout", accent: "#64d2ff" }, 1800);
+        }
+    }
+
+    Connections {
+        target: Downloads
+
+        function onActiveChanged(): void {
+            if (Downloads.active && armed.ready)
+                root.glow({ kind: "download", icon: "download", title: "Downloading", sub: Downloads.name, accent: "#64d2ff" }, 2400);
+        }
+
+        function onFinished(name: string): void {
+            root.glow({ kind: "download", icon: "download_done", title: "Downloaded", sub: name, accent: "#30d158" }, 3200);
+        }
+    }
+
+    Connections {
+        target: Modes
+
+        function onCurrentChanged(): void {
+            if (armed.ready)
+                root.glow({ kind: "mode", icon: Modes.mode.icon, title: Modes.mode.name, sub: "Mode", accent: "#0a84ff" }, 2000);
         }
     }
 
@@ -202,7 +351,7 @@ PanelWindow {
         messageIcon: root.messageIcon
         messageText: root.messageText
         osdKind: root.osdKind
-        powerKind: root.powerKind
+        moment: root.moment
         notif: root.notif
         onDismissNotification: flashTimer.triggered()
     }
@@ -226,9 +375,9 @@ PanelWindow {
             Actions.say("info", text);
         }
 
-        // preview the power flashes, plugged, unplugged, low or critical
-        function power(kind: string): void {
-            root.powerFlash(kind, kind === "low" || kind === "critical" ? 4500 : 3200);
+        // preview a moment, plugged, unplugged, low, critical or welcome
+        function moment(kind: string): void {
+            root.glow({ kind: kind }, 3200);
         }
     }
 }
