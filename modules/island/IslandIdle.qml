@@ -21,6 +21,7 @@ Item {
     readonly property color batteryColor: accent
     // a sideways swipe skips the track, the row follows the finger a little
     property real drag: 0
+    readonly property bool gestures: Config.options.island.gestures
     property bool swiped: false
 
     implicitWidth: row.implicitWidth + Theme.spacing.medium * 2
@@ -169,7 +170,7 @@ Item {
 
         // the microphone, camera or screen in use by an app
         Row {
-            visible: Privacy.mic || Privacy.camera || Privacy.screen
+            visible: Config.options.island.privacyDots && (Privacy.mic || Privacy.camera || Privacy.screen)
             spacing: 3
 
             Repeater {
@@ -399,11 +400,13 @@ Item {
             root.swiped = false;
         }
         onPositionChanged: e => {
-            if (pressed && Media.active)
+            if (pressed && Media.active && root.gestures)
                 root.drag = Math.max(-28, Math.min(28, (e.x - pressX) / 2));
         }
         onReleased: e => {
             const dx = e.x - pressX, dy = e.y - pressY;
+            if (!root.gestures)
+                return;
             // pulling the island down opens the dashboard, a sideways swipe skips the track
             if (dy > 24 && dy > Math.abs(dx)) {
                 root.swiped = true;
@@ -422,13 +425,13 @@ Item {
                 Actions.open("modeswitcher");
             else if (e.button === Qt.MiddleButton)
                 Media.toggle();
-            else if (Media.active)
+            else if (Media.active && root.gestures)
                 single.restart();
             else
                 Actions.toggle("island");
         }
         onDoubleClicked: e => {
-            if (e.button !== Qt.LeftButton || !Media.active)
+            if (e.button !== Qt.LeftButton || !Media.active || !root.gestures)
                 return;
             single.stop();
             Media.toggle();

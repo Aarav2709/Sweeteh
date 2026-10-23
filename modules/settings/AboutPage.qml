@@ -60,6 +60,81 @@ ColumnLayout {
         }
     }
 
+    // every changed option in one file, to carry to another machine or keep before a reinstall
+    Section {
+        id: sync
+
+        property string status: ""
+
+        Layout.fillWidth: true
+        title: "Sync settings"
+        icon: "sync"
+        subtitle: "Export your options to a file, or load them from one."
+
+        OptionRow {
+            label: "File"
+
+            Field {
+                id: syncPath
+
+                implicitWidth: 320
+                implicitHeight: 40
+                text: Quickshell.env("HOME") + "/sweeteh-settings.json"
+            }
+        }
+
+        OptionRow {
+            label: sync.status || "Your keybinds, layout and theme travel with it."
+
+            Button {
+                icon: "upload"
+                text: "Export"
+                onClicked: {
+                    exportFile.setText(JSON.stringify(Config.user, null, 2) + "\n");
+                    sync.status = "Saved to " + syncPath.text;
+                }
+            }
+
+            Button {
+                icon: "download"
+                text: "Import"
+                onClicked: {
+                    if (importFile.path === syncPath.text)
+                        importFile.reload();
+                    else
+                        importFile.path = syncPath.text;
+                }
+            }
+        }
+
+        FileView {
+            id: exportFile
+
+            path: syncPath.text
+            blockLoading: true
+            printErrors: false
+        }
+
+        // only given a path on import, a file view loads as soon as it has one
+        FileView {
+            id: importFile
+
+            printErrors: false
+            onLoaded: {
+                try {
+                    const parsed = JSON.parse(text());
+                    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed))
+                        throw "not an object";
+                    Config.save(parsed);
+                    sync.status = "Loaded from " + syncPath.text;
+                } catch (e) {
+                    sync.status = "That file is not a sweeteh settings file.";
+                }
+            }
+            onLoadFailed: sync.status = "Could not read " + syncPath.text
+        }
+    }
+
     Section {
         Layout.fillWidth: true
         title: "Files"

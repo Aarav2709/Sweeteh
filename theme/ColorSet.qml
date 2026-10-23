@@ -4,10 +4,24 @@ import QtQuick
 QtObject {
     id: root
 
+    // the desktop widgets keep to the wallpaper, everything else follows the song
+    property bool follow: true
+
     // a palette role, blended toward the song tone at the lightness the role has in this theme
     function song(role: string, light: real, dark: real, sat: real): color {
         const base = Colors.pick(role);
-        return Theme.songMix <= 0 ? base : Theme.mix(base, Theme.tone(Theme.song, Theme.dark ? dark : light, sat), Theme.songMix);
+        return !follow || Theme.songMix <= 0 ? base : Theme.mix(base, Theme.tone(Theme.song, Theme.dark ? dark : light, sat), Theme.songMix);
+    }
+
+    // the secondary roles are lighter and darker shades of the accent, so they never fall back to grey
+    function shade(light: real, dark: real, sat: real): color {
+        return Theme.tone(primary, Theme.dark ? dark : light, sat);
+    }
+
+    // container surfaces keep their lightness and take a faint hue of the accent
+    function hued(role: string): color {
+        const base = Colors.pick(role);
+        return Qt.hsla(Math.max(0, primary.hslHue), Math.max(base.hslSaturation, primary.hslSaturation * 0.3), base.hslLightness, base.a);
     }
 
     readonly property color background: Colors.pick("background")
@@ -23,8 +37,8 @@ QtObject {
     readonly property color fgPrimaryContainer: song("on_primary_container", 0.12, 0.9, 0.6)
     readonly property color fgPrimaryFixed: Colors.pick("on_primary_fixed")
     readonly property color fgPrimaryFixedVariant: Colors.pick("on_primary_fixed_variant")
-    readonly property color fgSecondary: Colors.pick("on_secondary")
-    readonly property color fgSecondaryContainer: song("on_secondary_container", 0.15, 0.88, 0.4)
+    readonly property color fgSecondary: shade(1.0, 0.15, 0.5)
+    readonly property color fgSecondaryContainer: shade(0.15, 0.9, 0.5)
     readonly property color fgSecondaryFixed: Colors.pick("on_secondary_fixed")
     readonly property color fgSecondaryFixedVariant: Colors.pick("on_secondary_fixed_variant")
     readonly property color fgSurface: Colors.pick("on_surface")
@@ -40,18 +54,18 @@ QtObject {
     readonly property color primaryFixed: Colors.pick("primary_fixed")
     readonly property color primaryFixedDim: Colors.pick("primary_fixed_dim")
     readonly property color scrim: Colors.pick("scrim")
-    readonly property color secondary: Colors.pick("secondary")
-    readonly property color secondaryContainer: song("secondary_container", 0.9, 0.26, 0.45)
+    readonly property color secondary: shade(0.45, 0.72, 0.6)
+    readonly property color secondaryContainer: shade(0.85, 0.32, 0.7)
     readonly property color secondaryFixed: Colors.pick("secondary_fixed")
     readonly property color secondaryFixedDim: Colors.pick("secondary_fixed_dim")
     readonly property color shadow: Colors.pick("shadow")
     readonly property color surface: Colors.pick("surface")
     readonly property color surfaceBright: Colors.pick("surface_bright")
-    readonly property color surfaceContainer: Colors.pick("surface_container")
-    readonly property color surfaceContainerHigh: Colors.pick("surface_container_high")
-    readonly property color surfaceContainerHighest: Colors.pick("surface_container_highest")
-    readonly property color surfaceContainerLow: Colors.pick("surface_container_low")
-    readonly property color surfaceContainerLowest: Colors.pick("surface_container_lowest")
+    readonly property color surfaceContainer: hued("surface_container")
+    readonly property color surfaceContainerHigh: hued("surface_container_high")
+    readonly property color surfaceContainerHighest: hued("surface_container_highest")
+    readonly property color surfaceContainerLow: hued("surface_container_low")
+    readonly property color surfaceContainerLowest: hued("surface_container_lowest")
     readonly property color surfaceDim: Colors.pick("surface_dim")
     readonly property color surfaceTint: song("surface_tint", 0.4, 0.78, 1.0)
     readonly property color surfaceVariant: Colors.pick("surface_variant")
@@ -76,6 +90,9 @@ QtObject {
     readonly property color hairline: Qt.alpha(outlineVariant, 0.7)
     readonly property color scrimSoft: Qt.alpha(scrim, 0.4)
     // hard shadow and rim of raised surfaces
-    readonly property color depthShadow: Theme.dark ? Qt.alpha("#000000", 0.7) : Theme.mix(primary, "#000000", 0.55)
-    readonly property color depthRim: Theme.dark ? Qt.alpha(fgSurface, 0.09) : Qt.alpha(Theme.mix(primary, "#000000", 0.55), 0.85)
+    // the raised look, a hard shadow in a deep shade of the accent and a lit rim, so tinted surfaces still stand off
+    readonly property color depthShadow: Theme.dark ? Qt.alpha(Theme.tone(primary, 0.08, 0.8), 0.9) : Theme.tone(primary, 0.28, 0.9)
+    readonly property color depthRim: Theme.dark ? Qt.alpha(Theme.mix(fgSurface, primary, 0.35), 0.16) : Qt.alpha(Theme.tone(primary, 0.28, 0.9), 0.85)
+    // the island and the bar pills, the plain panel with the accent seeping in
+    readonly property color island: Theme.mix(panel, Qt.alpha(primaryContainer, panel.a), Theme.islandTint)
 }

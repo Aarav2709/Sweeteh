@@ -35,6 +35,10 @@ Singleton {
     }
 
     readonly property ColorSet color: ColorSet {}
+    readonly property ColorSet wall: ColorSet {
+        follow: false
+    }
+    readonly property real islandTint: Math.max(0, Math.min(1, Config.options.island.wallpaperTint))
 
     // readable label from a camel case or dashed key
     function humanize(key: string): string {
@@ -122,7 +126,7 @@ Singleton {
     // raised 2.5d look, a crisp rim and a hard shadow that pressed surfaces sink into
     readonly property QtObject depth: QtObject {
         readonly property bool on: root.opts.depth
-        readonly property int offset: on ? 3 : 0
+        readonly property int offset: on ? 4 : 0
         readonly property int rim: on ? 1 : 0
     }
 

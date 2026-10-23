@@ -24,7 +24,7 @@ Rectangle {
     implicitWidth: grid.implicitWidth + pad * 2
     implicitHeight: Theme.size.barWidget
     radius: Theme.radius.full
-    color: Theme.color.panel
+    color: Theme.color.island
     border.width: Theme.depth.rim
     border.color: Theme.color.depthRim
 

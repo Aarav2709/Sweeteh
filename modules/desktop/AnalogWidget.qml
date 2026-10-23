@@ -26,7 +26,7 @@ DeskCard {
                 width: index % 3 === 0 ? 3 : 2
                 height: index % 3 === 0 ? 10 : 6
                 radius: width / 2
-                color: index % 3 === 0 ? Theme.color.ink : Theme.color.inkFaint
+                color: index % 3 === 0 ? Theme.wall.ink : Theme.wall.inkFaint
             }
         }
     }
@@ -35,14 +35,14 @@ DeskCard {
         length: 0.26
         thickness: 5
         angle: root.hours * 30
-        color: Theme.color.ink
+        color: Theme.wall.ink
     }
 
     Hand {
         length: 0.38
         thickness: 3
         angle: root.minutes * 6
-        color: Theme.color.primary
+        color: Theme.wall.primary
     }
 
     Rectangle {
@@ -50,9 +50,9 @@ DeskCard {
         width: 9
         height: 9
         radius: 4.5
-        color: Theme.color.primary
+        color: Theme.wall.primary
         border.width: 2
-        border.color: Theme.color.panel
+        border.color: Theme.wall.panel
     }
 
     component Hand: Item {

@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.config
 import Quickshell.Services.Pam
 
 // password state shared by every lock surface
@@ -13,7 +14,8 @@ Scope {
     // set once the password is accepted, the surfaces play their exit before the lock goes
     property bool leaving: false
     // fingerprint runs beside the password once fprintd has a finger enrolled
-    property bool fingerprint: false
+    property bool fingerReady: false
+    readonly property bool fingerprint: fingerReady && Config.options.lock.fingerprint
     property string fingerMessage: ""
     property int fingerTries: 0
     // notifications that arrive after this are counted on the lockscreen
@@ -83,7 +85,7 @@ Scope {
     Process {
         running: true
         command: ["sh", "-c", "command -v fprintd-list >/dev/null && fprintd-list \"$USER\" 2>/dev/null | grep -q ' - #'"]
-        onExited: code => root.fingerprint = code === 0
+        onExited: code => root.fingerReady = code === 0
     }
 
     // a missed or timed out scan starts listening again while the lock is up

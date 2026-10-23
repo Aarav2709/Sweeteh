@@ -31,9 +31,9 @@ Item {
         anchors.margins: -Theme.spacing.small
         visible: root.editing
         radius: Theme.radius.xl + Theme.spacing.small
-        color: dragArea.active ? Qt.alpha(Theme.color.primary, 0.08) : "transparent"
+        color: dragArea.active ? Qt.alpha(Theme.wall.primary, 0.08) : "transparent"
         border.width: 2
-        border.color: dragArea.active ? Theme.color.primary : Qt.alpha(Theme.color.ink, 0.35)
+        border.color: dragArea.active ? Theme.wall.primary : Qt.alpha(Theme.wall.ink, 0.35)
     }
 
     MouseArea {

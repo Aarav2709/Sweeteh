@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import qs.config
 import qs.theme
 import qs.services
 import qs.components
@@ -9,6 +10,10 @@ import qs.modules.notifications
 // notification history with a clear button
 ColumnLayout {
     id: root
+
+    // one card per app, the rest fold behind it until opened
+    readonly property bool grouping: Config.options.notifications.group
+    property var openApps: []
 
     property bool clearing: false
     readonly property int stagger: 45
@@ -85,7 +90,7 @@ ColumnLayout {
         clip: true
         spacing: Theme.spacing.small
         model: ScriptModel {
-            values: Array.from(Notifs.list)
+            values: Array.from(Notifs.list).filter((n, i, all) => !root.grouping || root.openApps.includes(n.appName) || all.findIndex(m => m.appName === n.appName) === i)
         }
 
         delegate: NotificationCard {
@@ -94,6 +99,8 @@ ColumnLayout {
 
             width: list.width
             entry: modelData
+            groupCount: root.grouping && !root.openApps.includes(modelData.appName) ? Notifs.list.filter(n => n.appName === modelData.appName).length - 1 : 0
+            onExpandGroup: root.openApps = root.openApps.concat([modelData.appName])
             leaving: root.clearing
             leaveDelay: Math.min(index, 8) * root.stagger
         }

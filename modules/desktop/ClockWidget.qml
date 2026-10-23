@@ -20,7 +20,7 @@ ColumnLayout {
         text: Time.hours + ":" + Time.minutes
         font.pixelSize: Theme.font.hero
         font.weight: Font.DemiBold
-        color: Theme.color.ink
+        color: Theme.wall.ink
     }
 
     Label {
@@ -28,6 +28,6 @@ ColumnLayout {
         text: Time.date
         font.pixelSize: Theme.font.title
         font.weight: Font.Medium
-        color: Theme.color.primary
+        color: Theme.wall.primary
     }
 }

@@ -5,11 +5,13 @@ import qs.components
 
 // paired and nearby bluetooth devices
 DevicePage {
+    id: root
+
     title: "Bluetooth"
     icon: "bluetooth"
     on: BluetoothState.enabled
     empty: !BluetoothState.available ? "Bluetooth is not running, switch it on to start it." : BluetoothState.enabled ? "Searching for devices." : "Bluetooth is off."
-    model: BluetoothState.devices
+    model: BluetoothState.devices.filter(d => root.matches(d.name || d.deviceName))
     onSwitched: on => BluetoothState.setEnabled(on)
     Component.onCompleted: BluetoothState.discover(true)
     Component.onDestruction: BluetoothState.discover(false)

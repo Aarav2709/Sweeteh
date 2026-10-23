@@ -24,21 +24,11 @@ Item {
     property var moment: ({ kind: "plugged" })
     property NotifEntry notif
     readonly property bool hovered: hover.hovered
-    // the wallpaper color, through the scheme, seeps into the plain island
-    readonly property color base: Theme.mix(Theme.color.panel, Qt.alpha(Theme.color.primaryContainer, Theme.color.panel.a), Math.max(0, Math.min(1, Config.options.island.wallpaperTint)))
+    readonly property color base: Theme.color.island
     readonly property Item content: ({ idle: idle, peek: peek, message: message, glow: glow, osd: osd, track: track, notification: notification, media: media, launcher: launcher, clipboard: clipboard, monitor: monitor, dashboard: dashboard, auth: auth })[mode] ?? idle
     readonly property bool compact: mode === "idle" || mode === "message" || mode === "glow" || mode === "osd" || mode === "track"
     readonly property int pad: mode === "idle" ? 0 : compact ? Theme.spacing.medium : Theme.spacing.large
     readonly property int idleHeight: Config.options.island.height
-    // the island takes its color from the theme, which follows the song, the rim lights up while it plays
-    property real music: Media.playing && Media.hasAccent && ["idle", "peek", "track", "media", "osd", "message"].includes(mode) ? 1 : 0
-
-    Behavior on music {
-        Anim {
-            duration: Theme.anim.extraSlow
-        }
-    }
-
     // the hover hint eases by itself, the color as a whole has no behavior so a fading moment
     // follows the shrinking island frame by frame instead of trailing behind it
     property real hoverMix: mode === "idle" && idle.hovered ? 1 : 0
@@ -131,8 +121,7 @@ Item {
         // a hint that the resting island opens the dashboard
         // a moment blushes the notch with its state color
         color: Theme.mix(Theme.mix(root.base, Theme.color.ink, 0.07 * root.hoverMix), Qt.alpha(glowView.blush, 1), glowView.glow * glowView.strength)
-        rimWidth: Math.max(Theme.depth.rim, root.music * 1.5)
-        rim: Theme.mix(Theme.color.depthRim, Theme.color.primary, root.music * 0.8)
+        rimWidth: Theme.depth.rim
         radius: root.compact ? Math.min(height / 2, Theme.radius.medium) : Theme.radius.xl
         flare: root.compact ? Theme.radius.flare / 2 : Theme.radius.flare
 

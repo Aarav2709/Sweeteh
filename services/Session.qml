@@ -88,7 +88,7 @@ Singleton {
     }
 
     LazyLoader {
-        active: dimIdle.enabled && dimIdle.isIdle
+        active: dimIdle.enabled && dimIdle.isIdle && root.opts.dimBeforeSleep
 
         Variants {
             model: Quickshell.screens

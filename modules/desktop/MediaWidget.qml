@@ -46,7 +46,7 @@ DeskCard {
                 implicitWidth: 48
                 implicitHeight: 48
                 radius: Theme.radius.medium
-                color: Theme.color.secondaryContainer
+                color: Theme.wall.secondaryContainer
 
                 Image {
                     anchors.fill: parent
@@ -60,7 +60,7 @@ DeskCard {
                     anchors.centerIn: parent
                     visible: Media.art === ""
                     name: "music_note"
-                    color: Theme.color.fgSecondaryContainer
+                    color: Theme.wall.fgSecondaryContainer
                 }
             }
 
@@ -71,7 +71,7 @@ DeskCard {
                 text: Media.artist
                 font.pixelSize: Theme.font.small
                 font.weight: Font.DemiBold
-                color: Theme.color.inkMeta
+                color: Theme.wall.inkMeta
             }
         }
 
@@ -97,7 +97,7 @@ DeskCard {
                 Label {
                     text: !Media.active ? "Play something to see it here." : Media.playing ? "Playing" : "Paused"
                     font.pixelSize: Theme.font.small
-                    color: Theme.color.inkMeta
+                    color: Theme.wall.inkMeta
                 }
             }
 

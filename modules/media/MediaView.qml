@@ -316,4 +316,35 @@ ColumnLayout {
         font.pixelSize: Theme.font.small
         color: Theme.color.inkMeta
     }
+
+    // what played lately, a click picks the player back up or opens the app again
+    ColumnLayout {
+        Layout.fillWidth: true
+        Layout.topMargin: Theme.spacing.small
+        visible: Config.options.media.history && recent.count > 0
+        spacing: Theme.spacing.xxs
+
+        Label {
+            text: "Recently played"
+            font.pixelSize: Theme.font.small
+            font.weight: Font.DemiBold
+            color: Theme.color.inkMeta
+        }
+
+        Repeater {
+            id: recent
+
+            model: Media.history.filter(h => h.title !== Media.title).slice(0, 3)
+
+            ListRow {
+                required property var modelData
+
+                Layout.fillWidth: true
+                title: modelData.title
+                subtitle: modelData.artist
+                icon: "history"
+                onClicked: Media.resume(modelData)
+            }
+        }
+    }
 }

@@ -14,6 +14,10 @@ Item {
     property NotifEntry entry
     property bool popup: false
     property bool expanded: false
+    // more notifications from the same app folded behind this one
+    property int groupCount: 0
+
+    signal expandGroup
     // set by the history list to sweep the card away before a clear
     property bool leaving: false
     property int leaveDelay: 0
@@ -206,6 +210,19 @@ Item {
 
                     TapHandler {
                         onTapped: root.expanded = !root.expanded
+                    }
+                }
+
+                Label {
+                    Layout.topMargin: Theme.spacing.xs
+                    visible: root.groupCount > 0
+                    text: "+" + root.groupCount + " more from " + (root.entry?.appName || "this app")
+                    font.pixelSize: Theme.font.small
+                    font.weight: Font.DemiBold
+                    color: Theme.color.primary
+
+                    TapHandler {
+                        onTapped: root.expandGroup()
                     }
                 }
 

@@ -26,7 +26,7 @@ Singleton {
     readonly property real avgWatts: drain.length > 0 ? drain.reduce((a, b) => a + b, 0) / drain.length : 0
     readonly property string timeText: {
         const energy = device?.energy ?? 0;
-        const s = charging ? device?.timeToFull : drain.length >= 3 && energy > 0 && avgWatts > 0.3 ? energy / avgWatts * 3600 : device?.timeToEmpty;
+        const s = charging ? device?.timeToFull : Config.options.power.smartTime && drain.length >= 3 && energy > 0 && avgWatts > 0.3 ? energy / avgWatts * 3600 : device?.timeToEmpty;
         if (!s)
             return "";
         const h = Math.floor(s / 3600);

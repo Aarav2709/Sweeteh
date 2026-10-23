@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Mpris
+import qs.config
 import qs.theme
 
 // active mpris player and its position
@@ -28,6 +29,50 @@ Singleton {
     readonly property string artFile: art.startsWith("http") ? cachedArt : art
 
     signal volumeNudged
+
+    // recently played tracks, newest first, kept across restarts
+    property var history: []
+
+    // a track counts once it has played for a few seconds
+    onTitleChanged: remember.restart()
+
+    function resume(item: var): void {
+        const open = players.find(p => (p.desktopEntry || p.identity) === item.app);
+        if (open) {
+            manual = open;
+            if (!open.isPlaying && open.canPlay)
+                open.play();
+        } else if (item.app) {
+            Quickshell.execDetached(["gtk-launch", item.app]);
+        }
+    }
+
+    Timer {
+        id: remember
+
+        interval: 4000
+        onTriggered: {
+            if (!Config.options.media.history || !root.playing || !root.player?.trackTitle)
+                return;
+            const item = { title: root.title, artist: root.artist, art: root.art.startsWith("http") || root.art.startsWith("file:") ? root.art : "", app: root.player.desktopEntry || root.player.identity || "" };
+            root.history = [item].concat(root.history.filter(h => h.title !== item.title || h.artist !== item.artist)).slice(0, 20);
+            historyFile.setText(JSON.stringify(root.history));
+        }
+    }
+
+    FileView {
+        id: historyFile
+
+        path: Paths.state + "/media-history.json"
+        printErrors: false
+        onLoaded: {
+            try {
+                root.history = JSON.parse(text()) || [];
+            } catch (e) {
+                root.history = [];
+            }
+        }
+    }
 
     onArtChanged: {
         cachedArt = "";
@@ -77,7 +122,7 @@ Singleton {
     Binding {
         target: Theme
         property: "songOn"
-        value: root.playing && root.hasAccent
+        value: root.playing && root.hasAccent && Config.options.theme.followSong
     }
 
     ColorQuantizer {

@@ -35,7 +35,7 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: Theme.radius.full
-        color: root.active ? Theme.color.secondaryContainer : Theme.color.panel
+        color: root.active ? Theme.color.secondaryContainer : Theme.color.island
         border.width: Theme.depth.rim
         border.color: Theme.color.depthRim
 

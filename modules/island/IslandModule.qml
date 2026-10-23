@@ -23,6 +23,8 @@ PanelWindow {
     property var btWarned: []
     // moments waiting for the island, one per kind so a flipped switch only shows its last state
     property var queue: []
+    // moments held back while something is fullscreen
+    property var held: []
     // hovering the resting island while music plays opens a small player
     property bool peeking: false
     property NotifEntry notif: null
@@ -39,7 +41,21 @@ PanelWindow {
     }
 
     // a colored moment, a notification on screen keeps its turn and a newer moment replaces an older one
+    // which moments switch a kind belongs to
+    function category(kind: string): string {
+        return ["plugged", "unplugged", "low", "critical", "profile"].includes(kind) ? "battery" : kind.startsWith("bluetooth") ? "bluetooth" : kind === "network" ? "network" : kind.startsWith("privacy") ? "privacy" : kind === "download" ? "downloads" : kind === "welcome" ? "welcome" : "toggles";
+    }
+
     function glow(m: var, ms: int): void {
+        const alert = m.kind === "critical" || (m.alert ?? false);
+        // only a critical battery ignores the switches, it is the one that can cost work
+        if (m.kind !== "critical" && Config.options.moments[category(m.kind)] === false)
+            return;
+        // over a fullscreen game or video the small stuff waits until it is gone
+        if (!alert && Perf.fullscreen && Config.options.performance.quietMoments) {
+            held = held.filter(q => q.moment.kind !== m.kind).concat([{ moment: m, ms: ms }]);
+            return;
+        }
         // the same kind again updates the moment on screen instead of waiting behind it
         if (flashing === "notification" || (flashing === "glow" && moment.kind !== m.kind)) {
             queue = queue.filter(q => q.moment.kind !== m.kind).concat([{ moment: m, ms: ms }]);
@@ -372,6 +388,19 @@ PanelWindow {
         }
     }
 
+    Connections {
+        target: Perf
+
+        function onFullscreenChanged(): void {
+            if (Perf.fullscreen || root.held.length === 0)
+                return;
+            // only the latest few, a long game should not end in a parade
+            root.queue = root.queue.concat(root.held.slice(-3));
+            root.held = [];
+            root.advance();
+        }
+    }
+
     // scrolling the island while music plays moves that player's own volume
     Connections {
         target: Media
@@ -387,7 +416,7 @@ PanelWindow {
     // the peek opens after a short hover and folds a moment after the pointer leaves
     Timer {
         interval: island.hovered ? 450 : 350
-        running: island.hovered !== root.peeking && (root.peeking || (Media.active && root.flashing === "" && root.hosted === ""))
+        running: island.hovered !== root.peeking && (root.peeking || (Media.active && Config.options.island.peek && root.flashing === "" && root.hosted === ""))
         onTriggered: root.peeking = island.hovered && Media.active
     }
 

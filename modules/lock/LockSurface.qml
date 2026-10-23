@@ -234,7 +234,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         anchors.bottomMargin: Theme.spacing.xxl + (Config.options.lock.showMedia && Media.active ? 72 + Theme.spacing.medium : 0)
-        visible: fresh.length > 0
+        visible: fresh.length > 0 && Config.options.lock.showNotifications
         implicitWidth: freshRow.implicitWidth + Theme.spacing.large * 2
         implicitHeight: 40
         radius: height / 2

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Widgets
+import qs.config
 import qs.theme
 import qs.services
 import qs.components
@@ -61,7 +62,7 @@ RowLayout {
             id: lyric
 
             Layout.fillWidth: true
-            visible: Lyrics.enabled && Lyrics.current !== ""
+            visible: Lyrics.enabled && Config.options.island.peekLyrics && Lyrics.current !== ""
             text: Lyrics.current
             font.pixelSize: Theme.font.small
             font.weight: Font.Medium

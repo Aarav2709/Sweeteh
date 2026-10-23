@@ -21,6 +21,19 @@ Singleton {
     readonly property bool active: installed && (forced === "on" || (forced === "" && opts.auto && scheduled))
 
     onScheduledChanged: forced = ""
+    // the brightness before night light lowered it, -1 when it did not
+    property real saved: -1
+
+    onActiveChanged: {
+        const target = Math.max(0, Math.min(100, opts.brightness)) / 100;
+        if (active && target > 0 && Brightness.available && Brightness.value > target) {
+            saved = Brightness.value;
+            Brightness.set(target);
+        } else if (!active && saved >= 0) {
+            Brightness.set(saved);
+            saved = -1;
+        }
+    }
 
     function minutes(t: string): int {
         const [h, m] = t.split(":").map(Number);

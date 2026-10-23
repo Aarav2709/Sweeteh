@@ -24,7 +24,7 @@ DeskCard {
             Icon {
                 name: "calendar_month"
                 size: 26
-                color: Theme.color.primary
+                color: Theme.wall.primary
             }
 
             Item {
@@ -40,7 +40,7 @@ DeskCard {
             Label {
                 text: Qt.formatDate(Time.now, "dddd")
                 font.pixelSize: Theme.font.small
-                color: Theme.color.inkMeta
+                color: Theme.wall.inkMeta
             }
         }
 
@@ -55,7 +55,7 @@ DeskCard {
                 text: Qt.formatDate(Time.now, "MMMM")
                 font.pixelSize: Theme.font.small
                 font.weight: Font.DemiBold
-                color: Theme.color.inkMeta
+                color: Theme.wall.inkMeta
             }
 
             Item {
@@ -80,7 +80,7 @@ DeskCard {
                         text: modelData
                         font.pixelSize: Theme.font.tiny
                         font.weight: Font.DemiBold
-                        color: index === root.weekday ? Theme.color.primary : Theme.color.inkFaint
+                        color: index === root.weekday ? Theme.wall.primary : Theme.wall.inkFaint
                     }
                 }
 
@@ -103,7 +103,7 @@ DeskCard {
                             height: 24
                             radius: 12
                             visible: day.today
-                            color: Theme.color.primary
+                            color: Theme.wall.primary
                         }
 
                         Label {
@@ -111,7 +111,7 @@ DeskCard {
                             text: day.date.getDate()
                             font.pixelSize: Theme.font.small
                             font.weight: day.today ? Font.DemiBold : Font.Medium
-                            color: day.today ? Theme.color.fgPrimary : Theme.color.ink
+                            color: day.today ? Theme.wall.fgPrimary : Theme.wall.ink
                         }
                     }
                 }

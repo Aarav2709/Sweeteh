@@ -13,9 +13,9 @@ Rectangle {
     implicitWidth: span === "wide" ? unit * 2 + gutter : unit
     implicitHeight: span === "tall" ? unit * 2 + gutter : unit
     radius: Theme.radius.xl
-    color: Theme.color.panel
+    color: Theme.wall.panel
     border.width: Theme.depth.rim
-    border.color: Theme.color.depthRim
+    border.color: Theme.wall.depthRim
 
     Depth {}
 }

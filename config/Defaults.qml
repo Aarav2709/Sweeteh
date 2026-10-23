@@ -46,6 +46,8 @@ Singleton {
                 wallpaperDir: "~/Pictures/Wallpapers"
             },
             theme: {
+                // the accent follows the cover of the playing song
+                followSong: true,
                 dark: true,
                 fromWallpaper: true,
                 accent: "#7c9cff",
@@ -83,6 +85,8 @@ Singleton {
                 duration: 900
             },
             notifications: {
+                // notifications from one app stack in the dashboard
+                group: true,
                 timeout: 6000,
                 historyLimit: 100,
                 dnd: false
@@ -97,19 +101,40 @@ Singleton {
             },
             island: {
                 height: 34,
+                // hover the island during music for a small player, with the sung line in it
+                peek: true,
+                peekLyrics: true,
+                // swipe to skip, pull down for the dashboard, double click to play or pause
+                gestures: true,
+                // camera, microphone and screen share dots
+                privacyDots: true,
+                // browser downloads, their progress across the island
+                downloads: true,
                 // how much the wallpaper color shows through the island, 0 keeps it plain
                 wallpaperTint: 0.35,
                 messageTime: 3000
             },
             media: {
+                // live level meter through cava
+                visualizer: true,
+                // recently played tracks in the player
+                history: true,
                 lyrics: true
             },
             lock: {
+                // fingerprint beside the password when fprintd has a finger
+                fingerprint: true,
+                // a count and app icons of what came in while locked
+                showNotifications: true,
                 idleMinutes: 0,
                 showMedia: true
             },
             // idle sleep, 0 turns it off, the lid itself is handled by logind
             power: {
+                // fade the screens over the last half minute before idle sleep
+                dimBeforeSleep: true,
+                // time left from the average draw of the last ten minutes
+                smartTime: true,
                 sleepMinutes: 15,
                 sleepMinutesPlugged: 30,
                 sleepAction: "suspend",
@@ -121,10 +146,24 @@ Singleton {
             },
             // pause the level meter, the camera check and other busy work while something is fullscreen
             performance: {
+                // hold minor moments while something is fullscreen, they show after
+                quietMoments: true,
                 auto: true
+            },
+            // colored moments in the island, one switch per kind
+            moments: {
+                battery: true,
+                bluetooth: true,
+                network: true,
+                toggles: true,
+                privacy: true,
+                downloads: true,
+                welcome: true
             },
             // warmer colors through hyprsunset between the two times
             nightLight: {
+                // lower the screen to this percent while night light is on, 0 leaves it alone
+                brightness: 0,
                 auto: true,
                 from: "19:00",
                 to: "06:30",

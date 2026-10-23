@@ -14,6 +14,12 @@ ColumnLayout {
     property alias delegate: list.delegate
     property string empty: "Nothing found."
     property bool busy: false
+    // typed filter, the pages match their names against it
+    readonly property string query: search.text.trim().toLowerCase()
+
+    function matches(name: string): bool {
+        return query === "" || (name ?? "").toLowerCase().includes(query);
+    }
 
     signal back
     signal switched(bool on)
@@ -42,6 +48,16 @@ ColumnLayout {
             checked: root.on
             onToggled: v => root.switched(v)
         }
+    }
+
+    Field {
+        id: search
+
+        Layout.fillWidth: true
+        implicitHeight: 38
+        visible: list.count > 4 || text !== ""
+        icon: "search"
+        placeholder: "Search " + root.title.toLowerCase()
     }
 
     Rectangle {

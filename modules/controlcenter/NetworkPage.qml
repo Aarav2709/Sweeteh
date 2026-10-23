@@ -14,7 +14,7 @@ DevicePage {
     icon: "wifi"
     on: Network.wifiEnabled
     empty: Network.wifiEnabled ? "Searching for networks." : "Wifi is off."
-    model: Network.networks
+    model: Network.networks.filter(n => root.matches(n.name))
     onSwitched: on => Network.setWifi(on)
     Component.onCompleted: Network.scan(true)
     Component.onDestruction: Network.scan(false)

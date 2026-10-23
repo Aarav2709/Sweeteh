@@ -19,7 +19,7 @@ DeskCard {
                 name: Weather.icon
                 fill: 1
                 size: 30
-                color: Theme.color.primary
+                color: Theme.wall.primary
             }
 
             Label {
@@ -29,7 +29,7 @@ DeskCard {
                 text: Weather.place
                 font.pixelSize: Theme.font.small
                 font.weight: Font.DemiBold
-                color: Theme.color.inkMeta
+                color: Theme.wall.inkMeta
             }
         }
 
@@ -47,7 +47,7 @@ DeskCard {
             Layout.fillWidth: true
             text: Weather.condition
             font.pixelSize: Theme.font.small
-            color: Theme.color.inkMeta
+            color: Theme.wall.inkMeta
         }
     }
 

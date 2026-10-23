@@ -51,7 +51,7 @@ PanelWindow {
         id: scrim
 
         anchors.fill: parent
-        color: Theme.color.scrim
+        color: Theme.wall.scrim
         opacity: root.editing ? 0.35 : 0
         focus: root.editing
         Keys.onEscapePressed: root.done()
@@ -88,9 +88,9 @@ PanelWindow {
         implicitWidth: toolbar.implicitWidth + Theme.spacing.small * 2
         implicitHeight: toolbar.implicitHeight + Theme.spacing.small * 2
         radius: height / 2
-        color: Theme.color.panel
+        color: Theme.wall.panel
         border.width: Theme.depth.rim
-        border.color: Theme.color.depthRim
+        border.color: Theme.wall.depthRim
 
         Depth {}
 
@@ -104,7 +104,7 @@ PanelWindow {
                 Layout.leftMargin: Theme.spacing.small
                 Layout.rightMargin: Theme.spacing.small
                 text: "Drag widgets to move them."
-                color: Theme.color.inkMeta
+                color: Theme.wall.inkMeta
             }
 
             Repeater {

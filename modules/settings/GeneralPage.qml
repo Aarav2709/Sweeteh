@@ -9,8 +9,8 @@ import qs.components
 ColumnLayout {
     id: root
 
-    readonly property var sections: ["general", "clock", "notifications", "osd", "launcher", "island", "media", "desktop", "lock", "power", "nightLight", "performance", "clipboard", "overview"]
-    readonly property var icons: ({ general: "tune", clock: "schedule", notifications: "notifications", osd: "volume_up", launcher: "search", island: "pill", media: "music_note", desktop: "widgets", lock: "lock", power: "battery_charging_full", nightLight: "nightlight", performance: "speed", clipboard: "content_paste", overview: "overview" })
+    readonly property var sections: ["general", "clock", "notifications", "osd", "launcher", "island", "moments", "media", "desktop", "lock", "power", "nightLight", "performance", "clipboard", "overview"]
+    readonly property var icons: ({ general: "tune", clock: "schedule", notifications: "notifications", osd: "volume_up", launcher: "search", island: "pill", moments: "auto_awesome", media: "music_note", desktop: "widgets", lock: "lock", power: "battery_charging_full", nightLight: "nightlight", performance: "speed", clipboard: "content_paste", overview: "overview" })
 
     spacing: Theme.spacing.small
 

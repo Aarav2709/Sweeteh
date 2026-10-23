@@ -17,7 +17,7 @@ DeskCard {
         Icon {
             name: "monitoring"
             size: 26
-            color: Theme.color.primary
+            color: Theme.wall.primary
         }
 
         Item {
@@ -50,7 +50,7 @@ DeskCard {
                         text: modelData.label
                         font.pixelSize: Theme.font.small
                         font.weight: Font.DemiBold
-                        color: Theme.color.inkMeta
+                        color: Theme.wall.inkMeta
                     }
 
                     Label {
@@ -64,13 +64,13 @@ DeskCard {
                     Layout.fillWidth: true
                     implicitHeight: 6
                     radius: 3
-                    color: Theme.color.layer3
+                    color: Theme.wall.layer3
 
                     Rectangle {
                         width: parent.width * Math.min(1, modelData.value)
                         height: parent.height
                         radius: 3
-                        color: Theme.color.primary
+                        color: Theme.wall.primary
 
                         Behavior on width {
                             Anim {}

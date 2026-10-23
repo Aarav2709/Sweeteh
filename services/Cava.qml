@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.config
 
 // live audio levels from cava while music plays, the island meter falls back to a dance without it
 Singleton {
@@ -21,7 +22,7 @@ Singleton {
     Process {
         id: proc
 
-        running: root.installed && Media.playing && !Perf.active
+        running: root.installed && Media.playing && !Perf.active && Config.options.media.visualizer
         command: ["cava", "-p", Quickshell.shellPath("assets/cava.conf")]
         stdout: SplitParser {
             onRead: line => root.values = line.split(";").filter(v => v !== "").map(v => Math.min(1, Number(v) / 100))

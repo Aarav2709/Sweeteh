@@ -4,11 +4,13 @@ import QtQuick
 import Qt.labs.folderlistmodel
 import Quickshell
 import Quickshell.Io
+import qs.config
 
 // browser downloads in progress, seen as their partial files in the downloads folder
 Singleton {
     id: root
 
+    readonly property bool enabled: Config.options.island.downloads
     readonly property string folder: (Quickshell.env("XDG_DOWNLOAD_DIR") || Quickshell.env("HOME") + "/Downloads")
     readonly property bool active: partials.count > 0
     // the newest partial file, without its .part or .crdownload ending
@@ -35,7 +37,7 @@ Singleton {
     FolderListModel {
         id: partials
 
-        folder: "file://" + root.folder
+        folder: root.enabled ? "file://" + root.folder : ""
         nameFilters: ["*.part", "*.crdownload"]
         showDirs: false
         sortField: FolderListModel.Time
@@ -66,7 +68,7 @@ Singleton {
     }
 
     Process {
-        running: true
+        running: root.enabled
         command: ["dbus-monitor", "--session", "type='signal',interface='com.canonical.Unity.LauncherEntry',member='Update'"]
         stdout: SplitParser {
             onRead: line => {
