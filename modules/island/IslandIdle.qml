@@ -14,13 +14,12 @@ Item {
     property bool shown: true
     readonly property bool hovered: hover.hovered
     readonly property bool alone: !Modes.islands
-    readonly property color tint: Media.hasAccent ? Media.accent : Theme.color.primary
-    // while a song plays the whole resting island takes the cover color, not only the meter
+    // one color runs through the resting island, the cover while a song plays and the wallpaper otherwise
     readonly property bool themed: Media.playing && Media.hasAccent
     readonly property color accent: themed ? Media.accent : Theme.color.primary
     readonly property color onAccent: themed ? "#111111" : Theme.color.fgPrimary
-    readonly property color ink: themed ? Theme.mix(Theme.color.ink, Qt.lighter(Media.accent, 1.35), 0.55) : Theme.color.ink
-    readonly property color batteryColor: Battery.charging ? "#30d158" : Battery.low ? "#ff453a" : Battery.saver ? "#ffd60a" : ink
+    readonly property color ink: Theme.mix(Theme.color.ink, Theme.dark ? Qt.lighter(accent, 1.35) : Qt.darker(accent, 1.4), 0.55)
+    readonly property color batteryColor: accent
     // a sideways swipe skips the track, the row follows the finger a little
     property real drag: 0
     property bool swiped: false
@@ -230,7 +229,7 @@ Item {
                     width: 3
                     height: 4 + 12 * (Cava.active ? Cava.values[index] ?? 0 : Media.playing ? level : 0.1)
                     radius: 1.5
-                    color: root.tint
+                    color: root.accent
 
                     Behavior on height {
                         enabled: Cava.active
@@ -351,7 +350,7 @@ Item {
                 font.features: ({
                         "tnum": 1
                     })
-                color: Battery.low || Battery.charging ? root.batteryColor : root.ink
+                color: root.ink
             }
         }
     }
@@ -367,7 +366,7 @@ Item {
         width: (root.width - inset * 2) * Math.min(1, Media.position / Math.max(1, Media.length))
         height: 1
         radius: 0.5
-        color: root.tint
+        color: root.accent
         opacity: 0.85
 
         Behavior on width {
