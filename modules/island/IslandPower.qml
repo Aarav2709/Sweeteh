@@ -1,19 +1,31 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import qs.theme
 import qs.services
 import qs.components
 
-// charger and battery flash, the island blushes with the state color and a shine sweeps across it
+// charger, battery and welcome back flashes, the island blushes with the state color and a shine sweeps across it
 Item {
     id: root
 
     property bool shown: false
     property string kind: "plugged"
     readonly property bool plugged: kind === "plugged"
+    readonly property bool welcome: kind === "welcome"
     readonly property bool warning: kind === "low" || kind === "critical"
-    readonly property color accent: plugged ? "#30d158" : kind === "unplugged" ? "#ff9f0a" : "#ff453a"
-    readonly property string title: ({ plugged: Battery.percent >= 100 ? "Fully charged" : "Charging", unplugged: "On battery", low: "Battery low", critical: "Battery critical" })[kind] ?? ""
+    readonly property color accent: welcome ? "#0a84ff" : plugged ? "#30d158" : kind === "unplugged" ? "#ff9f0a" : "#ff453a"
+    readonly property string title: ({ welcome: "Welcome back!", plugged: Battery.percent >= 100 ? "Fully charged" : "Charging", unplugged: "On battery", low: "Battery low", critical: "Battery critical" })[kind] ?? ""
+    readonly property string user: {
+        const u = Quickshell.env("USER") ?? "";
+        return u.charAt(0).toUpperCase() + u.slice(1);
+    }
+    readonly property string greeting: {
+        const h = new Date().getHours();
+        const part = h < 5 ? "Up late" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+        const n = Notifs.list.length;
+        return part + (user ? ", " + user : "") + (n > 0 ? "  ·  " + n + (n === 1 ? " notification" : " notifications") : "");
+    }
     // read by the surface, glow tints the notch and sweep moves the shine from 0 to 1
     property real glow: 0
     property real sweep: -1
@@ -141,8 +153,20 @@ Item {
         anchors.centerIn: parent
         spacing: Theme.spacing.small
 
+        // a waving hand that pops in for the greeting
+        Icon {
+            visible: root.welcome
+            name: "waving_hand"
+            fill: 1
+            size: 22
+            color: root.accent
+            scale: root.bolt
+            rotation: (1 - root.bolt) * -40
+        }
+
         // a little battery that fills up on the charger, the bolt pops in over it
         Item {
+            visible: !root.welcome
             implicitWidth: 30
             implicitHeight: 16
 
@@ -194,6 +218,14 @@ Item {
         }
 
         Label {
+            visible: root.welcome
+            text: root.greeting
+            font.pixelSize: Theme.font.small
+            color: Theme.color.inkMeta
+        }
+
+        Label {
+            visible: !root.welcome
             text: Battery.percent + "%"
             font.weight: Font.DemiBold
             font.features: ({
@@ -203,7 +235,7 @@ Item {
         }
 
         Label {
-            visible: text !== "" && Battery.percent < 100
+            visible: !root.welcome && text !== "" && Battery.percent < 100
             text: Battery.timeText ? Battery.timeText + (Battery.charging ? " to full" : " left") : ""
             font.pixelSize: Theme.font.small
             color: Theme.color.inkMeta

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
+import Quickshell
 import Quickshell.Widgets
 import qs.config
 import qs.theme
@@ -27,6 +28,26 @@ Item {
     readonly property bool compact: mode === "idle" || mode === "message" || mode === "power" || mode === "osd" || mode === "track"
     readonly property int pad: mode === "idle" ? 0 : compact ? Theme.spacing.medium : Theme.spacing.large
     readonly property int idleHeight: Config.options.island.height
+    // the cover of the playing track tints the island, kept dim enough for the text
+    readonly property color artTint: {
+        const c = quantizer.colors[0];
+        return c ? Qt.hsla(c.hslHue, Math.min(1, c.hslSaturation * 1.3 + 0.1), Theme.dark ? 0.42 : 0.6, 1) : Theme.color.panel;
+    }
+    property real music: Media.playing && Media.art !== "" && quantizer.colors.length > 0 && ["idle", "track", "media", "osd", "message"].includes(mode) ? 1 : 0
+
+    Behavior on music {
+        Anim {
+            duration: Theme.anim.extraSlow
+        }
+    }
+
+    ColorQuantizer {
+        id: quantizer
+
+        source: Media.art
+        depth: 0
+        rescaleSize: 48
+    }
 
     signal dismissNotification
 
@@ -85,7 +106,7 @@ Item {
         anchors.fill: parent
         // a hint that the resting island opens the dashboard
         // a power flash blushes the notch with its state color
-        color: Theme.mix(root.mode === "idle" && idle.hovered ? Theme.mix(Theme.color.panel, Theme.color.ink, 0.07) : Theme.color.panel, Qt.alpha(powerView.accent, 1), powerView.glow * 0.4)
+        color: Theme.mix(Theme.mix(root.mode === "idle" && idle.hovered ? Theme.mix(Theme.color.panel, Theme.color.ink, 0.07) : Theme.color.panel, Qt.alpha(root.artTint, 1), root.music * 0.32), Qt.alpha(powerView.accent, 1), powerView.glow * (powerView.welcome ? 0.6 : 0.4))
         rimWidth: Theme.depth.rim
         radius: root.compact ? Math.min(height / 2, Theme.radius.medium) : Theme.radius.xl
         flare: root.compact ? Theme.radius.flare / 2 : Theme.radius.flare

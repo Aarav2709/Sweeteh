@@ -111,7 +111,7 @@ Singleton {
                 sleepMinutes: 15,
                 sleepMinutesPlugged: 30,
                 sleepAction: "suspend",
-                lockOnSleep: false,
+                lockOnSleep: true,
                 lowBattery: 20,
                 criticalBattery: 10
             },

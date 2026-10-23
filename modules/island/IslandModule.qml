@@ -127,6 +127,15 @@ PanelWindow {
         }
     }
 
+    // coming back from the lockscreen gets a greeting
+    Connections {
+        target: Actions
+
+        function onUnlocked(): void {
+            root.powerFlash("welcome", 4000);
+        }
+    }
+
     Connections {
         target: Audio
 

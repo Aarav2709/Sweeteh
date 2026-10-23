@@ -18,6 +18,7 @@ Singleton {
     // short status lines shown by the island or a toast
     signal message(string icon, string text)
     signal lockRequested
+    signal unlocked
     signal screenshotRequested(string kind)
     signal desktopEditRequested
     signal settingsRequested(string page)

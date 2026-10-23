@@ -20,7 +20,10 @@ Scope {
     LockContext {
         id: lockContext
 
-        onUnlocked: session.locked = false
+        onUnlocked: {
+            session.locked = false;
+            Actions.unlocked();
+        }
     }
 
     WlSessionLock {
