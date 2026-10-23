@@ -11,6 +11,28 @@ Singleton {
     readonly property var opts: Config.options.theme
     readonly property real panelOpacity: Math.max(0.3, Math.min(1, opts.panelOpacity))
     readonly property bool dark: opts.dark
+    // the cover of the playing song takes over the accent roles, both fade so nothing jumps
+    property color song: "#7c9cff"
+    property bool songOn: false
+    property real songMix: songOn ? 1 : 0
+
+    Behavior on songMix {
+        NumberAnimation {
+            duration: 900
+            easing.type: Easing.InOutQuad
+        }
+    }
+
+    Behavior on song {
+        ColorAnimation {
+            duration: 900
+        }
+    }
+
+    // a color at a fixed lightness, so text on it keeps its contrast whatever cover it came from
+    function tone(c: color, light: real, sat: real): color {
+        return Qt.hsla(Math.max(0, c.hslHue), Math.max(0, Math.min(1, Math.max(0.3, Math.min(0.9, c.hslSaturation)) * sat)), light, 1);
+    }
 
     readonly property ColorSet color: ColorSet {}
 

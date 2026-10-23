@@ -9,7 +9,7 @@ import qs.components
 RowLayout {
     id: root
 
-    readonly property color tint: Media.hasAccent ? Media.accent : Theme.color.primary
+    readonly property color tint: Theme.color.primary
     readonly property real progress: Math.min(1, Media.position / Math.max(1, Media.length))
 
     spacing: Theme.spacing.medium
@@ -54,6 +54,38 @@ RowLayout {
             text: Media.artist
             font.pixelSize: Theme.font.small
             color: Theme.color.inkMeta
+        }
+
+        // the line being sung, when lyrics are found
+        Label {
+            id: lyric
+
+            Layout.fillWidth: true
+            visible: Lyrics.enabled && Lyrics.current !== ""
+            text: Lyrics.current
+            font.pixelSize: Theme.font.small
+            font.weight: Font.Medium
+            color: root.tint
+
+            Behavior on text {
+                SequentialAnimation {
+                    Anim {
+                        target: lyric
+                        property: "opacity"
+                        to: 0
+                        duration: Theme.anim.fast
+                    }
+
+                    PropertyAction {}
+
+                    Anim {
+                        target: lyric
+                        property: "opacity"
+                        to: 1
+                        duration: Theme.anim.fast
+                    }
+                }
+            }
         }
 
         // click or drag along it to seek

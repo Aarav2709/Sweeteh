@@ -30,7 +30,7 @@ Item {
     readonly property bool compact: mode === "idle" || mode === "message" || mode === "glow" || mode === "osd" || mode === "track"
     readonly property int pad: mode === "idle" ? 0 : compact ? Theme.spacing.medium : Theme.spacing.large
     readonly property int idleHeight: Config.options.island.height
-    // the cover of the playing track tints the island and lights its rim
+    // the island takes its color from the theme, which follows the song, the rim lights up while it plays
     property real music: Media.playing && Media.hasAccent && ["idle", "peek", "track", "media", "osd", "message"].includes(mode) ? 1 : 0
 
     Behavior on music {
@@ -130,9 +130,9 @@ Item {
         anchors.fill: parent
         // a hint that the resting island opens the dashboard
         // a moment blushes the notch with its state color
-        color: Theme.mix(Theme.mix(Theme.mix(root.base, Theme.color.ink, 0.07 * root.hoverMix), Qt.alpha(Media.accent, 1), root.music * 0.3), Qt.alpha(glowView.accent, 1), glowView.glow * glowView.strength)
+        color: Theme.mix(Theme.mix(root.base, Theme.color.ink, 0.07 * root.hoverMix), Qt.alpha(glowView.blush, 1), glowView.glow * glowView.strength)
         rimWidth: Math.max(Theme.depth.rim, root.music * 1.5)
-        rim: Theme.mix(Theme.color.depthRim, Media.accent, root.music * 0.8)
+        rim: Theme.mix(Theme.color.depthRim, Theme.color.primary, root.music * 0.8)
         radius: root.compact ? Math.min(height / 2, Theme.radius.medium) : Theme.radius.xl
         flare: root.compact ? Theme.radius.flare / 2 : Theme.radius.flare
 
@@ -159,7 +159,7 @@ Item {
             id: dl
 
             readonly property bool known: Downloads.progress >= 0
-            readonly property color blue: Qt.alpha("#0a84ff", 0.45)
+            readonly property color blue: Qt.alpha(Theme.color.primary, 0.4)
 
             x1: known ? 0 : (root.downloadBand - 0.3) * root.width
             x2: known ? root.width : (root.downloadBand + 0.3) * root.width

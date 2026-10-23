@@ -15,9 +15,8 @@ Item {
     readonly property bool hovered: hover.hovered
     readonly property bool alone: !Modes.islands
     // one color runs through the resting island, the cover while a song plays and the wallpaper otherwise
-    readonly property bool themed: Media.playing && Media.hasAccent
-    readonly property color accent: themed ? Media.accent : Theme.color.primary
-    readonly property color onAccent: themed ? "#111111" : Theme.color.fgPrimary
+    readonly property color accent: Theme.color.primary
+    readonly property color onAccent: Theme.color.fgPrimary
     readonly property color ink: Theme.mix(Theme.color.ink, Theme.dark ? Qt.lighter(accent, 1.35) : Qt.darker(accent, 1.4), 0.55)
     readonly property color batteryColor: accent
     // a sideways swipe skips the track, the row follows the finger a little
@@ -197,7 +196,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 name: "downloading"
                 size: Theme.font.large
-                color: "#64d2ff"
+                color: root.accent
             }
 
             Label {
@@ -240,7 +239,7 @@ Item {
                     }
 
                     SequentialAnimation on level {
-                        running: Media.playing && root.visible && !Cava.active
+                        running: Media.playing && root.visible && !Cava.active && !Perf.active
                         loops: Animation.Infinite
 
                         NumberAnimation {
@@ -337,7 +336,7 @@ Item {
                     name: "bolt"
                     fill: 1
                     size: 14
-                    color: "#ffffff"
+                    color: root.onAccent
                 }
             }
 

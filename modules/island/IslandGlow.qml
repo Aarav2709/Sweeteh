@@ -16,7 +16,10 @@ Item {
     readonly property bool plugged: kind === "plugged"
     readonly property bool battery: ["plugged", "unplugged", "low", "critical"].includes(kind)
     readonly property bool warning: kind === "low" || kind === "critical"
-    readonly property color accent: moment.accent ?? (({ welcome: "#0a84ff", plugged: "#30d158", unplugged: "#ff9f0a" })[kind] ?? "#ff453a")
+    // every moment speaks in the shell accent, only alerts turn to the error color
+    readonly property bool alert: kind === "critical" || (moment.alert ?? false)
+    readonly property color accent: alert ? Theme.color.error : Theme.color.primary
+    readonly property color blush: alert ? Theme.color.errorContainer : Theme.color.vivid
     readonly property string title: moment.title ?? (({ welcome: "Welcome back!", plugged: Battery.percent >= 100 ? "Fully charged" : "Charging", unplugged: "On battery", low: "Battery low", critical: "Battery critical" })[kind] ?? "")
     readonly property string icon: moment.icon ?? (kind === "welcome" ? "waving_hand" : "info")
     // the charger moments say how fast power flows and how long it lasts, live while they show
@@ -208,7 +211,7 @@ Item {
                 fill: 1
                 size: 18
                 scale: root.bolt
-                color: "#ffffff"
+                color: root.alert ? Theme.color.fgError : Theme.color.fgPrimary
             }
         }
 

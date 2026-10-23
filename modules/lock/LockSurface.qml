@@ -276,7 +276,7 @@ Item {
         implicitWidth: 420
         implicitHeight: 72
         radius: height / 2
-        color: Theme.mix(Theme.color.panel, Qt.alpha(Media.accent, 1), Media.hasAccent ? 0.25 : 0)
+        color: Theme.mix(Theme.color.panel, Qt.alpha(Theme.color.primaryContainer, Theme.color.panel.a), 0.5)
         border.width: Theme.depth.rim
         border.color: Theme.color.depthRim
 

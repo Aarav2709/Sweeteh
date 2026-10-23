@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Mpris
+import qs.theme
 
 // active mpris player and its position
 Singleton {
@@ -63,6 +64,20 @@ Singleton {
     readonly property color accent: {
         const c = quantizer.colors[0];
         return c ? Qt.hsla(c.hslHue, Math.min(1, c.hslSaturation * 1.3 + 0.1), 0.55, 1) : "#7c9cff";
+    }
+
+    // the whole shell follows the cover while the song plays
+    Binding {
+        target: Theme
+        property: "song"
+        value: root.accent
+        when: root.hasAccent
+    }
+
+    Binding {
+        target: Theme
+        property: "songOn"
+        value: root.playing && root.hasAccent
     }
 
     ColorQuantizer {

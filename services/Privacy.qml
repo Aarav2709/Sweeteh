@@ -20,7 +20,7 @@ Singleton {
 
     // browsers open the camera device directly, so look at who holds it open
     Timer {
-        running: true
+        running: !Perf.active
         repeat: true
         interval: 3000
         onTriggered: cam.running = true

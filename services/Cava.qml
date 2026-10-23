@@ -21,7 +21,7 @@ Singleton {
     Process {
         id: proc
 
-        running: root.installed && Media.playing
+        running: root.installed && Media.playing && !Perf.active
         command: ["cava", "-p", Quickshell.shellPath("assets/cava.conf")]
         stdout: SplitParser {
             onRead: line => root.values = line.split(";").filter(v => v !== "").map(v => Math.min(1, Number(v) / 100))

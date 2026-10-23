@@ -21,8 +21,12 @@ Singleton {
     readonly property bool saver: profile === PowerProfile.PowerSaver
     readonly property bool low: available && !plugged && percent <= Config.options.power.lowBattery
     readonly property string icon: charging ? "battery_charging_full" : percent > 90 ? "battery_full" : "battery_" + Math.max(0, Math.min(6, Math.floor(level * 7))) + "_bar"
+    // watts sampled on battery over the last ten minutes
+    property var drain: []
+    readonly property real avgWatts: drain.length > 0 ? drain.reduce((a, b) => a + b, 0) / drain.length : 0
     readonly property string timeText: {
-        const s = charging ? device?.timeToFull : device?.timeToEmpty;
+        const energy = device?.energy ?? 0;
+        const s = charging ? device?.timeToFull : drain.length >= 3 && energy > 0 && avgWatts > 0.3 ? energy / avgWatts * 3600 : device?.timeToEmpty;
         if (!s)
             return "";
         const h = Math.floor(s / 3600);
@@ -60,6 +64,20 @@ Singleton {
     }
 
     onPercentChanged: check()
-    onPluggedChanged: check()
+    onPluggedChanged: {
+        drain = [];
+        check();
+    }
     onAvailableChanged: check()
+
+    Timer {
+        running: root.available && !root.plugged
+        repeat: true
+        triggeredOnStart: true
+        interval: 30000
+        onTriggered: {
+            if (root.watts > 0.3)
+                root.drain = root.drain.concat([root.watts]).slice(-20);
+        }
+    }
 }

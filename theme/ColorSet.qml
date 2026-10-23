@@ -2,6 +2,14 @@ import QtQuick
 
 // material color roles, filled from the active palette
 QtObject {
+    id: root
+
+    // a palette role, blended toward the song tone at the lightness the role has in this theme
+    function song(role: string, light: real, dark: real, sat: real): color {
+        const base = Colors.pick(role);
+        return Theme.songMix <= 0 ? base : Theme.mix(base, Theme.tone(Theme.song, Theme.dark ? dark : light, sat), Theme.songMix);
+    }
+
     readonly property color background: Colors.pick("background")
     readonly property color error: Colors.pick("error")
     readonly property color errorContainer: Colors.pick("error_container")
@@ -11,12 +19,12 @@ QtObject {
     readonly property color fgBackground: Colors.pick("on_background")
     readonly property color fgError: Colors.pick("on_error")
     readonly property color fgErrorContainer: Colors.pick("on_error_container")
-    readonly property color fgPrimary: Colors.pick("on_primary")
-    readonly property color fgPrimaryContainer: Colors.pick("on_primary_container")
+    readonly property color fgPrimary: song("on_primary", 1.0, 0.18, 0.6)
+    readonly property color fgPrimaryContainer: song("on_primary_container", 0.12, 0.9, 0.6)
     readonly property color fgPrimaryFixed: Colors.pick("on_primary_fixed")
     readonly property color fgPrimaryFixedVariant: Colors.pick("on_primary_fixed_variant")
     readonly property color fgSecondary: Colors.pick("on_secondary")
-    readonly property color fgSecondaryContainer: Colors.pick("on_secondary_container")
+    readonly property color fgSecondaryContainer: song("on_secondary_container", 0.15, 0.88, 0.4)
     readonly property color fgSecondaryFixed: Colors.pick("on_secondary_fixed")
     readonly property color fgSecondaryFixedVariant: Colors.pick("on_secondary_fixed_variant")
     readonly property color fgSurface: Colors.pick("on_surface")
@@ -27,13 +35,13 @@ QtObject {
     readonly property color fgTertiaryFixedVariant: Colors.pick("on_tertiary_fixed_variant")
     readonly property color outline: Colors.pick("outline")
     readonly property color outlineVariant: Colors.pick("outline_variant")
-    readonly property color primary: Colors.pick("primary")
-    readonly property color primaryContainer: Colors.pick("primary_container")
+    readonly property color primary: song("primary", 0.4, 0.78, 1.0)
+    readonly property color primaryContainer: song("primary_container", 0.88, 0.3, 0.8)
     readonly property color primaryFixed: Colors.pick("primary_fixed")
     readonly property color primaryFixedDim: Colors.pick("primary_fixed_dim")
     readonly property color scrim: Colors.pick("scrim")
     readonly property color secondary: Colors.pick("secondary")
-    readonly property color secondaryContainer: Colors.pick("secondary_container")
+    readonly property color secondaryContainer: song("secondary_container", 0.9, 0.26, 0.45)
     readonly property color secondaryFixed: Colors.pick("secondary_fixed")
     readonly property color secondaryFixedDim: Colors.pick("secondary_fixed_dim")
     readonly property color shadow: Colors.pick("shadow")
@@ -45,7 +53,7 @@ QtObject {
     readonly property color surfaceContainerLow: Colors.pick("surface_container_low")
     readonly property color surfaceContainerLowest: Colors.pick("surface_container_lowest")
     readonly property color surfaceDim: Colors.pick("surface_dim")
-    readonly property color surfaceTint: Colors.pick("surface_tint")
+    readonly property color surfaceTint: song("surface_tint", 0.4, 0.78, 1.0)
     readonly property color surfaceVariant: Colors.pick("surface_variant")
     readonly property color tertiary: Colors.pick("tertiary")
     readonly property color tertiaryContainer: Colors.pick("tertiary_container")
@@ -53,6 +61,8 @@ QtObject {
     readonly property color tertiaryFixedDim: Colors.pick("tertiary_fixed_dim")
 
     // ground of the bar, drawers and island, follows the opacity setting
+    // a vivid version of the accent for moments to blush the island with
+    readonly property color vivid: Theme.tone(primary, Theme.dark ? 0.4 : 0.7, 1.1)
     readonly property color panel: Qt.alpha(surface, Theme.panelOpacity)
     // raised layers that sit on the panel ground
     readonly property color layer1: surfaceContainer

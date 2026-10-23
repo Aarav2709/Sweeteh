@@ -119,6 +119,10 @@ Singleton {
                 lowBattery: 20,
                 criticalBattery: 10
             },
+            // pause the level meter, the camera check and other busy work while something is fullscreen
+            performance: {
+                auto: true
+            },
             // warmer colors through hyprsunset between the two times
             nightLight: {
                 auto: true,

@@ -63,9 +63,9 @@ PanelWindow {
     }
 
     // switches flipped by keybinds or toggles, ignored while the shell is still loading
-    function toggled(on: bool, icon: string, title: string, accent: string): void {
+    function toggled(on: bool, icon: string, title: string): void {
         if (armed.ready)
-            glow({ kind: "toggle " + title, icon: icon, title: title, sub: on ? "On" : "Off", accent: on ? accent : "#8e8e93" }, 2200);
+            glow({ kind: "toggle " + title, icon: icon, title: title, sub: on ? "On" : "Off" }, 2200);
     }
 
     function btIcon(icon: string): string {
@@ -172,7 +172,7 @@ PanelWindow {
             if (!armed.ready || (root.flashing === "glow" && ["plugged", "low", "critical"].includes(root.moment.kind)))
                 return;
             const p = Battery.profile;
-            root.glow(p === PowerProfile.PowerSaver ? { kind: "profile", icon: "energy_savings_leaf", title: "Battery saver", sub: "On", accent: "#30d158" } : p === PowerProfile.Performance ? { kind: "profile", icon: "speed", title: "Performance", sub: "Power mode", accent: "#ff6b3d" } : { kind: "profile", icon: "balance", title: "Balanced", sub: "Power mode", accent: "#0a84ff" }, 2400);
+            root.glow(p === PowerProfile.PowerSaver ? { kind: "profile", icon: "energy_savings_leaf", title: "Battery saver", sub: "On" } : p === PowerProfile.Performance ? { kind: "profile", icon: "speed", title: "Performance", sub: "Power mode" } : { kind: "profile", icon: "balance", title: "Balanced", sub: "Power mode" }, 2400);
         }
     }
 
@@ -195,15 +195,15 @@ PanelWindow {
                 const came = now.find(d => !root.btSeen.includes(d.address));
                 const left = root.btSeen.filter(a => !ids.includes(a));
                 if (came)
-                    root.glow({ kind: "bluetooth", icon: root.btIcon(came.icon ?? ""), title: came.name || came.deviceName || "Device", sub: "Connected" + (came.batteryAvailable ? "  ·  " + Math.round(came.battery * 100) + "%" : ""), accent: "#0a84ff", run: () => Actions.open("island") }, 3000);
+                    root.glow({ kind: "bluetooth", icon: root.btIcon(came.icon ?? ""), title: came.name || came.deviceName || "Device", sub: "Connected" + (came.batteryAvailable ? "  ·  " + Math.round(came.battery * 100) + "%" : ""), run: () => Actions.open("island") }, 3000);
                 else if (left.length > 0)
-                    root.glow({ kind: "bluetooth", icon: "bluetooth_disabled", title: "Bluetooth device", sub: "Disconnected", accent: "#8e8e93" }, 2400);
+                    root.glow({ kind: "bluetooth", icon: "bluetooth_disabled", title: "Bluetooth device", sub: "Disconnected" }, 2400);
             }
             root.btSeen = ids;
         }
 
         function onEnabledChanged(): void {
-            root.toggled(BluetoothState.enabled, "bluetooth", "Bluetooth", "#0a84ff");
+            root.toggled(BluetoothState.enabled, "bluetooth", "Bluetooth");
         }
     }
 
@@ -217,7 +217,7 @@ PanelWindow {
         }
 
         function onWifiEnabledChanged(): void {
-            root.toggled(Network.wifiEnabled, Network.wifiEnabled ? "wifi" : "wifi_off", "Wi-Fi", "#0a84ff");
+            root.toggled(Network.wifiEnabled, Network.wifiEnabled ? "wifi" : "wifi_off", "Wi-Fi");
         }
     }
 
@@ -226,7 +226,7 @@ PanelWindow {
         id: nameWait
 
         interval: 600
-        onTriggered: root.glow(Network.connected ? { kind: "network", icon: Network.wired ? "lan" : "wifi", title: Network.name || "Connected", sub: "Connected", accent: "#30d158" } : { kind: "network", icon: "wifi_off", title: "Wi-Fi dropped", sub: "Offline", accent: "#ff453a", run: () => Actions.open("island") }, 2800)
+        onTriggered: root.glow(Network.connected ? { kind: "network", icon: Network.wired ? "lan" : "wifi", title: Network.name || "Connected", sub: "Connected" } : { kind: "network", icon: "wifi_off", title: "Wi-Fi dropped", sub: "Offline", run: () => Actions.open("island") }, 2800)
     }
 
     Connections {
@@ -234,17 +234,17 @@ PanelWindow {
 
         function onMicChanged(): void {
             if (Privacy.mic && armed.ready)
-                root.glow({ kind: "privacy mic", icon: "mic", title: "Microphone in use", sub: Privacy.micApp, accent: "#ff9f0a" }, 2600);
+                root.glow({ kind: "privacy mic", icon: "mic", title: "Microphone in use", sub: Privacy.micApp }, 2600);
         }
 
         function onCameraChanged(): void {
             if (Privacy.camera && armed.ready)
-                root.glow({ kind: "privacy camera", icon: "videocam", title: "Camera in use", sub: Privacy.cameraApp, accent: "#30d158" }, 2600);
+                root.glow({ kind: "privacy camera", icon: "videocam", title: "Camera in use", sub: Privacy.cameraApp }, 2600);
         }
 
         function onScreenChanged(): void {
             if (Privacy.screen && armed.ready)
-                root.glow({ kind: "privacy screen", icon: "screen_share", title: "Screen shared", accent: "#bf5af2" }, 2600);
+                root.glow({ kind: "privacy screen", icon: "screen_share", title: "Screen shared" }, 2600);
         }
     }
 
@@ -261,7 +261,7 @@ PanelWindow {
                 const warned = root.btWarned.includes(d.address);
                 if (d.battery <= 0.15 && !warned) {
                     root.btWarned = root.btWarned.concat([d.address]);
-                    root.glow({ kind: "bluetooth low " + d.address, icon: root.btIcon(d.icon ?? ""), title: (d.name || "Device") + " battery low", sub: Math.round(d.battery * 100) + "%", accent: "#ff453a" }, 3500);
+                    root.glow({ kind: "bluetooth low " + d.address, icon: root.btIcon(d.icon ?? ""), title: (d.name || "Device") + " battery low", sub: Math.round(d.battery * 100) + "%", alert: true }, 3500);
                 } else if (d.battery > 0.25 && warned) {
                     root.btWarned = root.btWarned.filter(a => a !== d.address);
                 }
@@ -274,7 +274,7 @@ PanelWindow {
 
         function onMicMutedChanged(): void {
             if (armed.ready)
-                root.glow({ kind: "mic", icon: Audio.micMuted ? "mic_off" : "mic", title: Audio.micMuted ? "Microphone muted" : "Microphone on", accent: Audio.micMuted ? "#ff453a" : "#30d158" }, 2000);
+                root.glow({ kind: "mic", icon: Audio.micMuted ? "mic_off" : "mic", title: Audio.micMuted ? "Microphone muted" : "Microphone on" }, 2000);
         }
     }
 
@@ -282,7 +282,7 @@ PanelWindow {
         target: Session
 
         function onCaffeineChanged(): void {
-            root.toggled(Session.caffeine, "coffee", "Caffeine", "#ffb74d");
+            root.toggled(Session.caffeine, "coffee", "Caffeine");
         }
     }
 
@@ -290,7 +290,7 @@ PanelWindow {
         target: Notifs
 
         function onDndChanged(): void {
-            root.toggled(Notifs.dnd, "do_not_disturb_on", "Do not disturb", "#bf5af2");
+            root.toggled(Notifs.dnd, "do_not_disturb_on", "Do not disturb");
         }
     }
 
@@ -298,7 +298,7 @@ PanelWindow {
         target: NightLight
 
         function onActiveChanged(): void {
-            root.toggled(NightLight.active, "nightlight", "Night light", "#ff9f43");
+            root.toggled(NightLight.active, "nightlight", "Night light");
         }
     }
 
@@ -307,7 +307,7 @@ PanelWindow {
 
         function onRecordingChanged(): void {
             if (armed.ready)
-                root.glow({ kind: "record", icon: Recorder.recording ? "radio_button_checked" : "check_circle", title: Recorder.recording ? "Recording" : "Recording saved", accent: "#ff453a" }, 2200);
+                root.glow({ kind: "record", icon: Recorder.recording ? "radio_button_checked" : "check_circle", title: Recorder.recording ? "Recording" : "Recording saved" }, 2200);
         }
     }
 
@@ -315,12 +315,12 @@ PanelWindow {
         target: Keyboard
 
         function onCapsChanged(): void {
-            root.toggled(Keyboard.caps, "keyboard_capslock", "Caps Lock", "#64d2ff");
+            root.toggled(Keyboard.caps, "keyboard_capslock", "Caps Lock");
         }
 
         function onLayoutChanged(): void {
             if (armed.ready && Keyboard.layout)
-                root.glow({ kind: "layout", icon: "keyboard", title: Keyboard.layout, sub: "Layout", accent: "#64d2ff" }, 1800);
+                root.glow({ kind: "layout", icon: "keyboard", title: Keyboard.layout, sub: "Layout" }, 1800);
         }
     }
 
@@ -329,15 +329,15 @@ PanelWindow {
 
         function onActiveChanged(): void {
             if (Downloads.active && armed.ready)
-                root.glow({ kind: "download", icon: "download", title: "Downloading", sub: Downloads.name, accent: "#64d2ff", run: () => Quickshell.execDetached(["xdg-open", Downloads.folder]) }, 2400);
+                root.glow({ kind: "download", icon: "download", title: "Downloading", sub: Downloads.name, run: () => Quickshell.execDetached(["xdg-open", Downloads.folder]) }, 2400);
         }
 
         function onFinished(name: string): void {
-            root.glow({ kind: "download", icon: "download_done", title: "Downloaded", sub: name, accent: "#30d158", run: () => Quickshell.execDetached(["xdg-open", Downloads.folder + "/" + name]) }, 3600);
+            root.glow({ kind: "download", icon: "download_done", title: "Downloaded", sub: name, run: () => Quickshell.execDetached(["xdg-open", Downloads.folder + "/" + name]) }, 3600);
         }
 
         function onCancelled(name: string): void {
-            root.glow({ kind: "download", icon: "cancel", title: "Download cancelled", sub: name, accent: "#8e8e93" }, 2400);
+            root.glow({ kind: "download", icon: "cancel", title: "Download cancelled", sub: name }, 2400);
         }
     }
 
@@ -346,7 +346,7 @@ PanelWindow {
 
         function onCurrentChanged(): void {
             if (armed.ready)
-                root.glow({ kind: "mode", icon: Modes.mode.icon, title: Modes.mode.name, sub: "Mode", accent: "#0a84ff" }, 2000);
+                root.glow({ kind: "mode", icon: Modes.mode.icon, title: Modes.mode.name, sub: "Mode" }, 2000);
         }
     }
 
