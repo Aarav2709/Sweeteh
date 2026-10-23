@@ -23,17 +23,51 @@ Item {
     property string osdKind
     property var moment: ({ kind: "plugged" })
     property NotifEntry notif
-    readonly property Item content: ({ idle: idle, message: message, glow: glow, osd: osd, track: track, notification: notification, media: media, launcher: launcher, clipboard: clipboard, monitor: monitor, dashboard: dashboard, auth: auth })[mode] ?? idle
+    readonly property bool hovered: hover.hovered
+    readonly property Item content: ({ idle: idle, peek: peek, message: message, glow: glow, osd: osd, track: track, notification: notification, media: media, launcher: launcher, clipboard: clipboard, monitor: monitor, dashboard: dashboard, auth: auth })[mode] ?? idle
     readonly property bool compact: mode === "idle" || mode === "message" || mode === "glow" || mode === "osd" || mode === "track"
     readonly property int pad: mode === "idle" ? 0 : compact ? Theme.spacing.medium : Theme.spacing.large
     readonly property int idleHeight: Config.options.island.height
     // the cover of the playing track tints the island and lights its rim
-    property real music: Media.playing && Media.hasAccent && ["idle", "track", "media", "osd", "message"].includes(mode) ? 1 : 0
+    property real music: Media.playing && Media.hasAccent && ["idle", "peek", "track", "media", "osd", "message"].includes(mode) ? 1 : 0
 
     Behavior on music {
         Anim {
             duration: Theme.anim.extraSlow
         }
+    }
+
+    // the hover hint eases by itself, the color as a whole has no behavior so a fading moment
+    // follows the shrinking island frame by frame instead of trailing behind it
+    property real hoverMix: mode === "idle" && idle.hovered ? 1 : 0
+
+    Behavior on hoverMix {
+        Anim {
+            duration: Theme.anim.fast
+        }
+    }
+
+    // a download fills the resting island from the left, or a band runs across while its size is unknown
+    property real downloadFill: Downloads.progress >= 0 ? Downloads.progress : 0
+    property real downloadBand: 0
+
+    Behavior on downloadFill {
+        Anim {
+            duration: Theme.anim.slow
+        }
+    }
+
+    NumberAnimation on downloadBand {
+        running: Downloads.active && Downloads.progress < 0 && root.mode === "idle"
+        loops: Animation.Infinite
+        from: -0.3
+        to: 1.3
+        duration: 1600
+        easing.type: Easing.InOutSine
+    }
+
+    HoverHandler {
+        id: hover
     }
 
     signal dismissNotification
@@ -93,17 +127,11 @@ Item {
         anchors.fill: parent
         // a hint that the resting island opens the dashboard
         // a moment blushes the notch with its state color
-        color: Theme.mix(Theme.mix(root.mode === "idle" && idle.hovered ? Theme.mix(Theme.color.panel, Theme.color.ink, 0.07) : Theme.color.panel, Qt.alpha(Media.accent, 1), root.music * 0.3), Qt.alpha(glowView.accent, 1), glowView.glow * glowView.strength)
+        color: Theme.mix(Theme.mix(Theme.mix(Theme.color.panel, Theme.color.ink, 0.07 * root.hoverMix), Qt.alpha(Media.accent, 1), root.music * 0.3), Qt.alpha(glowView.accent, 1), glowView.glow * glowView.strength)
         rimWidth: Math.max(Theme.depth.rim, root.music * 1.5)
         rim: Theme.mix(Theme.color.depthRim, Media.accent, root.music * 0.8)
         radius: root.compact ? Math.min(height / 2, Theme.radius.medium) : Theme.radius.xl
         flare: root.compact ? Theme.radius.flare / 2 : Theme.radius.flare
-
-        Behavior on color {
-            ColorAnim {
-                duration: Theme.anim.fast
-            }
-        }
 
         Behavior on radius {
             Anim {
@@ -115,6 +143,44 @@ Item {
             Anim {
                 duration: Theme.anim.slow
             }
+        }
+    }
+
+    NotchShape {
+        anchors.fill: parent
+        visible: opacity > 0
+        opacity: Downloads.active && root.mode === "idle" ? 1 : 0
+        radius: shape.radius
+        flare: shape.flare
+        gradient: LinearGradient {
+            id: dl
+
+            readonly property bool known: Downloads.progress >= 0
+            readonly property color blue: Qt.alpha("#0a84ff", 0.45)
+
+            x1: known ? 0 : (root.downloadBand - 0.3) * root.width
+            x2: known ? root.width : (root.downloadBand + 0.3) * root.width
+            y1: 0
+            y2: 0
+
+            GradientStop {
+                position: 0
+                color: dl.known ? dl.blue : "transparent"
+            }
+
+            GradientStop {
+                position: dl.known ? root.downloadFill : 0.5
+                color: dl.blue
+            }
+
+            GradientStop {
+                position: dl.known ? Math.min(1, root.downloadFill + 0.004) : 1
+                color: "transparent"
+            }
+        }
+
+        Behavior on opacity {
+            Anim {}
         }
     }
 
@@ -159,6 +225,14 @@ Item {
 
             anchors.centerIn: parent
             shown: root.mode === "idle"
+        }
+
+        IslandSlot {
+            id: peek
+
+            shown: root.mode === "peek"
+
+            IslandPeek {}
         }
 
         IslandSlot {

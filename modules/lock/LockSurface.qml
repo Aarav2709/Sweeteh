@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
+import Quickshell
 import Quickshell.Widgets
 import qs.config
 import qs.theme
@@ -220,6 +221,50 @@ Item {
             Layout.preferredHeight: Theme.font.body * 2
             text: root.context.error || (root.context.fingerprint ? root.context.fingerMessage || "Or touch the fingerprint sensor" : "")
             color: root.context.error ? Theme.color.error : Theme.color.inkMeta
+        }
+    }
+
+    // what came in while away, app icons and a count only so nothing private shows
+    Rectangle {
+        id: away
+
+        readonly property var fresh: Notifs.list.filter(n => n.time > root.context.lockedAt)
+        readonly property var apps: fresh.map(n => n.appIcon).filter((a, i, all) => a && all.indexOf(a) === i).slice(0, 5)
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: Theme.spacing.xxl + (Config.options.lock.showMedia && Media.active ? 72 + Theme.spacing.medium : 0)
+        visible: fresh.length > 0
+        implicitWidth: freshRow.implicitWidth + Theme.spacing.large * 2
+        implicitHeight: 40
+        radius: height / 2
+        color: Theme.color.panel
+        border.width: Theme.depth.rim
+        border.color: Theme.color.depthRim
+
+        Row {
+            id: freshRow
+
+            anchors.centerIn: parent
+            spacing: Theme.spacing.small
+
+            Repeater {
+                model: away.apps
+
+                IconImage {
+                    required property string modelData
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    implicitSize: 20
+                    source: Quickshell.iconPath(modelData, true) || (modelData.startsWith("/") ? "file://" + modelData : "")
+                }
+            }
+
+            Label {
+                anchors.verticalCenter: parent.verticalCenter
+                text: away.fresh.length + (away.fresh.length === 1 ? " notification" : " notifications")
+                font.weight: Font.DemiBold
+            }
         }
     }
 

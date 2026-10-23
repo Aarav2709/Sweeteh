@@ -156,6 +156,26 @@ Item {
                 })
         }
 
+        // the microphone, camera or screen in use by an app
+        Row {
+            visible: Privacy.mic || Privacy.camera || Privacy.screen
+            spacing: 3
+
+            Repeater {
+                model: [Privacy.camera ? "#30d158" : "", Privacy.mic ? "#ff9f0a" : "", Privacy.screen ? "#bf5af2" : ""].filter(c => c !== "")
+
+                Rectangle {
+                    required property string modelData
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 7
+                    height: 7
+                    radius: 3.5
+                    color: modelData
+                }
+            }
+        }
+
         // a browser download in progress
         Row {
             visible: Downloads.active
@@ -275,8 +295,8 @@ Item {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 2
         width: (root.width - inset * 2) * Math.min(1, Media.position / Math.max(1, Media.length))
-        height: 2
-        radius: 1
+        height: 1
+        radius: 0.5
         color: root.tint
         opacity: 0.85
 
@@ -314,6 +334,12 @@ Item {
             root.drag = 0;
         }
         onClicked: e => root.swiped ? undefined : e.button === Qt.RightButton ? Actions.open("modeswitcher") : e.button === Qt.MiddleButton ? Media.toggle() : Actions.toggle("island")
-        onWheel: e => Audio.setVolume(Audio.volume + (e.angleDelta.y > 0 ? 0.05 : -0.05))
+        onWheel: e => {
+            const step = e.angleDelta.y > 0 ? 0.05 : -0.05;
+            if (Media.playing && Media.volumeSupported)
+                Media.setVolume(Media.volume + step);
+            else
+                Audio.setVolume(Audio.volume + step);
+        }
     }
 }

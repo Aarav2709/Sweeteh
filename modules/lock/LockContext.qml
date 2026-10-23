@@ -16,6 +16,8 @@ Scope {
     property bool fingerprint: false
     property string fingerMessage: ""
     property int fingerTries: 0
+    // notifications that arrive after this are counted on the lockscreen
+    property real lockedAt: Date.now()
 
     signal unlocked
 
@@ -26,6 +28,7 @@ Scope {
         busy = false;
         fingerMessage = "";
         fingerTries = 0;
+        lockedAt = Date.now();
         if (fingerprint)
             fingerRetry.restart();
     }

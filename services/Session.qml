@@ -14,6 +14,8 @@ Singleton {
     readonly property var opts: Config.options.power
     // a shorter wait on battery, the charger gets the longer one
     readonly property int sleepMinutes: Battery.available && !Battery.plugged ? opts.sleepMinutes : opts.sleepMinutesPlugged
+    // a call, the camera, a screen share or a download keeps the machine awake like music does
+    readonly property bool busy: Media.playing || Privacy.mic || Privacy.camera || Privacy.screen || Downloads.active
     readonly property string sleepAction: Defaults.choices["power.sleepAction"].includes(opts.sleepAction) ? opts.sleepAction : "suspend"
 
     function lock(): void {
@@ -65,9 +67,9 @@ Singleton {
         }
     }
 
-    // nobody at the keyboard and nothing playing, video players and caffeine hold it off through inhibitors
+    // nobody at the keyboard and nothing going on, video players and caffeine hold it off through inhibitors
     IdleMonitor {
-        enabled: root.sleepMinutes > 0 && !root.caffeine && !Media.playing
+        enabled: root.sleepMinutes > 0 && !root.caffeine && !root.busy
         timeout: root.sleepMinutes * 60
         respectInhibitors: true
         onIsIdleChanged: {
@@ -80,7 +82,7 @@ Singleton {
     IdleMonitor {
         id: dimIdle
 
-        enabled: root.sleepMinutes > 0 && !root.caffeine && !Media.playing
+        enabled: root.sleepMinutes > 0 && !root.caffeine && !root.busy
         timeout: Math.max(30, root.sleepMinutes * 60 - 30)
         respectInhibitors: true
     }

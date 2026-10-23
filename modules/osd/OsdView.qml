@@ -9,8 +9,8 @@ Item {
 
     property string kind: "volume"
     property bool vertical: false
-    readonly property real level: Math.min(1, kind === "volume" ? Audio.volume : Brightness.value)
-    readonly property string icon: kind === "volume" ? Audio.icon : Brightness.icon
+    readonly property real level: Math.min(1, kind === "volume" ? Audio.volume : kind === "player" ? Media.volume : Brightness.value)
+    readonly property string icon: kind === "volume" ? Audio.icon : kind === "player" ? "music_note" : Brightness.icon
     readonly property bool muted: kind === "volume" && Audio.muted
     readonly property int thickness: 40
     readonly property int length: vertical ? 168 : 240

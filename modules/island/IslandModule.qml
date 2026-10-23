@@ -20,12 +20,17 @@ PanelWindow {
     property var moment: ({ kind: "plugged" })
     // bluetooth devices seen connected, so a change can tell who came and who left
     property var btSeen: []
+    property var btWarned: []
+    // moments waiting for the island, one per kind so a flipped switch only shows its last state
+    property var queue: []
+    // hovering the resting island while music plays opens a small player
+    property bool peeking: false
     property NotifEntry notif: null
     // panels that live in the island, first match wins
     readonly property string hosted: ["launcher", "clipboard", "monitor", "island", "media"].find(id => Actions.isOpen(id) && (id === "island" || Modes.enabled(id))) ?? ""
     readonly property bool typing: hosted === "launcher" || hosted === "clipboard" || Auth.active || (Notifs.replying && flashing === "notification")
     readonly property bool expanded: hosted !== "" || Auth.active
-    readonly property string state: Auth.active ? "auth" : hosted === "island" ? "dashboard" : hosted !== "" ? hosted : flashing !== "" ? flashing : "idle"
+    readonly property string state: Auth.active ? "auth" : hosted === "island" ? "dashboard" : hosted !== "" ? hosted : flashing !== "" ? flashing : peeking ? "peek" : "idle"
 
     function flash(kind: string, ms: int): void {
         flashing = kind;
@@ -35,16 +40,32 @@ PanelWindow {
 
     // a colored moment, a notification on screen keeps its turn and a newer moment replaces an older one
     function glow(m: var, ms: int): void {
-        if (flashing === "notification")
+        // the same kind again updates the moment on screen instead of waiting behind it
+        if (flashing === "notification" || (flashing === "glow" && moment.kind !== m.kind)) {
+            queue = queue.filter(q => q.moment.kind !== m.kind).concat([{ moment: m, ms: ms }]);
             return;
+        }
         moment = m;
         flash("glow", ms);
+    }
+
+    // after a flash, waiting notifications go first and then queued moments
+    function advance(): void {
+        if (flashing !== "")
+            return;
+        showNext();
+        if (flashing !== "" || queue.length === 0)
+            return;
+        const next = queue[0];
+        queue = queue.slice(1);
+        moment = next.moment;
+        flash("glow", next.ms);
     }
 
     // switches flipped by keybinds or toggles, ignored while the shell is still loading
     function toggled(on: bool, icon: string, title: string, accent: string): void {
         if (armed.ready)
-            glow({ kind: "toggle", icon: icon, title: title, sub: on ? "On" : "Off", accent: on ? accent : "#8e8e93" }, 2200);
+            glow({ kind: "toggle " + title, icon: icon, title: title, sub: on ? "On" : "Off", accent: on ? accent : "#8e8e93" }, 2200);
     }
 
     function btIcon(icon: string): string {
@@ -102,7 +123,7 @@ PanelWindow {
             Notifs.replying = false;
             root.flashing = "";
             root.notif = null;
-            Qt.callLater(root.showNext);
+            Qt.callLater(root.advance);
         }
     }
 
@@ -209,6 +230,46 @@ PanelWindow {
     }
 
     Connections {
+        target: Privacy
+
+        function onMicChanged(): void {
+            if (Privacy.mic && armed.ready)
+                root.glow({ kind: "privacy mic", icon: "mic", title: "Microphone in use", sub: Privacy.micApp, accent: "#ff9f0a" }, 2600);
+        }
+
+        function onCameraChanged(): void {
+            if (Privacy.camera && armed.ready)
+                root.glow({ kind: "privacy camera", icon: "videocam", title: "Camera in use", sub: Privacy.cameraApp, accent: "#30d158" }, 2600);
+        }
+
+        function onScreenChanged(): void {
+            if (Privacy.screen && armed.ready)
+                root.glow({ kind: "privacy screen", icon: "screen_share", title: "Screen shared", accent: "#bf5af2" }, 2600);
+        }
+    }
+
+    // headphones and the like warn once when they run low, and again after a charge
+    Timer {
+        running: BluetoothState.connectedDevices.length > 0
+        repeat: true
+        triggeredOnStart: true
+        interval: 60000
+        onTriggered: {
+            for (const d of BluetoothState.connectedDevices) {
+                if (!d.batteryAvailable)
+                    continue;
+                const warned = root.btWarned.includes(d.address);
+                if (d.battery <= 0.15 && !warned) {
+                    root.btWarned = root.btWarned.concat([d.address]);
+                    root.glow({ kind: "bluetooth low " + d.address, icon: root.btIcon(d.icon ?? ""), title: (d.name || "Device") + " battery low", sub: Math.round(d.battery * 100) + "%", accent: "#ff453a" }, 3500);
+                } else if (d.battery > 0.25 && warned) {
+                    root.btWarned = root.btWarned.filter(a => a !== d.address);
+                }
+            }
+        }
+    }
+
+    Connections {
         target: Audio
 
         function onMicMutedChanged(): void {
@@ -274,6 +335,10 @@ PanelWindow {
         function onFinished(name: string): void {
             root.glow({ kind: "download", icon: "download_done", title: "Downloaded", sub: name, accent: "#30d158" }, 3200);
         }
+
+        function onCancelled(name: string): void {
+            root.glow({ kind: "download", icon: "cancel", title: "Download cancelled", sub: name, accent: "#8e8e93" }, 2400);
+        }
     }
 
     Connections {
@@ -305,6 +370,25 @@ PanelWindow {
                 return;
             root.flash("track", 3500);
         }
+    }
+
+    // scrolling the island while music plays moves that player's own volume
+    Connections {
+        target: Media
+
+        function onVolumeNudged(): void {
+            if (!Modes.enabled("osd"))
+                return;
+            root.osdKind = "player";
+            root.flash("osd", Config.options.osd.timeout);
+        }
+    }
+
+    // the peek opens after a short hover and folds a moment after the pointer leaves
+    Timer {
+        interval: island.hovered ? 450 : 350
+        running: island.hovered !== root.peeking && (root.peeking || (Media.active && root.flashing === "" && root.hosted === ""))
+        onTriggered: root.peeking = island.hovered && Media.active
     }
 
     Connections {

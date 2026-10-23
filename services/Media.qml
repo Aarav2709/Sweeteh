@@ -20,8 +20,46 @@ Singleton {
     readonly property string art: player?.trackArtUrl ?? ""
     readonly property real length: player?.length ?? 0
     property real position: 0
+    readonly property real volume: player?.volume ?? 0
+    readonly property bool volumeSupported: player?.volumeSupported ?? false
+    // covers from the web are fetched once into the runtime dir, the quantizer only reads local files
+    property string cachedArt: ""
+    readonly property string artFile: art.startsWith("http") ? cachedArt : art
+
+    signal volumeNudged
+
+    onArtChanged: {
+        cachedArt = "";
+        if (art.startsWith("http")) {
+            fetch.running = false;
+            fetch.command = ["sh", "-c", "d=\"${XDG_RUNTIME_DIR:-/tmp}/sweeteh/art\"; mkdir -p \"$d\"; f=\"$d/$(printf %s \"$1\" | md5sum | cut -c1-16)\"; [ -s \"$f\" ] || curl -sfL --max-time 10 -o \"$f\" \"$1\"; [ -s \"$f\" ] && echo \"$f\"", "sh", art];
+            fetch.running = true;
+        }
+    }
+
+    // the player's own volume when it has one, the system volume otherwise
+    function setVolume(v: real): void {
+        if (volumeSupported) {
+            player.volume = Math.max(0, Math.min(1, v));
+            volumeNudged();
+        } else {
+            Audio.setVolume(v);
+        }
+    }
+
+    Process {
+        id: fetch
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (text.trim())
+                    root.cachedArt = "file://" + text.trim();
+            }
+        }
+    }
+
     // the strongest color of the cover, evened out so it reads as a tint in either theme
-    readonly property bool hasAccent: art !== "" && quantizer.colors.length > 0
+    readonly property bool hasAccent: artFile !== "" && quantizer.colors.length > 0
     readonly property color accent: {
         const c = quantizer.colors[0];
         return c ? Qt.hsla(c.hslHue, Math.min(1, c.hslSaturation * 1.3 + 0.1), 0.55, 1) : "#7c9cff";
@@ -30,7 +68,7 @@ Singleton {
     ColorQuantizer {
         id: quantizer
 
-        source: root.art
+        source: root.artFile
         depth: 0
         rescaleSize: 48
     }
