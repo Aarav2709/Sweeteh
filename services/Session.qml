@@ -2,13 +2,19 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Wayland
+import qs.config
 
-// power actions and the caffeine idle inhibitor
+// power actions, idle sleep and the caffeine idle inhibitor
 Singleton {
     id: root
 
     property bool caffeine: false
+    readonly property var opts: Config.options.power
+    // a shorter wait on battery, the charger gets the longer one
+    readonly property int sleepMinutes: Battery.available && !Battery.plugged ? opts.sleepMinutes : opts.sleepMinutesPlugged
+    readonly property string sleepAction: Defaults.choices["power.sleepAction"].includes(opts.sleepAction) ? opts.sleepAction : "suspend"
 
     function lock(): void {
         Actions.lock();
@@ -20,6 +26,11 @@ Singleton {
 
     function suspend(): void {
         Quickshell.execDetached(["systemctl", "suspend"]);
+    }
+
+    // the configured sleep, falling back to suspend when hibernation is not set up
+    function sleep(): void {
+        Quickshell.execDetached(["sh", "-c", `systemctl ${root.sleepAction} || systemctl suspend`]);
     }
 
     function reboot(): void {
@@ -52,5 +63,41 @@ Singleton {
                 enabled: true
             }
         }
+    }
+
+    // nobody at the keyboard and nothing playing, video players and caffeine hold it off through inhibitors
+    IdleMonitor {
+        enabled: root.sleepMinutes > 0 && !root.caffeine && !Media.playing
+        timeout: root.sleepMinutes * 60
+        respectInhibitors: true
+        onIsIdleChanged: {
+            if (isIdle)
+                root.sleep();
+        }
+    }
+
+    // logind announces every sleep, lid or idle or menu, so the lock goes up before the screen comes back
+    Process {
+        id: sleepWatch
+
+        running: root.opts.lockOnSleep
+        command: ["gdbus", "monitor", "--system", "--dest", "org.freedesktop.login1", "--object-path", "/org/freedesktop/login1"]
+        stdout: SplitParser {
+            onRead: line => {
+                if (line.includes("PrepareForSleep (true"))
+                    Actions.lock();
+            }
+        }
+        onExited: {
+            if (root.opts.lockOnSleep)
+                rewatch.restart();
+        }
+    }
+
+    Timer {
+        id: rewatch
+
+        interval: 5000
+        onTriggered: sleepWatch.running = Qt.binding(() => root.opts.lockOnSleep)
     }
 }

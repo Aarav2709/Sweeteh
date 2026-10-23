@@ -12,6 +12,8 @@ Shape {
     // optional outline along the shape
     property real rimWidth: 0
     property color rim: Theme.color.depthRim
+    // a gradient takes over from the plain color when set
+    property ShapeGradient gradient: null
 
     readonly property string path: {
         const w = width, h = height;
@@ -27,6 +29,7 @@ Shape {
 
     ShapePath {
         fillColor: root.color
+        fillGradient: root.gradient
         strokeWidth: root.rimWidth > 0 ? root.rimWidth : -1
         strokeColor: root.rimWidth > 0 ? root.rim : "transparent"
 

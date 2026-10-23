@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Shapes
 import Quickshell.Widgets
 import qs.config
 import qs.theme
@@ -20,9 +21,10 @@ Item {
     property string messageIcon
     property string messageText
     property string osdKind
+    property string powerKind
     property NotifEntry notif
-    readonly property Item content: ({ idle: idle, message: message, osd: osd, track: track, notification: notification, media: media, launcher: launcher, clipboard: clipboard, monitor: monitor, dashboard: dashboard, auth: auth })[mode] ?? idle
-    readonly property bool compact: mode === "idle" || mode === "message" || mode === "osd" || mode === "track"
+    readonly property Item content: ({ idle: idle, message: message, power: power, osd: osd, track: track, notification: notification, media: media, launcher: launcher, clipboard: clipboard, monitor: monitor, dashboard: dashboard, auth: auth })[mode] ?? idle
+    readonly property bool compact: mode === "idle" || mode === "message" || mode === "power" || mode === "osd" || mode === "track"
     readonly property int pad: mode === "idle" ? 0 : compact ? Theme.spacing.medium : Theme.spacing.large
     readonly property int idleHeight: Config.options.island.height
 
@@ -82,7 +84,8 @@ Item {
 
         anchors.fill: parent
         // a hint that the resting island opens the dashboard
-        color: root.mode === "idle" && idle.hovered ? Theme.mix(Theme.color.panel, Theme.color.ink, 0.07) : Theme.color.panel
+        // a power flash blushes the notch with its state color
+        color: Theme.mix(root.mode === "idle" && idle.hovered ? Theme.mix(Theme.color.panel, Theme.color.ink, 0.07) : Theme.color.panel, Qt.alpha(powerView.accent, 1), powerView.glow * 0.4)
         rimWidth: Theme.depth.rim
         radius: root.compact ? Math.min(height / 2, Theme.radius.medium) : Theme.radius.xl
         flare: root.compact ? Theme.radius.flare / 2 : Theme.radius.flare
@@ -102,6 +105,38 @@ Item {
         Behavior on flare {
             Anim {
                 duration: Theme.anim.slow
+            }
+        }
+    }
+
+    // the shine that sweeps across on a power flash, drawn in the notch outline so it keeps the corners
+    NotchShape {
+        anchors.fill: parent
+        visible: powerView.sweep >= 0
+        radius: shape.radius
+        flare: shape.flare
+        gradient: LinearGradient {
+            readonly property real band: 90
+            readonly property real at: -band + powerView.sweep * (root.width + band * 2)
+
+            x1: at - band
+            x2: at + band
+            y1: 0
+            y2: 0
+
+            GradientStop {
+                position: 0
+                color: "transparent"
+            }
+
+            GradientStop {
+                position: 0.5
+                color: Qt.alpha(powerView.accent, 0.55)
+            }
+
+            GradientStop {
+                position: 1
+                color: "transparent"
             }
         }
     }
@@ -136,6 +171,19 @@ Item {
                     text: root.messageText
                     font.weight: Font.Medium
                 }
+            }
+        }
+
+        IslandSlot {
+            id: power
+
+            shown: root.mode === "power"
+
+            IslandPower {
+                id: powerView
+
+                shown: power.shown
+                kind: root.powerKind
             }
         }
 

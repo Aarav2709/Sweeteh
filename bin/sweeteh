@@ -4,6 +4,8 @@ set -euo pipefail
 
 name="sweeteh"
 unbind="${XDG_RUNTIME_DIR:-/tmp}/sweeteh/unbind.lua"
+# left by stop so the crash watchdog in run knows the exit was wanted
+stopflag="${XDG_RUNTIME_DIR:-/tmp}/sweeteh/stopping"
 repo="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
 
 say() { printf '%s\n' "$*"; }
@@ -20,21 +22,47 @@ running() {
   pgrep -f "^qs -c $name( |$)" >/dev/null 2>&1
 }
 
+# a crash brings the shell straight back, a stop or a clean exit does not
+# five crashes inside a minute means something is really broken, so give up then
 run() {
   if running; then
     say "sweeteh is already running"
     exit 0
   fi
-  local child
-  qs -c "$name" --log-rules "qt.qpa.wayland.textinput=false" "$@" &
-  child=$!
-  trap 'kill "$child" 2>/dev/null' INT TERM
-  wait "$child" || true
-  wait "$child" 2>/dev/null || true
+  local child status crashes=()
+  rm -f "$stopflag"
+  trap 'stopping=1; kill "$child" 2>/dev/null' INT TERM
+  stopping=0
+  while true; do
+    qs -c "$name" --log-rules "qt.qpa.wayland.textinput=false" "$@" &
+    child=$!
+    status=0
+    wait "$child" || status=$?
+    wait "$child" 2>/dev/null || true
+    [[ $stopping == 1 || -e "$stopflag" ]] && break
+    # 128 + signal, segv abrt bus fpe ill trap and the oom killer are crashes, term and int are a stop
+    case "$status" in
+      132|133|134|135|136|137|139) ;;
+      *) break ;;
+    esac
+    local now
+    now="$(date +%s)"
+    crashes=("${crashes[@]}" "$now")
+    crashes=($(for t in "${crashes[@]}"; do if (( now - t < 60 )); then echo "$t"; fi; done))
+    if (( ${#crashes[@]} >= 5 )); then
+      say "sweeteh crashed ${#crashes[@]} times in a minute, not restarting"
+      break
+    fi
+    say "sweeteh crashed with status $status, starting it again"
+    sleep 1
+  done
+  rm -f "$stopflag"
   cleanup
 }
 
 stop() {
+  mkdir -p "$(dirname "$stopflag")"
+  touch "$stopflag"
   pkill -f "^qs -c $name( |$)" || true
   sleep 0.5
   cleanup

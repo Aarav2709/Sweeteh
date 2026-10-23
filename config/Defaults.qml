@@ -9,6 +9,7 @@ Singleton {
     readonly property var choices: ({
             "theme.scheme": ["scheme-tonal-spot", "scheme-content", "scheme-expressive", "scheme-fidelity", "scheme-fruit-salad", "scheme-monochrome", "scheme-neutral", "scheme-rainbow", "scheme-vibrant"],
             "wallpaper.transition": ["circle", "wipe", "fade", "zoom"],
+            "power.sleepAction": ["suspend", "hibernate", "suspend-then-hibernate", "hybrid-sleep"],
             "theme.accent": ["#7c9cff", "#ff8a80", "#ffb74d", "#81c784", "#4dd0e1", "#ba68c8", "#f06292", "#a1887f"]
         })
 
@@ -104,6 +105,15 @@ Singleton {
             lock: {
                 idleMinutes: 0,
                 showMedia: true
+            },
+            // idle sleep, 0 turns it off, the lid itself is handled by logind
+            power: {
+                sleepMinutes: 15,
+                sleepMinutesPlugged: 30,
+                sleepAction: "suspend",
+                lockOnSleep: false,
+                lowBattery: 20,
+                criticalBattery: 10
             },
             clipboard: {
                 maxItems: 200

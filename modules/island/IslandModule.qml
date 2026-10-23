@@ -16,6 +16,7 @@ PanelWindow {
     property string messageIcon: ""
     property string messageText: ""
     property string osdKind: "volume"
+    property string powerKind: "plugged"
     property NotifEntry notif: null
     // panels that live in the island, first match wins
     readonly property string hosted: ["launcher", "clipboard", "monitor", "island", "media"].find(id => Actions.isOpen(id) && (id === "island" || Modes.enabled(id))) ?? ""
@@ -27,6 +28,14 @@ PanelWindow {
         flashing = kind;
         flashTimer.interval = ms;
         flashTimer.restart();
+    }
+
+    // a notification on screen keeps its turn, a newer power state replaces an older one
+    function powerFlash(kind: string, ms: int): void {
+        if (flashing === "notification")
+            return;
+        powerKind = kind;
+        flash("power", ms);
     }
 
     function showNext(): void {
@@ -103,6 +112,21 @@ PanelWindow {
         }
     }
 
+    // the charger going in or out and the battery running low each get a colored flash
+    Connections {
+        target: Battery
+
+        function onPluggedChanged(): void {
+            if (!Battery.available || !armed.ready)
+                return;
+            root.powerFlash(Battery.plugged ? "plugged" : "unplugged", 3200);
+        }
+
+        function onDropped(critical: bool): void {
+            root.powerFlash(critical ? "critical" : "low", 4500);
+        }
+    }
+
     Connections {
         target: Audio
 
@@ -169,6 +193,7 @@ PanelWindow {
         messageIcon: root.messageIcon
         messageText: root.messageText
         osdKind: root.osdKind
+        powerKind: root.powerKind
         notif: root.notif
         onDismissNotification: flashTimer.triggered()
     }
@@ -190,6 +215,11 @@ PanelWindow {
 
         function message(text: string): void {
             Actions.say("info", text);
+        }
+
+        // preview the power flashes, plugged, unplugged, low or critical
+        function power(kind: string): void {
+            root.powerFlash(kind, kind === "low" || kind === "critical" ? 4500 : 3200);
         }
     }
 }
