@@ -27,6 +27,12 @@ PanelWindow {
     property var held: []
     // hovering the resting island while music plays opens a small player
     property bool peeking: false
+    // hovering the workspace number, here or on the bar, opens previews of the workspaces
+    property bool wsPeek: false
+    readonly property bool wsHover: island.wsHovered || Actions.barWorkspaceHover
+    // headphones taking the music away, so their return can offer it back
+    property bool lastSinkEar: false
+    property bool pausedByUnplug: false
     property NotifEntry notif: null
     // more notifications from the same app folded behind the one on screen
     property int notifGroup: 0
@@ -34,7 +40,7 @@ PanelWindow {
     readonly property string hosted: ["launcher", "clipboard", "monitor", "island", "media"].find(id => Actions.isOpen(id) && (id === "island" || Modes.enabled(id))) ?? ""
     readonly property bool typing: hosted === "launcher" || hosted === "clipboard" || Auth.active || (Notifs.replying && flashing === "notification")
     readonly property bool expanded: hosted !== "" || Auth.active
-    readonly property string state: Auth.active ? "auth" : hosted === "island" ? "dashboard" : hosted !== "" ? hosted : flashing !== "" ? flashing : peeking ? "peek" : "idle"
+    readonly property string state: Auth.active ? "auth" : hosted === "island" ? "dashboard" : hosted !== "" ? hosted : flashing !== "" ? flashing : wsPeek ? "workspaces" : peeking ? "peek" : "idle"
 
     function flash(kind: string, ms: int): void {
         flashing = kind;
@@ -321,6 +327,14 @@ PanelWindow {
         }
     }
 
+    // after a while the paused music is no longer worth offering back
+    Timer {
+        id: forgetPause
+
+        interval: 30 * 60 * 1000
+        onTriggered: root.pausedByUnplug = false
+    }
+
     Connections {
         target: Clipboard
 
@@ -335,10 +349,27 @@ PanelWindow {
 
         // the output moving to headphones or speakers says where the sound went
         function onSinkChanged(): void {
-            if (!armed.ready || !Audio.sink)
+            if (!Audio.sink)
                 return;
             const name = Audio.sink.description || Audio.sink.nickname || Audio.sink.name || "Speakers";
             const ear = /head|ear|bud|pod|bluez/i.test(name + " " + (Audio.sink.name ?? ""));
+            const wasEar = root.lastSinkEar;
+            root.lastSinkEar = ear;
+            if (!armed.ready)
+                return;
+            // music should not suddenly play out loud when the headphones drop
+            if (wasEar && !ear && Media.playing && Config.options.media.pauseOnDisconnect) {
+                Media.pause();
+                root.pausedByUnplug = true;
+                forgetPause.restart();
+                root.glow({ kind: "audio", icon: "pause", title: "Music paused", sub: "Headphones disconnected" }, 2400);
+                return;
+            }
+            if (ear && root.pausedByUnplug) {
+                root.pausedByUnplug = false;
+                root.glow({ kind: "audio", icon: "play_arrow", title: "Resume music?", sub: name + "  ·  click to play", run: () => Media.play() }, 6000);
+                return;
+            }
             root.glow({ kind: "audio", icon: ear ? "headphones" : "speaker", title: name, sub: "Audio output" }, 2400);
         }
 
@@ -467,6 +498,12 @@ PanelWindow {
         }
     }
 
+    Timer {
+        interval: root.wsHover ? 400 : 350
+        running: root.wsHover !== root.wsPeek && (root.wsPeek || (Config.options.island.workspacePeek && root.flashing === "" && root.hosted === ""))
+        onTriggered: root.wsPeek = root.wsHover && Config.options.island.workspacePeek
+    }
+
     // the peek opens after a short hover and folds a moment after the pointer leaves
     Timer {
         interval: island.hovered ? 450 : 350
@@ -523,6 +560,7 @@ PanelWindow {
         notifGroup: root.notifGroup
         onDismissNotification: flashTimer.triggered()
         // a moment with somewhere to go runs it and folds away
+        onWorkspacePicked: root.wsPeek = false
         onMomentClicked: {
             const run = root.moment.run;
             flashTimer.stop();

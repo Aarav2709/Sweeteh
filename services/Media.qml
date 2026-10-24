@@ -133,6 +133,16 @@ Singleton {
         rescaleSize: 48
     }
 
+    function play(): void {
+        if (player?.canPlay)
+            player.play();
+    }
+
+    function pause(): void {
+        if (player?.canPause)
+            player.pause();
+    }
+
     function toggle(): void {
         if (player?.canTogglePlaying)
             player.togglePlaying();

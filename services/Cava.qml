@@ -25,7 +25,15 @@ Singleton {
         running: root.installed && Media.playing && !Perf.active && Config.options.media.visualizer
         command: ["cava", "-p", Quickshell.shellPath("assets/cava.conf")]
         stdout: SplitParser {
-            onRead: line => root.values = line.split(";").filter(v => v !== "").map(v => Math.min(1, Number(v) / 100))
+            // quick to rise and slow to fall, raw frames jump too much to read as a meter
+            onRead: line => {
+                const prev = root.values;
+                root.values = line.split(";").filter(v => v !== "").map((v, i) => {
+                    const n = Math.min(1, Number(v) / 100);
+                    const p = prev[i] ?? n;
+                    return n > p ? p + (n - p) * 0.55 : p + (n - p) * 0.18;
+                });
+            }
         }
         onRunningChanged: {
             if (!running)

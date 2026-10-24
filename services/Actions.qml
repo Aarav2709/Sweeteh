@@ -19,6 +19,8 @@ Singleton {
     signal message(string icon, string text)
     signal lockRequested
     signal unlocked
+    // the bar's workspace pill is hovered, the island shows the workspace peek
+    property bool barWorkspaceHover: false
     // settings asks the island to show a sample moment
     signal momentPreview(string kind)
     signal screenshotRequested(string kind)

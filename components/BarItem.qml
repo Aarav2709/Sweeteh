@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import qs.config
 import qs.theme
 
 // raised pill on the bar that lays its children out in a row
@@ -29,7 +30,27 @@ Item {
     implicitHeight: Theme.size.barWidget
 
     transform: Translate {
-        y: depth.shift
+        y: depth.shift - (1 - root.intro) * (root.height + 16)
+    }
+
+    // at start the pills drop in from the top one after another, left to right
+    property real intro: Config.options.island.intro && Theme.anim.speed > 0 ? 0 : 1
+
+    Timer {
+        running: root.intro < 1
+        interval: 380 + Math.min(500, Math.max(0, root.mapToItem(null, 0, 0).x) / 4)
+        onTriggered: dropIn.start()
+    }
+
+    NumberAnimation {
+        id: dropIn
+
+        target: root
+        property: "intro"
+        to: 1
+        duration: 520
+        easing.type: Easing.OutBack
+        easing.overshoot: 1.6
     }
 
     Rectangle {

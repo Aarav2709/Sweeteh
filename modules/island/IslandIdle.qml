@@ -13,6 +13,7 @@ Item {
 
     property bool shown: true
     readonly property bool hovered: hover.hovered
+    readonly property bool wsHovered: wsHover.hovered
     readonly property bool alone: !Modes.islands
     // one color runs through the resting island, the cover while a song plays and the wallpaper otherwise
     readonly property color accent: Theme.color.primary
@@ -122,6 +123,10 @@ Item {
                 }
             }
 
+            HoverHandler {
+                id: wsHover
+            }
+
             Label {
                 id: wsLabel
 
@@ -211,9 +216,11 @@ Item {
             }
         }
 
-        // the level meter follows the real audio through cava, in the accent color
+        // the level meter dances while music plays, or follows the real audio when the cava visualizer is on
+        // a fixed height, so a bar growing never re-centers its neighbours
         Row {
             visible: Media.active
+            height: 16
             spacing: 2
 
             Repeater {
@@ -223,8 +230,7 @@ Item {
                     id: bar
 
                     required property int index
-                    // without cava the meter rests in a fixed shape, an endless dance would redraw the island every frame
-                    readonly property real level: [0.45, 0.8, 0.6, 0.9, 0.5][index]
+                    property real level: 0.3
 
                     anchors.verticalCenter: parent.verticalCenter
                     width: 3
@@ -232,13 +238,24 @@ Item {
                     radius: 1.5
                     color: root.accent
 
-                    Behavior on height {
-                        enabled: Cava.active
+                    // a soft dance while music plays, each bar at its own pace
+                    SequentialAnimation on level {
+                        running: Media.playing && root.visible && !Cava.active && !Perf.active
+                        loops: Animation.Infinite
 
                         NumberAnimation {
-                            duration: 60
+                            to: 1
+                            duration: 260 + bar.index * 70
+                            easing.type: Easing.InOutSine
+                        }
+
+                        NumberAnimation {
+                            to: 0.2
+                            duration: 300 + bar.index * 50
+                            easing.type: Easing.InOutSine
                         }
                     }
+
                 }
             }
         }

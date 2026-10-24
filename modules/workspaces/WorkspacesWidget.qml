@@ -10,6 +10,10 @@ import qs.components
 Rectangle {
     id: root
 
+    HoverHandler {
+        onHoveredChanged: Actions.barWorkspaceHover = hovered
+    }
+
     readonly property int count: Config.options.bar.workspaceCount
     readonly property int base: Math.floor((Hypr.activeWorkspace - 1) / count) * count
     readonly property int pad: Theme.spacing.xs - 1

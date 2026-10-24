@@ -25,8 +25,10 @@ Item {
     property NotifEntry notif
     property int notifGroup: 0
     readonly property bool hovered: hover.hovered
+    // the workspace number, or the workspace peek itself, under the pointer
+    readonly property bool wsHovered: idle.wsHovered || (mode === "workspaces" && hover.hovered)
     readonly property color base: Theme.color.island
-    readonly property Item content: ({ idle: idle, peek: peek, message: message, glow: glow, osd: osd, track: track, notification: notification, media: media, launcher: launcher, clipboard: clipboard, monitor: monitor, dashboard: dashboard, auth: auth })[mode] ?? idle
+    readonly property Item content: ({ idle: idle, peek: peek, workspaces: workspaces, message: message, glow: glow, osd: osd, track: track, notification: notification, media: media, launcher: launcher, clipboard: clipboard, monitor: monitor, dashboard: dashboard, auth: auth })[mode] ?? idle
     readonly property bool compact: mode === "idle" || mode === "message" || mode === "glow" || mode === "osd" || mode === "track"
     readonly property int pad: mode === "idle" ? 0 : compact ? Theme.spacing.medium : Theme.spacing.large
     readonly property int idleHeight: Config.options.island.height
@@ -65,6 +67,7 @@ Item {
 
     signal dismissNotification
     signal momentClicked
+    signal workspacePicked
 
     focus: true
     // escape folds whatever the island is showing back to rest, the player answers to space and arrows
@@ -86,11 +89,34 @@ Item {
     }
 
     // squash and stretch, the island leans into growing and settles with a little spring
-    transform: Scale {
-        id: squash
+    transform: [
+        Scale {
+            id: squash
 
-        origin.x: root.width / 2
-        origin.y: 0
+            origin.x: root.width / 2
+            origin.y: 0
+        },
+        // at start the island slides out of the top edge
+        Translate {
+            y: -(1 - root.intro) * (root.height + Theme.depth.offset + 4)
+        }
+    ]
+
+    property real intro: Config.options.island.intro && Theme.anim.speed > 0 ? 0 : 1
+
+    SequentialAnimation on intro {
+        running: root.intro < 1
+
+        PauseAnimation {
+            duration: 250
+        }
+
+        NumberAnimation {
+            to: 1
+            duration: 650
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.4
+        }
     }
 
     property real lastWidth: 0
@@ -283,6 +309,20 @@ Item {
 
             anchors.centerIn: parent
             shown: root.mode === "idle"
+        }
+
+        IslandSlot {
+            id: workspaces
+
+            shown: root.mode === "workspaces"
+
+            Loader {
+                active: workspaces.shown
+
+                sourceComponent: IslandWorkspaces {
+                    onPicked: root.workspacePicked()
+                }
+            }
         }
 
         IslandSlot {

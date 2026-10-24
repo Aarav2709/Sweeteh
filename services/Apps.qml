@@ -21,16 +21,36 @@ Singleton {
             if (s > 0)
                 scored.push({
                     app: app,
-                    score: s + Math.min(200, (usage[app.id] ?? 0) * 15)
+                    score: s + rank(app.id)
                 });
         }
         scored.sort((a, b) => b.score - a.score || a.app.name.localeCompare(b.app.name));
         return scored.slice(0, limit).map(s => s.app);
     }
 
+    // older files hold a plain count, newer ones also keep the hours and the last launch
+    function entry(id: string): var {
+        const u = usage[id];
+        return typeof u === "number" ? { count: u, hours: [], last: 0 } : u ?? { count: 0, hours: [], last: 0 };
+    }
+
+    // how often, plus with smart ranking how often around this hour and how lately
+    function rank(id: string): real {
+        const e = entry(id);
+        let score = Math.min(200, e.count * 15);
+        if (Config.options.launcher.smartRanking) {
+            const h = new Date().getHours();
+            score += Math.min(150, e.hours.filter(x => Math.min(Math.abs(x - h), 24 - Math.abs(x - h)) <= 1).length * 30);
+            const days = (Date.now() - e.last) / 86400000;
+            score += e.last > 0 ? Math.max(0, 80 - days * 12) : 0;
+        }
+        return score;
+    }
+
     function launch(app: DesktopEntry): void {
         const next = Object.assign({}, usage);
-        next[app.id] = (next[app.id] ?? 0) + 1;
+        const e = entry(app.id);
+        next[app.id] = { count: e.count + 1, hours: e.hours.concat([new Date().getHours()]).slice(-30), last: Date.now() };
         usage = next;
         store.setText(JSON.stringify(next));
         if (app.runInTerminal)

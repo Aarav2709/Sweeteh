@@ -95,12 +95,20 @@ Singleton {
                 timeout: 1500
             },
             launcher: {
+                // apps you open at this hour and lately rise to the top
+                smartRanking: true,
+                // a copied link or sum is offered first on an empty search
+                clipboardActions: true,
                 maxResults: 8,
                 files: true,
                 web: true
             },
             island: {
                 height: 34,
+                // hover the workspace number for previews of your workspaces
+                workspacePeek: true,
+                // the island grows out of the edge and the pills drop in at start
+                intro: true,
                 // hover the island during music for a small player, with the sung line in it
                 peek: true,
                 peekLyrics: true,
@@ -117,8 +125,10 @@ Singleton {
                 messageTime: 3000
             },
             media: {
-                // live level meter through cava
-                visualizer: true,
+                // pause when headphones go away, offer to resume when they come back
+                pauseOnDisconnect: true,
+                // live level meter through cava instead of the dance, livelier but jumpier
+                visualizer: false,
                 // recently played tracks in the player
                 history: true,
                 lyrics: true

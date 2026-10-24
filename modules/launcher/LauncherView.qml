@@ -38,6 +38,17 @@ Item {
                 out.push({ kind: "run", icon: "terminal", title: cmd, subtitle: "Run command", run: () => Actions.shell(cmd) });
             return out;
         }
+        // with nothing typed, what was just copied can be acted on
+        if (q === "" && Config.options.launcher.clipboardActions) {
+            const clip = (Quickshell.clipboardText ?? "").trim();
+            const clipSum = clip.length < 80 ? Calc.evaluate(clip) : null;
+            if (/^https?:\/\/\S+$/.test(clip))
+                out.push({ kind: "action", icon: "open_in_new", title: "Open copied link", subtitle: clip, run: () => Qt.openUrlExternally(clip) });
+            else if (clipSum !== null && String(clipSum) !== clip)
+                out.push({ kind: "sum", icon: "calculate", title: String(clipSum), subtitle: "Copied " + clip, run: () => Quickshell.clipboardText = String(clipSum) });
+            else if (clip.startsWith("/") && clip.indexOf("\n") < 0)
+                out.push({ kind: "file", icon: "folder_open", title: "Open copied path", subtitle: clip, run: () => Files.open(clip) });
+        }
         for (const app of Apps.search(q, limit))
             out.push({ kind: "app", image: Apps.icon(app.icon || app.id), title: app.name, subtitle: app.comment || app.genericName, run: () => Apps.launch(app) });
         if (q !== "") {
