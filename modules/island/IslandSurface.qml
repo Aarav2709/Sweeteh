@@ -103,7 +103,8 @@ Item {
         }
     ]
 
-    property real intro: Config.options.island.intro && Theme.anim.speed > 0 ? 0 : 1
+    // a plain value, not a binding, so a config change can never send the island back off screen
+    property real intro: 1
 
     // started once and left to finish, the bounce overshoots 1 on its way
     SequentialAnimation on intro {
@@ -180,8 +181,10 @@ Item {
 
     Component.onCompleted: {
         lastWidth = implicitWidth;
-        if (intro < 1)
+        if (Config.options.island.intro && Theme.anim.speed > 0) {
+            intro = 0;
             introAnim.start();
+        }
     }
 
     implicitWidth: content.implicitWidth + pad * 2

@@ -34,10 +34,19 @@ Item {
     }
 
     // at start the pills drop in from the top one after another, left to right
-    property real intro: Config.options.island.intro && Theme.anim.speed > 0 ? 0 : 1
+    // a plain value, not a binding, so a config change can never lift the pill away again
+    property real intro: 1
+
+    Component.onCompleted: {
+        if (Config.options.island.intro && Theme.anim.speed > 0) {
+            intro = 0;
+            dropDelay.start();
+        }
+    }
 
     Timer {
-        running: root.intro < 1
+        id: dropDelay
+
         interval: 380 + Math.min(500, Math.max(0, root.mapToItem(null, 0, 0).x) / 4)
         onTriggered: dropIn.start()
     }
