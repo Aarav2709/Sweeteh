@@ -97,15 +97,19 @@ Item {
             origin.y: 0
         },
         // at start the island slides out of the top edge
+        // never below zero, a bounce past the edge would leave a gap above the island
         Translate {
-            y: -(1 - root.intro) * (root.height + Theme.depth.offset + 4)
+            y: Math.min(0, -(1 - root.intro) * (root.height + Theme.depth.offset + 4))
         }
     ]
 
     property real intro: Config.options.island.intro && Theme.anim.speed > 0 ? 0 : 1
 
+    // started once and left to finish, the bounce overshoots 1 on its way
     SequentialAnimation on intro {
-        running: root.intro < 1
+        id: introAnim
+
+        running: false
 
         PauseAnimation {
             duration: 250
@@ -174,7 +178,11 @@ Item {
         }
     }
 
-    Component.onCompleted: lastWidth = implicitWidth
+    Component.onCompleted: {
+        lastWidth = implicitWidth;
+        if (intro < 1)
+            introAnim.start();
+    }
 
     implicitWidth: content.implicitWidth + pad * 2
     implicitHeight: Math.max(idleHeight, content.implicitHeight + pad * 2)
