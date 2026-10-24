@@ -12,7 +12,12 @@ status() {
 }
 
 enable() {
-  [[ -e /usr/lib/security/pam_fprintd.so ]] || { echo "fprintd is not installed" >&2; exit 2; }
+  [[ -e /usr/lib/security/pam_fprintd.so ]] || { echo "fprintd is not installed, sudo pacman -S fprintd" >&2; exit 2; }
+  # libfprint has no driver for some sensors, then a finger can never work
+  if fprintd-list "${SUDO_USER:-root}" 2>&1 | grep -q "No devices available"; then
+    echo "fprintd sees no usable fingerprint sensor, this one is not supported by libfprint" >&2
+    exit 3
+  fi
   for f in "${files[@]}"; do
     # polkit ships its file under /usr/lib, a copy in /etc takes over and is removed again on disable
     if [[ ! -e "$f" ]]; then
@@ -40,8 +45,8 @@ disable() {
 }
 
 case "${1:-status}" in
-  enable) enable ;;
-  disable) disable ;;
+  enable) enable; echo "fingerprint is on for sudo and polkit, add a finger with fprintd-enroll if you have not" ;;
+  disable) disable; echo "fingerprint is off for sudo and polkit" ;;
   status) status ;;
   *) echo "usage: sweeteh-pam enable|disable|status" >&2; exit 1 ;;
 esac
