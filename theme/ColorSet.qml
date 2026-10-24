@@ -76,7 +76,9 @@ QtObject {
 
     // ground of the bar, drawers and island, follows the opacity setting
     // a vivid version of the accent for moments to blush the island with
-    readonly property color vivid: Theme.tone(primary, Theme.dark ? 0.4 : 0.7, 1.1)
+    // grey schemes borrow the wallpaper's hue so moments still have a color, a grey wallpaper stays grey
+    readonly property color hueSource: primary.hslSaturation >= 0.12 || source.hslSaturation < 0.06 ? primary : source
+    readonly property color vivid: hueSource.hslSaturation < 0.06 ? Theme.tone(primary, Theme.dark ? 0.4 : 0.7, 0) : Theme.tone(hueSource, Theme.dark ? 0.4 : 0.7, 1.1)
     readonly property color panel: Qt.alpha(surface, Theme.panelOpacity)
     // raised layers that sit on the panel ground
     readonly property color layer1: surfaceContainer
@@ -93,6 +95,9 @@ QtObject {
     // the raised look, a hard shadow in a deep shade of the accent and a lit rim, so tinted surfaces still stand off
     readonly property color depthShadow: Theme.dark ? Qt.alpha(Theme.tone(primary, 0.08, 0.8), 0.9) : Theme.tone(primary, 0.28, 0.9)
     readonly property color depthRim: Theme.dark ? Qt.alpha(Theme.mix(fgSurface, primary, 0.35), 0.16) : Qt.alpha(Theme.tone(primary, 0.28, 0.9), 0.85)
-    // the island and the bar pills, the plain panel with the accent seeping in
-    readonly property color island: Theme.mix(panel, Qt.alpha(primaryContainer, panel.a), Theme.islandTint)
+    // the wallpaper's real color, or the song's while one plays, so the island tints even on the monochrome scheme
+    readonly property color source: follow && Theme.songMix > 0 ? Theme.mix(Theme.wallpaper, Theme.song, Theme.songMix) : Theme.wallpaper
+    readonly property color sourceTone: Qt.hsla(Math.max(0, source.hslHue), Math.min(1, source.hslSaturation * 1.35), Theme.dark ? Math.max(0.08, Math.min(0.24, source.hslLightness)) : Math.max(0.8, Math.min(0.92, source.hslLightness)), panel.a)
+    // the island and the bar pills, the plain panel with the wallpaper seeping in
+    readonly property color island: Theme.mix(panel, sourceTone, Theme.islandTint)
 }
