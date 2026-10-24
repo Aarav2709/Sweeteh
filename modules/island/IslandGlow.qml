@@ -4,7 +4,7 @@ import qs.theme
 import qs.services
 import qs.components
 
-// a short colored moment, the island blushes with the accent and a shine sweeps across it
+// a short colored moment, the island blushes with the accent and glows from within
 // battery moments draw a little battery, every other one pops its icon in
 Item {
     id: root
@@ -28,9 +28,9 @@ Item {
     readonly property bool actionable: typeof moment.run === "function"
     // a stronger blush for moments that stand on their own
     readonly property real strength: moment.strength ?? (kind === "welcome" ? 0.6 : 0.4)
-    // read by the surface, glow tints the notch and sweep moves the shine from 0 to 1
+    // read by the surface, glow tints the notch and shine swells the inner light and rim
     property real glow: 0
-    property real sweep: -1
+    property real shine: 0
     property real fill: Battery.level
     property real bolt: 0
 
@@ -53,7 +53,7 @@ Item {
         } else {
             intro.stop();
             breathe.stop();
-            sweep = -1;
+            shine = 0;
             outro.restart();
         }
     }
@@ -77,13 +77,23 @@ Item {
                 easing.type: Easing.OutCubic
             }
 
-            NumberAnimation {
-                target: root
-                property: "sweep"
-                from: root.kind === "unplugged" ? 1 : 0
-                to: root.kind === "unplugged" ? 0 : 1
-                duration: 1100
-                easing.type: Easing.InOutCubic
+            SequentialAnimation {
+                NumberAnimation {
+                    target: root
+                    property: "shine"
+                    from: 0
+                    to: 1
+                    duration: 300
+                    easing.type: Easing.OutCubic
+                }
+
+                NumberAnimation {
+                    target: root
+                    property: "shine"
+                    to: 0
+                    duration: 1000
+                    easing.type: Easing.InOutSine
+                }
             }
 
             NumberAnimation {
@@ -112,7 +122,6 @@ Item {
 
         ScriptAction {
             script: {
-                root.sweep = -1;
                 breathe.restart();
             }
         }

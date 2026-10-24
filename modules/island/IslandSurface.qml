@@ -279,29 +279,25 @@ Item {
         }
     }
 
-    // the shine that sweeps across on a moment, drawn in the notch outline so it keeps the corners
+    // the light that swells from inside on a moment, drawn in the notch outline so it keeps the corners
     NotchShape {
         anchors.fill: parent
-        visible: glowView.sweep >= 0
+        visible: glowView.shine > 0
+        opacity: glowView.shine
         radius: shape.radius
         flare: shape.flare
-        gradient: LinearGradient {
-            readonly property real band: 90
-            readonly property real at: -band + glowView.sweep * (root.width + band * 2)
-
-            x1: at - band
-            x2: at + band
-            y1: 0
-            y2: 0
+        rimWidth: 1.5
+        rim: Qt.alpha(Qt.lighter(glowView.accent, 1.3), 0.8)
+        gradient: RadialGradient {
+            centerX: root.width / 2
+            centerY: root.height / 2
+            centerRadius: root.width * 0.6
+            focalX: centerX
+            focalY: centerY
 
             GradientStop {
                 position: 0
-                color: "transparent"
-            }
-
-            GradientStop {
-                position: 0.5
-                color: Qt.alpha(glowView.accent, 0.55)
+                color: Qt.alpha(glowView.accent, 0.5)
             }
 
             GradientStop {
