@@ -88,11 +88,13 @@ PanelWindow {
         implicitWidth: toolbar.implicitWidth + Theme.spacing.small * 2
         implicitHeight: toolbar.implicitHeight + Theme.spacing.small * 2
         radius: height / 2
-        color: Theme.wall.panel
+        color: Theme.wallpaperSurface
         border.width: Theme.depth.rim
         border.color: Theme.wall.depthRim
 
-        Depth {}
+        Depth {
+            color: Theme.wall.depthShadow
+        }
 
         RowLayout {
             id: toolbar

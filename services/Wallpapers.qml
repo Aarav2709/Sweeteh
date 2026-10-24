@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.config
+import qs.theme
 
 // wallpaper list, current wallpaper and matugen recolor
 Singleton {
@@ -14,6 +15,22 @@ Singleton {
     // a still frame of the current wallpaper, for colors, the lockscreen and transitions
     readonly property string still: !isVideo(current) ? current : stillFor === current ? poster(current) : ""
     property string stillFor: ""
+
+    // the wallpaper's own average color, unmuted, for the desktop widgets
+    ColorQuantizer {
+        id: quantizer
+
+        source: root.still ? "file://" + root.still.replace(/^file:\/\//, "") : ""
+        depth: 0
+        rescaleSize: 64
+    }
+
+    Binding {
+        target: Theme
+        property: "wallpaper"
+        value: quantizer.colors[0] ?? "#000000"
+        when: quantizer.colors.length > 0
+    }
     // video wallpapers need the multimedia module, checked once at start
     property bool videoSupport: false
     property list<string> files: []

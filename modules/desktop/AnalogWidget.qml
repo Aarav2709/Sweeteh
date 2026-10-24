@@ -52,7 +52,7 @@ DeskCard {
         radius: 4.5
         color: Theme.wall.primary
         border.width: 2
-        border.color: Theme.wall.panel
+        border.color: Theme.wallpaperSurface
     }
 
     component Hand: Item {

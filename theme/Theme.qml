@@ -29,6 +29,16 @@ Singleton {
         }
     }
 
+    // the wallpaper's real color, red stays red and black stays black, kept dark or light enough for text
+    property color wallpaper: "#000000"
+    readonly property color wallpaperSurface: Qt.hsla(Math.max(0, wallpaper.hslHue), Math.min(1, wallpaper.hslSaturation * 1.25), dark ? Math.max(0.05, Math.min(0.26, wallpaper.hslLightness)) : Math.max(0.82, Math.min(0.94, wallpaper.hslLightness)), panelOpacity)
+
+    Behavior on wallpaper {
+        ColorAnimation {
+            duration: 900
+        }
+    }
+
     // a color at a fixed lightness, so text on it keeps its contrast whatever cover it came from
     function tone(c: color, light: real, sat: real): color {
         return Qt.hsla(Math.max(0, c.hslHue), Math.max(0, Math.min(1, Math.max(0.3, Math.min(0.9, c.hslSaturation)) * sat)), light, 1);
