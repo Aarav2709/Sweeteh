@@ -464,7 +464,10 @@ Item {
                 id: dashboardView
             }
 
-            onShownChanged: dashboardView.page = ""
+            onShownChanged: {
+                dashboardView.page = shown ? Actions.dashboardPage : "";
+                Actions.dashboardPage = "";
+            }
         }
 
         IslandSlot {

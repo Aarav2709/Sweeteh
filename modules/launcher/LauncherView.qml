@@ -32,10 +32,16 @@ Item {
         const out = [];
         if (sum !== null)
             out.push({ kind: "sum", icon: "calculate", title: String(sum), subtitle: "Press enter to copy", run: () => Quickshell.clipboardText = String(sum) });
+        // > is the command palette, every shell action plus dates to copy, with a shell run as the last resort
         if (q.startsWith(">")) {
             const cmd = q.slice(1).trim();
+            out.push(...Commands.moments(cmd));
+            const pool = cmd === "" ? Commands.list : Commands.list.concat(Commands.wallpapers);
+            const hits = cmd === "" ? pool.map(c => ({ c: c, s: 1 })) : pool.map(c => ({ c: c, s: Fuzzy.best(cmd, [c.title, c.keywords]) })).filter(x => x.s > 0).sort((a, b) => b.s - a.s).slice(0, 12);
+            for (const x of hits)
+                out.push({ kind: "action", icon: x.c.icon, title: x.c.title, run: x.c.run });
             if (cmd)
-                out.push({ kind: "run", icon: "terminal", title: cmd, subtitle: "Run command", run: () => Actions.shell(cmd) });
+                out.push({ kind: "run", icon: "terminal", title: cmd, subtitle: "Run in a shell", run: () => Actions.shell(cmd) });
             return out;
         }
         // with nothing typed, what was just copied can be acted on
@@ -94,7 +100,7 @@ Item {
             color: Theme.color.layer1
             outlineOnFocus: false
             icon: "search"
-            placeholder: "Search apps, files, actions and sums"
+            placeholder: "Search apps, files and sums, or > for commands"
             onEdited: root.query = text
             onAccepted: root.activate(root.current, false)
             input.Keys.onPressed: e => {
@@ -140,7 +146,7 @@ Item {
                 required property var modelData
                 required property int index
                 readonly property bool selected: index === root.current
-                readonly property string hint: ({ sum: "Copy", run: "Run", action: "Action", file: "File", web: "Web" })[modelData.kind] ?? ""
+                readonly property string hint: ({ sum: "Copy", copy: "Copy", run: "Shell", action: "Action", file: "File", web: "Web" })[modelData.kind] ?? ""
 
                 width: list.width
                 height: list.rowHeight

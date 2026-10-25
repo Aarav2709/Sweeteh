@@ -14,6 +14,8 @@ Singleton {
     property string lastClosed: ""
     property real closedAt: 0
     property string settingsPage: ""
+    // a quick settings page the island dashboard should open on, taken once it shows
+    property string dashboardPage: ""
 
     // short status lines shown by the island or a toast
     signal message(string icon, string text)
@@ -53,6 +55,11 @@ Singleton {
             close(id);
         else if (!(lastClosed === id && Date.now() - closedAt < 300))
             open(id);
+    }
+
+    function openPage(page: string): void {
+        dashboardPage = page;
+        open("island");
     }
 
     function openSettings(page: string): void {
