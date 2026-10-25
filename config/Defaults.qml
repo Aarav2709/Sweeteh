@@ -60,6 +60,7 @@ Singleton {
                 fontScale: 1.0,
                 fontRound: 40,
                 animationSpeed: 1.0,
+                motionBlur: true,
                 panelOpacity: 1.0,
                 depth: true,
                 windowBorders: true,

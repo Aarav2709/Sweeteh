@@ -1,8 +1,10 @@
 import QtQuick
+import QtQuick.Effects
 import qs.theme
 import qs.components
+import qs.services
 
-// content that fades and scales in when its state is active
+// content that fades, blurs and springs in when its state is active
 Item {
     id: root
 
@@ -18,6 +20,13 @@ Item {
     opacity: shown ? 1 : 0
     scale: shown ? 1 : 0.9
     enabled: shown
+    // a blur that thins out with the fade, only layered while it moves so a resting slot costs nothing
+    layer.enabled: Theme.anim.blur && !Perf.active && opacity > 0.01 && opacity < 0.99
+    layer.effect: MultiEffect {
+        blurEnabled: true
+        blurMax: 32
+        blur: 1 - root.opacity
+    }
 
     Behavior on opacity {
         Anim {
@@ -28,7 +37,7 @@ Item {
     Behavior on scale {
         Anim {
             duration: Theme.anim.slow
-            easing.bezierCurve: Theme.anim.decel
+            easing.bezierCurve: root.shown ? Theme.anim.spatial : Theme.anim.accel
         }
     }
 

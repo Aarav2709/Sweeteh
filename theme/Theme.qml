@@ -129,8 +129,13 @@ Singleton {
         readonly property list<real> emphasized: [0.05, 0, 0.133, 0.06, 0.166, 0.4, 0.208, 0.82, 0.25, 1, 1, 1]
         readonly property list<real> decel: [0.05, 0.7, 0.1, 1, 1, 1]
         readonly property list<real> accel: [0.3, 0, 0.8, 0.15, 1, 1]
-        readonly property list<real> spatial: [0.38, 1.21, 0.22, 1, 1, 1]
-        readonly property list<real> spatialFast: [0.42, 1.67, 0.21, 0.9, 1, 1]
+        readonly property list<real> spatial: [0.34, 1.56, 0.4, 1, 1, 1]
+        readonly property list<real> spatialFast: [0.3, 1.8, 0.4, 0.95, 1, 1]
+        // physics for things that should land with a bounce, stiffer as the speed setting rises
+        readonly property real spring: 3.4 * speed * speed
+        readonly property real damping: 0.24
+        // content blurs while it fades so moves read as motion, off in perf mode
+        readonly property bool blur: speed > 0 && root.opts.motionBlur
     }
 
     // raised 2.5d look, a crisp rim and a hard shadow that pressed surfaces sink into

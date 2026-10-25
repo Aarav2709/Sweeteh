@@ -193,17 +193,15 @@ Item {
     height: implicitHeight
 
     Behavior on width {
-        Anim {
-            duration: Theme.anim.slow
-            easing.bezierCurve: Theme.anim.spatial
-        }
+        enabled: Theme.anim.speed > 0
+
+        Spring {}
     }
 
     Behavior on height {
-        Anim {
-            duration: Theme.anim.slow
-            easing.bezierCurve: Theme.anim.spatial
-        }
+        enabled: Theme.anim.speed > 0
+
+        Spring {}
     }
 
     // hard shadow under the notch for the raised look

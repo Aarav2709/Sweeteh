@@ -245,6 +245,16 @@ ColumnLayout {
         }
 
         OptionRow {
+            label: "Motion blur"
+            hint: "Island content blurs while it fades in and out. Skipped in performance mode."
+
+            Toggle {
+                checked: root.t.motionBlur
+                onToggled: v => Config.set("theme.motionBlur", v)
+            }
+        }
+
+        OptionRow {
             label: "Window borders from wallpaper"
             hint: "Window borders take their colors from the palette. Turning this off hands them back to your Hyprland config."
 
