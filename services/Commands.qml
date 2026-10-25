@@ -2,9 +2,12 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.UPower
 import qs.config
 import qs.theme
+import "Fuzzy.js" as Fuzzy
+import "Calc.js" as Calc
 
 // shell actions for the launcher and the > command palette
 Singleton {
@@ -143,8 +146,121 @@ Singleton {
         }
         const label = ago(at.getTime() - now.getTime(), day);
         const formats = word === "unix" || word === "timestamp" ? [String(Math.floor(at.getTime() / 1000))] : word === "now" ? [at.toISOString(), String(Math.floor(at.getTime() / 1000))] : day ? [Qt.formatDate(at, "dddd, d MMMM yyyy"), Qt.formatDate(at, "yyyy-MM-dd"), Qt.formatDate(at, "dd/MM/yyyy")] : [Qt.formatTime(at, "HH:mm"), Qt.formatTime(at, "h:mm AP"), Qt.formatDateTime(at, "yyyy-MM-dd HH:mm")];
-        return formats.map(text => ({ kind: "copy", icon: day ? "calendar_today" : "schedule", title: text, subtitle: label, run: () => {
-                    Quickshell.clipboardText = text;
-                } }));
+        return formats.map(text => ({ kind: "copy", icon: day ? "calendar_today" : "schedule", title: text, subtitle: label, run: () => Actions.copy(text) }));
+    }
+
+    // commands that take something after them, volume 40, ws 3, timer 5m, close firefox, #ff8800
+    function answers(cmd: string): list<var> {
+        const out = moments(cmd);
+        const lower = cmd.toLowerCase();
+        const num = lower.match(/^(volume|vol|brightness|bright|ws|workspace|go)\s+(\d+)%?$/);
+        if (num) {
+            const n = Number(num[2]);
+            if (num[1].startsWith("vol"))
+                out.push({ kind: "action", icon: "volume_up", title: "Set volume to " + Math.min(150, n) + "%", run: () => Audio.setVolume(Math.min(150, n) / 100) });
+            else if (num[1].startsWith("bright") && Brightness.available)
+                out.push({ kind: "action", icon: "brightness_6", title: "Set brightness to " + Math.min(100, n) + "%", run: () => Brightness.set(Math.min(100, n) / 100) });
+            else if (n > 0)
+                out.push({ kind: "action", icon: "space_dashboard", title: "Go to workspace " + n, run: () => Hypr.focusWorkspace(n) });
+        }
+        const timer = lower.match(/^timer\s+(.+)$/);
+        if (timer) {
+            const ms = span(timer[1]);
+            if (ms > 0)
+                out.push({ kind: "action", icon: "timer", title: "Timer for " + ago(ms, false).replace(/^In /, ""), subtitle: countdown.running ? "Replaces the running timer" : "The island glows when it ends", run: () => startTimer(ms, timer[1]) });
+        }
+        if (/^timer\b/.test(lower) && countdown.running)
+            out.push({ kind: "action", icon: "timer_off", title: "Cancel the timer", subtitle: ago(timerEnd - Date.now(), false).replace(/^In /, "") + " left", run: () => countdown.stop() });
+        const win = lower.match(/^(close|kill|focus|win|window)\s+(.+)$/);
+        if (win)
+            for (const t of Hypr.toplevels.values) {
+                const cls = t.wayland?.appId ?? t.lastIpcObject?.class ?? "";
+                const s = Fuzzy.best(win[2], [cls, t.title]);
+                if (s <= 0)
+                    continue;
+                const close = win[1] === "close" || win[1] === "kill";
+                out.push({ kind: "action", image: Apps.icon(cls), title: (close ? "Close " : "Focus ") + (t.title || cls), subtitle: cls, score: s, run: close ? () => Hypr.closeWindow(t.address) : () => Hypr.focusWindow(t.address) });
+            }
+        // three digits only with the hash, so words like bad or fed stay words
+        const hex = cmd.match(/^(?:#([0-9a-f]{3}|[0-9a-f]{6})|([0-9a-f]{6}))$/i);
+        if (hex) {
+            const c = Qt.color("#" + (hex[1] ?? hex[2]));
+            const rgb = `rgb(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)})`;
+            const hsl = `hsl(${Math.round(Math.max(0, c.hslHue) * 360)}, ${Math.round(c.hslSaturation * 100)}%, ${Math.round(c.hslLightness * 100)}%)`;
+            for (const text of [c.toString(), rgb, hsl])
+                out.push({ kind: "copy", icon: "palette", swatch: c, title: text, run: () => Actions.copy(text) });
+        }
+        if (lower === "uuid") {
+            const id = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, ch => ((ch === "x" ? 0 : 8) + Math.floor(Math.random() * (ch === "x" ? 16 : 4))).toString(16));
+            out.push({ kind: "copy", icon: "fingerprint", title: id, subtitle: "New uuid", run: () => Actions.copy(id) });
+        }
+        const pass = lower.match(/^(pass|password)\s*(\d*)$/);
+        if (pass) {
+            const len = Math.max(8, Math.min(64, Number(pass[2]) || 20));
+            const set = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%&*-_";
+            let pw = "";
+            for (let i = 0; i < len; i++)
+                pw += set[Math.floor(Math.random() * set.length)];
+            out.push({ kind: "copy", icon: "password", title: pw, subtitle: len + " characters", run: () => Actions.copy(pw) });
+        }
+        const sum = Calc.evaluate(cmd);
+        if (sum !== null)
+            out.push({ kind: "sum", icon: "calculate", title: String(sum), subtitle: "Press enter to copy", run: () => Actions.copy(String(sum)) });
+        return out;
+    }
+
+    // 5m, 1h30m, 90s, a bare number is minutes
+    function span(text: string): real {
+        const re = /(\d+(?:\.\d+)?)\s*([a-z]*)/g;
+        let hit, total = 0;
+        while ((hit = re.exec(text.toLowerCase())) !== null)
+            total += Number(hit[1]) * (units[(hit[2] || "m").replace(/s$/, "") || "s"] ?? 0);
+        return total;
+    }
+
+    property real timerEnd: 0
+    property string timerLabel: ""
+
+    function startTimer(ms: real, label: string): void {
+        timerEnd = Date.now() + ms;
+        timerLabel = label.trim();
+        countdown.interval = ms;
+        countdown.restart();
+        Actions.say("timer", "Timer set for " + timerLabel);
+    }
+
+    Timer {
+        id: countdown
+
+        onTriggered: {
+            Actions.say("timer", "Timer done, " + root.timerLabel);
+            Quickshell.execDetached(["notify-send", "-a", "Sweeteh", "-i", "alarm", "Timer done", root.timerLabel]);
+        }
+    }
+
+    // the palette remembers what ran lately so it comes back first
+    property list<string> recent: []
+
+    function used(title: string): void {
+        recent = [title].concat(recent.filter(t => t !== title)).slice(0, 8);
+        recentStore.setText(JSON.stringify(recent));
+    }
+
+    // a small lift for what ran lately, the newest the most
+    function boost(title: string): int {
+        const i = recent.indexOf(title);
+        return i < 0 ? 0 : 120 - i * 12;
+    }
+
+    FileView {
+        id: recentStore
+
+        path: Paths.state + "/palette.json"
+        printErrors: false
+        onLoaded: {
+            try {
+                root.recent = JSON.parse(text());
+            } catch (e) {}
+        }
     }
 }

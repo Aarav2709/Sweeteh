@@ -31,15 +31,16 @@ Item {
         const limit = Config.options.launcher.maxResults;
         const out = [];
         if (sum !== null)
-            out.push({ kind: "sum", icon: "calculate", title: String(sum), subtitle: "Press enter to copy", run: () => Quickshell.clipboardText = String(sum) });
+            out.push({ kind: "sum", icon: "calculate", title: String(sum), subtitle: "Press enter to copy", run: () => Actions.copy(String(sum)) });
         // > is the command palette, every shell action plus dates to copy, with a shell run as the last resort
         if (q.startsWith(">")) {
             const cmd = q.slice(1).trim();
-            out.push(...Commands.moments(cmd));
+            out.length = 0;
+            out.push(...Commands.answers(cmd));
             const pool = cmd === "" ? Commands.list : Commands.list.concat(Commands.wallpapers);
-            const hits = cmd === "" ? pool.map(c => ({ c: c, s: 1 })) : pool.map(c => ({ c: c, s: Fuzzy.best(cmd, [c.title, c.keywords]) })).filter(x => x.s > 0).sort((a, b) => b.s - a.s).slice(0, 12);
+            const hits = pool.map(c => ({ c: c, s: (cmd === "" ? 1 : Fuzzy.best(cmd, [c.title, c.keywords])) })).filter(x => x.s > 0).map(x => ({ c: x.c, s: x.s + Commands.boost(x.c.title) })).sort((a, b) => b.s - a.s).slice(0, cmd === "" ? pool.length : 12);
             for (const x of hits)
-                out.push({ kind: "action", icon: x.c.icon, title: x.c.title, run: x.c.run });
+                out.push({ kind: "action", icon: x.c.icon, title: x.c.title, subtitle: Commands.boost(x.c.title) > 0 && cmd === "" ? "Recent" : "", keywords: x.c.keywords, remember: true, run: x.c.run });
             if (cmd)
                 out.push({ kind: "run", icon: "terminal", title: cmd, subtitle: "Run in a shell", run: () => Actions.shell(cmd) });
             return out;
@@ -51,7 +52,7 @@ Item {
             if (/^https?:\/\/\S+$/.test(clip))
                 out.push({ kind: "action", icon: "open_in_new", title: "Open copied link", subtitle: clip, run: () => Qt.openUrlExternally(clip) });
             else if (clipSum !== null && String(clipSum) !== clip)
-                out.push({ kind: "sum", icon: "calculate", title: String(clipSum), subtitle: "Copied " + clip, run: () => Quickshell.clipboardText = String(clipSum) });
+                out.push({ kind: "sum", icon: "calculate", title: String(clipSum), subtitle: "Copied " + clip, run: () => Actions.copy(String(clipSum)) });
             else if (clip.startsWith("/") && clip.indexOf("\n") < 0)
                 out.push({ kind: "file", icon: "folder_open", title: "Open copied path", subtitle: clip, run: () => Files.open(clip) });
         }
@@ -74,8 +75,33 @@ Item {
         const r = results[index];
         if (!r)
             return;
+        if (r.remember)
+            Commands.used(r.title);
         alt && r.alt ? r.alt() : r.run();
         done();
+    }
+
+    // the last word typed after > grows into the first longer word the top results know
+    function complete(): bool {
+        if (!query.startsWith(">"))
+            return false;
+        const m = query.match(/(\S+)$/);
+        if (!m || query.endsWith(" "))
+            return false;
+        const part = m[1].toLowerCase().replace(/^>/, "");
+        if (part === "")
+            return false;
+        for (const r of results) {
+            const words = (r.title + " " + (r.keywords ?? "")).toLowerCase().split(/\s+/);
+            const word = words.find(w => w.length > part.length && w.startsWith(part));
+            if (word) {
+                field.text = query.slice(0, query.length - part.length) + word + " ";
+                query = field.text;
+                field.input.cursorPosition = field.text.length;
+                return true;
+            }
+        }
+        return false;
     }
 
     implicitWidth: Theme.size.launcherWidth
@@ -104,7 +130,13 @@ Item {
             onEdited: root.query = text
             onAccepted: root.activate(root.current, false)
             input.Keys.onPressed: e => {
-                if (e.key === Qt.Key_Down || (e.key === Qt.Key_Tab && !(e.modifiers & Qt.ShiftModifier))) {
+                // ctrl and a digit runs that row, tab in the palette finishes the word first
+                if ((e.modifiers & Qt.ControlModifier) && e.key >= Qt.Key_1 && e.key <= Qt.Key_9) {
+                    root.activate(e.key - Qt.Key_1, false);
+                    e.accepted = true;
+                } else if (e.key === Qt.Key_Tab && !(e.modifiers & Qt.ShiftModifier) && root.complete()) {
+                    e.accepted = true;
+                } else if (e.key === Qt.Key_Down || (e.key === Qt.Key_Tab && !(e.modifiers & Qt.ShiftModifier))) {
                     root.current = Math.min(root.results.length - 1, root.current + 1);
                     e.accepted = true;
                 } else if (e.key === Qt.Key_Up || e.key === Qt.Key_Backtab) {
@@ -173,11 +205,12 @@ Item {
                         Rectangle {
                             anchors.fill: parent
                             visible: !row.modelData.image
-                            radius: row.modelData.kind === "sum" ? Theme.radius.medium : width / 2
-                            color: row.modelData.kind === "sum" ? Theme.color.primary : Theme.color.layer2
+                            radius: row.modelData.kind === "sum" || row.modelData.swatch ? Theme.radius.medium : width / 2
+                            color: row.modelData.swatch ?? (row.modelData.kind === "sum" ? Theme.color.primary : Theme.color.layer2)
 
                             Icon {
                                 anchors.centerIn: parent
+                                visible: !row.modelData.swatch
                                 name: row.modelData.icon ?? ""
                                 fill: row.modelData.kind === "sum" ? 1 : 0
                                 color: row.modelData.kind === "sum" ? Theme.color.fgPrimary : Theme.color.inkMeta
@@ -207,7 +240,7 @@ Item {
 
                     Label {
                         visible: row.hint !== ""
-                        text: row.hint
+                        text: row.index < 9 && row.selected ? "Ctrl " + (row.index + 1) + "  ·  " + row.hint : row.hint
                         font.pixelSize: Theme.font.small
                         color: Theme.color.inkFaint
                     }

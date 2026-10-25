@@ -57,6 +57,13 @@ Singleton {
             open(id);
     }
 
+    // copy text and let the island say so, the clipboard watcher says it by itself when it runs
+    function copy(text: string): void {
+        Quickshell.clipboardText = text;
+        if (!Clipboard.watching)
+            Clipboard.copied(text.length > 60 ? text.slice(0, 60) + "…" : text, false);
+    }
+
     function openPage(page: string): void {
         dashboardPage = page;
         open("island");
