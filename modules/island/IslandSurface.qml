@@ -13,6 +13,11 @@ import qs.modules.monitor
 import qs.modules.media
 import qs.modules.osd
 import qs.modules.notifications
+import qs.modules.power
+import qs.modules.wallpaper
+import qs.modules.overview
+import qs.modules.cheatsheet
+import qs.modules.modeswitcher
 
 // the notch fused to the top edge, its size follows whichever content is showing
 Item {
@@ -29,7 +34,16 @@ Item {
     // the workspace number, or the workspace peek itself, under the pointer
     readonly property bool wsHovered: idle.wsHovered || (mode === "workspaces" && hover.hovered)
     readonly property color base: Theme.color.island
-    readonly property Item content: ({ idle: idle, peek: peek, workspaces: workspaces, message: message, glow: glow, osd: osd, track: track, notification: notification, media: media, launcher: launcher, clipboard: clipboard, monitor: monitor, dashboard: dashboard, auth: auth })[mode] ?? idle
+    readonly property Item content: ({ idle: idle, peek: peek, workspaces: workspaces, message: message, glow: glow, osd: osd, track: track, notification: notification, media: media, launcher: launcher, clipboard: clipboard, monitor: monitor, dashboard: dashboard, auth: auth })[mode] ?? hostedSlot(mode) ?? idle
+
+    function hostedSlot(id: string): Item {
+        for (let i = 0; i < hostedViews.count; i++) {
+            const slot = hostedViews.itemAt(i);
+            if (slot?.modelData.id === id)
+                return slot;
+        }
+        return null;
+    }
     readonly property bool compact: mode === "idle" || mode === "message" || mode === "glow" || mode === "osd" || mode === "track"
     readonly property int pad: mode === "idle" ? 0 : compact ? Theme.spacing.medium : Theme.spacing.large
     readonly property int idleHeight: Config.options.island.height
@@ -617,6 +631,73 @@ Item {
                 if (shown)
                     launcherView.reset();
             }
+        }
+
+        // the old panels, each loads when it opens and resets itself as it shows
+        Repeater {
+            id: hostedViews
+
+            model: [
+                { id: "power", view: powerView },
+                { id: "wallpaper", view: wallpaperView },
+                { id: "overview", view: overviewView },
+                { id: "cheatsheet", view: cheatsheetView },
+                { id: "modeswitcher", view: modeSwitcherView }
+            ]
+
+            IslandSlot {
+                id: hostedSlot
+
+                required property var modelData
+
+                shown: root.mode === modelData.id
+
+                Loader {
+                    id: hostedLoader
+
+                    active: hostedSlot.shown || hostedSlot.visible
+                    sourceComponent: hostedSlot.modelData.view
+                    onLoaded: {
+                        if (hostedSlot.shown)
+                            item.reset();
+                    }
+                }
+
+                onShownChanged: {
+                    if (shown && hostedLoader.item)
+                        hostedLoader.item.reset();
+                }
+            }
+        }
+
+        Component {
+            id: powerView
+
+            PowerView {}
+        }
+
+        Component {
+            id: wallpaperView
+
+            WallpaperView {}
+        }
+
+        Component {
+            id: overviewView
+
+            OverviewView {}
+        }
+
+        Component {
+            id: cheatsheetView
+
+            CheatsheetView {}
+        }
+
+        Component {
+            id: modeSwitcherView
+
+            ModeSwitcherView {}
         }
     }
 }

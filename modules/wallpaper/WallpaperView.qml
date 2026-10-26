@@ -6,17 +6,17 @@ import qs.theme
 import qs.services
 import qs.components
 
-// wallpaper grid, picking one recolors the whole shell
-Panel {
+// wallpaper grid in the island, picking one recolors the whole shell
+Item {
     id: root
 
     property string filter: ""
     readonly property var matches: Wallpapers.files.filter(f => f.toLowerCase().includes(filter.toLowerCase()))
 
-    panelId: "wallpaper"
-    edge: "bottom"
-    exclusiveKeyboard: true
-    onOpened: {
+    implicitWidth: column.width
+    implicitHeight: column.implicitHeight
+
+    function reset(): void {
         Wallpapers.refresh();
         search.text = "";
         filter = "";
@@ -27,8 +27,7 @@ Panel {
     ColumnLayout {
         id: column
 
-        width: Math.min((root.screen?.width ?? 1200) - Theme.spacing.xxl * 4, 1000)
-        height: implicitHeight
+        width: 960
         spacing: Theme.spacing.medium
 
         RowLayout {

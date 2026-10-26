@@ -1,18 +1,18 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Wayland
 import Quickshell.Hyprland
 import qs.config
 import qs.theme
 import qs.services
 import qs.components
 
-// workspace grid with live window previews, drag windows between workspaces
-PanelWindow {
+// workspace grid with live window previews in the island, drag windows between workspaces
+Item {
     id: root
 
     readonly property bool open: Actions.isOpen("overview")
+    readonly property var screen: Hypr.screenFor(Actions.screen)
     readonly property int rows: Config.options.overview.rows
     readonly property int columns: Config.options.overview.columns
     readonly property int perPage: rows * columns
@@ -34,50 +34,22 @@ PanelWindow {
         Actions.close("overview");
     }
 
-    screen: Hypr.screenFor(Actions.screen)
-    visible: open || content.opacity > 0
-    color: "transparent"
-    exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.namespace: "sweeteh-overview"
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-    anchors.top: true
-    anchors.bottom: true
-    anchors.left: true
-    anchors.right: true
-
-    onOpenChanged: {
-        if (open) {
-            Hyprland.refreshToplevels();
-            Hyprland.refreshMonitors();
-            selected = Hypr.activeWorkspace;
-            content.forceActiveFocus();
-        }
+    // the island calls this as it opens
+    function reset(): void {
+        Hyprland.refreshToplevels();
+        Hyprland.refreshMonitors();
+        selected = Hypr.activeWorkspace;
+        content.forceActiveFocus();
     }
 
-    Rectangle {
-        anchors.fill: parent
-        color: Theme.color.scrim
-        opacity: root.open ? 0.45 : 0
-
-        Behavior on opacity {
-            Anim {}
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: Actions.close("overview")
-        }
-    }
+    implicitWidth: content.width
+    implicitHeight: content.height
 
     Item {
         id: content
 
-        anchors.centerIn: parent
-        width: board.implicitWidth + Theme.spacing.large * 2
-        height: board.implicitHeight + Theme.spacing.large * 2
-        opacity: root.open ? 1 : 0
-        scale: root.open ? 1 : 0.9
+        width: board.implicitWidth
+        height: board.implicitHeight
         focus: true
         Keys.onEscapePressed: Actions.close("overview")
         Keys.onLeftPressed: root.move(-1)
@@ -98,30 +70,9 @@ PanelWindow {
             }
         }
 
-        Behavior on opacity {
-            Anim {}
-        }
-
-        Behavior on scale {
-            Anim {
-                easing.bezierCurve: root.open ? Theme.anim.decel : Theme.anim.accel
-            }
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            radius: Theme.radius.xl
-            color: Theme.color.panel
-            border.width: Theme.depth.rim
-            border.color: Theme.color.depthRim
-
-            Depth {}
-        }
-
         GridLayout {
             id: board
 
-            anchors.centerIn: parent
             columns: root.columns
             rowSpacing: Theme.spacing.medium
             columnSpacing: Theme.spacing.medium

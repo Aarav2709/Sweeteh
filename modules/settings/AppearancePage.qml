@@ -235,20 +235,6 @@ ColumnLayout {
         icon: "layers"
 
         OptionRow {
-            label: "Raised look"
-            hint: "Pills, cards and the island sit on a crisp edge and a hard shadow, and sink when pressed."
-
-            Toggle {
-                checked: root.t.depth
-                onToggled: v => Config.set("theme.depth", v)
-            }
-        }
-
-        AutoOption {
-            key: "theme.style"
-        }
-
-        OptionRow {
             label: "Motion blur"
             hint: "Island content blurs while it fades in and out. Skipped in performance mode."
 

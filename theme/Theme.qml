@@ -11,24 +11,6 @@ Singleton {
     readonly property var opts: Config.options.theme
     readonly property real panelOpacity: Math.max(0.3, Math.min(1, opts.panelOpacity))
     readonly property bool dark: opts.dark
-    // the cover of the playing song takes over the accent roles, both fade so nothing jumps
-    property color song: "#7c9cff"
-    property bool songOn: false
-    property real songMix: songOn ? 1 : 0
-
-    Behavior on songMix {
-        NumberAnimation {
-            duration: 900
-            easing.type: Easing.InOutQuad
-        }
-    }
-
-    Behavior on song {
-        ColorAnimation {
-            duration: 900
-        }
-    }
-
     // the wallpaper's real color, red stays red and black stays black, kept dark or light enough for text
     property color wallpaper: "#000000"
     readonly property color wallpaperSurface: Qt.hsla(Math.max(0, wallpaper.hslHue), Math.min(1, wallpaper.hslSaturation * 1.25), dark ? Math.max(0.05, Math.min(0.26, wallpaper.hslLightness)) : Math.max(0.82, Math.min(0.94, wallpaper.hslLightness)), panelOpacity)
@@ -45,9 +27,7 @@ Singleton {
     }
 
     readonly property ColorSet color: ColorSet {}
-    readonly property ColorSet wall: ColorSet {
-        follow: false
-    }
+    readonly property ColorSet wall: ColorSet {}
     readonly property real islandTint: Math.max(0, Math.min(1, Config.options.island.wallpaperTint))
 
     // readable label from a camel case or dashed key
@@ -138,13 +118,13 @@ Singleton {
         readonly property bool blur: speed > 0 && root.opts.motionBlur
     }
 
-    // raised 2.5d look, a crisp rim and a hard shadow that pressed surfaces sink into
+    // the backlit look, every raised key sits on a ledge lit from below that pressed keys sink into
+    // it is the shell's identity, so it has no switch
     readonly property QtObject depth: QtObject {
-        readonly property bool on: root.opts.depth
-        readonly property int offset: on ? 4 : 0
-        readonly property int rim: on ? 1 : 0
-        // keys lit from below, the light spills out under each one and blooms under the island
-        readonly property bool backlit: on && root.opts.style !== "classic"
+        readonly property bool on: true
+        readonly property int offset: 4
+        readonly property int rim: 1
+        readonly property bool backlit: true
     }
 
     // state layer opacities for hover and press feedback

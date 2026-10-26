@@ -7,7 +7,6 @@ import Quickshell
 Singleton {
     // allowed values for options that are a fixed set
     readonly property var choices: ({
-            "theme.style": ["backlit", "classic"],
             "theme.scheme": ["scheme-tonal-spot", "scheme-content", "scheme-expressive", "scheme-fidelity", "scheme-fruit-salad", "scheme-monochrome", "scheme-neutral", "scheme-rainbow", "scheme-vibrant"],
             "wallpaper.transition": ["circle", "wipe", "fade", "zoom"],
             "power.sleepAction": ["suspend", "hibernate", "suspend-then-hibernate", "hybrid-sleep"],
@@ -47,8 +46,6 @@ Singleton {
                 wallpaperDir: "~/Pictures/Wallpapers"
             },
             theme: {
-                // the accent follows the cover of the playing song
-                followSong: true,
                 dark: true,
                 fromWallpaper: true,
                 accent: "#7c9cff",
@@ -62,10 +59,7 @@ Singleton {
                 fontRound: 40,
                 animationSpeed: 1.0,
                 motionBlur: true,
-                // backlit lights every raised key from underneath in the wallpaper color, classic keeps a dark hard shadow
-                style: "backlit",
                 panelOpacity: 1.0,
-                depth: true,
                 windowBorders: true,
                 appTheming: true,
                 screenCorners: true

@@ -37,8 +37,9 @@ PanelWindow {
     // more notifications from the same app folded behind the one on screen
     property int notifGroup: 0
     // panels that live in the island, first match wins
-    readonly property string hosted: ["launcher", "clipboard", "monitor", "island", "media"].find(id => Actions.isOpen(id) && (id === "island" || Modes.enabled(id))) ?? ""
-    readonly property bool typing: hosted === "launcher" || hosted === "clipboard" || Auth.active || (Notifs.replying && flashing === "notification")
+    readonly property string hosted: ["launcher", "clipboard", "monitor", "island", "media", "power", "wallpaper", "overview", "cheatsheet", "modeswitcher"].find(id => Actions.isOpen(id) && (id === "island" || Modes.enabled(id))) ?? ""
+    // views driven by the keyboard take it whole, like the panels they replaced
+    readonly property bool typing: ["launcher", "clipboard", "power", "wallpaper", "overview", "cheatsheet", "modeswitcher"].includes(hosted) || Auth.active || (Notifs.replying && flashing === "notification")
     readonly property bool expanded: hosted !== "" || Auth.active
     readonly property string state: Auth.active ? "auth" : hosted === "island" ? "dashboard" : hosted !== "" ? hosted : flashing !== "" ? flashing : wsPeek ? "workspaces" : peeking ? "peek" : "idle"
 
@@ -133,8 +134,9 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: typing ? WlrKeyboardFocus.Exclusive : expanded ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
     anchors.top: true
-    implicitWidth: 1120
-    implicitHeight: 680
+    // wide and tall enough for the overview and the wallpaper grid, the mask keeps the rest click through
+    implicitWidth: screen?.width ?? 1920
+    implicitHeight: Math.min(screen?.height ?? 1080, 1000)
     mask: Region {
         item: island
     }

@@ -5,8 +5,8 @@ import qs.services
 import qs.components
 import "../../services/Fuzzy.js" as Fuzzy
 
-// every hyprland bind that has a description, searchable
-Panel {
+// every hyprland bind that has a description, searchable in the island
+Item {
     id: root
 
     property string filter: ""
@@ -19,10 +19,10 @@ Panel {
         return names[k.toLowerCase()] ?? (k.length === 1 ? k.toUpperCase() : k.charAt(0).toUpperCase() + k.slice(1).toLowerCase());
     }
 
-    panelId: "cheatsheet"
-    edge: "center"
-    exclusiveKeyboard: true
-    onOpened: {
+    implicitWidth: 780
+    implicitHeight: 470
+
+    function reset(): void {
         Keybinds.refresh();
         field.text = "";
         filter = "";
@@ -30,8 +30,7 @@ Panel {
     }
 
     ColumnLayout {
-        width: 780
-        height: 470
+        anchors.fill: parent
         spacing: Theme.spacing.medium
 
         RowLayout {

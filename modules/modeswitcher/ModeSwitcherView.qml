@@ -5,8 +5,8 @@ import qs.theme
 import qs.services
 import qs.components
 
-// cards for each mode, arrows and enter switch live
-Panel {
+// cards for each mode in the island, arrows and enter switch live
+Item {
     id: root
 
     property int current: Modes.names.indexOf(Modes.current)
@@ -20,13 +20,17 @@ Panel {
         Actions.close("modeswitcher");
     }
 
-    panelId: "modeswitcher"
-    edge: "center"
-    exclusiveKeyboard: true
-    padding: Theme.spacing.xl
-    onOpened: current = Modes.names.indexOf(Modes.current)
+    function reset(): void {
+        current = Modes.names.indexOf(Modes.current);
+        keys.forceActiveFocus();
+    }
+
+    implicitWidth: keys.implicitWidth
+    implicitHeight: keys.implicitHeight
 
     ColumnLayout {
+        id: keys
+
         focus: true
         spacing: Theme.spacing.large
         Keys.onLeftPressed: root.current = (root.current + Modes.names.length - 1) % Modes.names.length

@@ -4,8 +4,8 @@ import qs.theme
 import qs.services
 import qs.components
 
-// power menu, arrows move, enter runs, a second press confirms risky actions
-Panel {
+// power menu in the island, arrows move, enter runs, a second press confirms risky actions
+Item {
     id: root
 
     property int current: 0
@@ -28,16 +28,18 @@ Panel {
         item.run();
     }
 
-    panelId: "power"
-    edge: "center"
-    exclusiveKeyboard: true
-    padding: Theme.spacing.xl
-    onOpened: {
+    function reset(): void {
         current = 0;
         armed = -1;
+        keys.forceActiveFocus();
     }
 
+    implicitWidth: keys.implicitWidth
+    implicitHeight: keys.implicitHeight
+
     ColumnLayout {
+        id: keys
+
         focus: true
         spacing: Theme.spacing.xl
         Keys.onLeftPressed: root.current = (root.current + root.items.length - 1) % root.items.length
