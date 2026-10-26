@@ -93,8 +93,13 @@ QtObject {
     readonly property color scrimSoft: Qt.alpha(scrim, 0.4)
     // hard shadow and rim of raised surfaces
     // the raised look, a hard shadow in a deep shade of the accent and a lit rim, so tinted surfaces still stand off
+    // the light under every key, the wallpaper's hue at full color, a grey wallpaper gives a white light
+    readonly property color backlight: hueSource.hslSaturation < 0.06 ? Qt.hsla(0, 0, Theme.dark ? 0.78 : 0.6, 1) : Qt.hsla(Math.max(0, hueSource.hslHue), Math.min(1, Math.max(0.65, hueSource.hslSaturation * 1.3)), Theme.dark ? 0.6 : 0.55, 1)
+    // the lit ledge fades from the dark shadow at the top to the light at the bottom
+    readonly property color depthLit: Theme.depth.backlit ? backlight : depthShadow
     readonly property color depthShadow: Theme.dark ? Qt.alpha(Theme.tone(primary, 0.08, 0.8), 0.9) : Theme.tone(primary, 0.28, 0.9)
-    readonly property color depthRim: Theme.dark ? Qt.alpha(Theme.mix(fgSurface, primary, 0.35), 0.16) : Qt.alpha(Theme.tone(primary, 0.28, 0.9), 0.85)
+    // backlit keys get a glossy candy edge instead of the plain rim
+    readonly property color depthRim: Theme.depth.backlit ? Qt.alpha(Theme.mix(backlight, "#ffffff", 0.6), Theme.dark ? 0.22 : 0.7) : Theme.dark ? Qt.alpha(Theme.mix(fgSurface, primary, 0.35), 0.16) : Qt.alpha(Theme.tone(primary, 0.28, 0.9), 0.85)
     // the wallpaper's real color, or the song's while one plays, so the island tints even on the monochrome scheme
     readonly property color source: follow && Theme.songMix > 0 ? Theme.mix(Theme.wallpaper, Theme.song, Theme.songMix) : Theme.wallpaper
     readonly property color sourceTone: Qt.hsla(Math.max(0, source.hslHue), Math.min(1, source.hslSaturation * 1.35), Theme.dark ? Math.max(0.08, Math.min(0.24, source.hslLightness)) : Math.max(0.8, Math.min(0.92, source.hslLightness)), panel.a)

@@ -244,6 +244,10 @@ ColumnLayout {
             }
         }
 
+        AutoOption {
+            key: "theme.style"
+        }
+
         OptionRow {
             label: "Motion blur"
             hint: "Island content blurs while it fades in and out. Skipped in performance mode."

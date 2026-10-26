@@ -12,6 +12,8 @@ Singleton {
     property bool installed: false
     readonly property bool active: installed && proc.running && values.length > 0
     property list<real> values: []
+    // the low end on its own, what the backlight breathes to
+    readonly property real bass: values.length > 0 ? (values[0] + (values[1] ?? 0) + (values[2] ?? 0)) / Math.min(3, values.length) : 0
 
     Process {
         running: true

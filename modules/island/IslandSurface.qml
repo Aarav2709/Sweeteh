@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
+import QtQuick.Effects
 import Quickshell.Widgets
 import qs.config
 import qs.theme
@@ -204,15 +205,63 @@ Item {
         Spring {}
     }
 
-    // hard shadow under the notch for the raised look
+    // how bright the light under the island burns, it breathes with the bass and flares on a moment
+    readonly property real backlight: Math.min(1, 0.45 + (Cava.active ? Cava.bass * 0.55 : Media.playing ? 0.1 : 0) + glowView.glow * 0.4 + glowView.shine * 0.3)
+
+    // the bloom, the island's own light spilling onto the desktop below it
+    NotchShape {
+        anchors.fill: parent
+        anchors.topMargin: Theme.depth.offset * 2
+        anchors.bottomMargin: -Theme.depth.offset * 2
+        visible: Theme.depth.backlit && !Perf.active
+        opacity: root.backlight * 0.8
+        color: Theme.color.backlight
+        radius: shape.radius
+        flare: 0
+        layer.enabled: visible
+        layer.effect: MultiEffect {
+            blurEnabled: true
+            blurMax: 40
+            blur: 1
+            autoPaddingEnabled: true
+        }
+
+        Behavior on opacity {
+            Anim {
+                duration: Theme.anim.fast
+            }
+        }
+    }
+
+    // the ledge under the notch for the raised look, lit at its lower edge when backlit
     NotchShape {
         anchors.fill: parent
         anchors.topMargin: Theme.depth.offset
         anchors.bottomMargin: -Theme.depth.offset
         visible: Theme.depth.on
-        color: Theme.color.depthShadow
         radius: shape.radius
         flare: shape.flare
+        gradient: LinearGradient {
+            y1: 0
+            y2: root.height
+            x1: 0
+            x2: 0
+
+            GradientStop {
+                position: 0
+                color: Theme.color.depthShadow
+            }
+
+            GradientStop {
+                position: 0.75
+                color: Theme.color.depthShadow
+            }
+
+            GradientStop {
+                position: 1
+                color: Theme.mix(Theme.color.depthShadow, Theme.color.depthLit, 0.5 + root.backlight * 0.5)
+            }
+        }
     }
 
     NotchShape {

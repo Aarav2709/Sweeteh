@@ -143,6 +143,8 @@ Singleton {
         readonly property bool on: root.opts.depth
         readonly property int offset: on ? 4 : 0
         readonly property int rim: on ? 1 : 0
+        // keys lit from below, the light spills out under each one and blooms under the island
+        readonly property bool backlit: on && root.opts.style !== "classic"
     }
 
     // state layer opacities for hover and press feedback

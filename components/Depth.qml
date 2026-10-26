@@ -1,8 +1,8 @@
 import QtQuick
 import qs.theme
 
-// hard offset shadow behind a rounded parent for the raised look
-// the parent sinks onto it by translating down by its shift
+// the ledge behind a rounded parent for the raised look, dark at the top and lit at the bottom when backlit
+// the parent sinks onto it by translating down by its shift, a pressed key flashes its light
 Rectangle {
     id: root
 
@@ -15,7 +15,22 @@ Rectangle {
     width: parent.width
     height: parent.height
     radius: parent.radius ?? 0
-    color: Theme.color.depthShadow
+    gradient: Gradient {
+        GradientStop {
+            position: 0
+            color: Theme.color.depthShadow
+        }
+
+        GradientStop {
+            position: 0.7
+            color: Theme.color.depthShadow
+        }
+
+        GradientStop {
+            position: 1
+            color: Theme.mix(Theme.color.depthLit, "#ffffff", 0.35 * root.sink)
+        }
+    }
 
     Behavior on sink {
         Anim {
