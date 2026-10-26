@@ -13,7 +13,8 @@ import "Calc.js" as Calc
 Singleton {
     id: root
 
-    readonly property list<var> list: {
+    // built on demand, a binding would rebuild on every volume or media change while nobody looks
+    function all(): list<var> {
         const out = [];
         for (const name of Modes.names) {
             const m = Modes.modes[name];
@@ -84,10 +85,12 @@ Singleton {
     }
 
     // every wallpaper by name, only searched once something is typed
-    readonly property list<var> wallpapers: Wallpapers.files.map(f => {
-        const name = f.slice(f.lastIndexOf("/") + 1).replace(/\.[^.]+$/, "");
-        return { icon: "image", title: "Wallpaper " + name, keywords: "wallpaper background " + name.replace(/[-_.]/g, " "), run: () => Wallpapers.set(f) };
-    })
+    function wallpapers(): list<var> {
+        return Wallpapers.files.map(f => {
+            const name = f.slice(f.lastIndexOf("/") + 1).replace(/\.[^.]+$/, "");
+            return { icon: "image", title: "Wallpaper " + name, keywords: "wallpaper background " + name.replace(/[-_.]/g, " "), run: () => Wallpapers.set(f) };
+        });
+    }
 
     // dates and times to copy, with offsets like 3d, -3d, +4h or 2w
     readonly property var units: ({ s: 1e3, sec: 1e3, m: 6e4, min: 6e4, h: 36e5, hr: 36e5, hour: 36e5, d: 864e5, day: 864e5, w: 6048e5, wk: 6048e5, week: 6048e5 })

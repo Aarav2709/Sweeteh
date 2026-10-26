@@ -69,6 +69,10 @@ ColumnLayout {
         }
 
         AutoOption {
+            key: "wallpaper.pauseWithWindows"
+        }
+
+        AutoOption {
             key: "wallpaper.path"
         }
     }

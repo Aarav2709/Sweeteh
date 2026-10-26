@@ -452,7 +452,23 @@ Item {
 
             shown: root.mode === "media"
 
-            MediaView {}
+            // heavy views load on first open and unload a while after closing
+            Loader {
+                active: media.shown || media.visible || mediaKeep.running
+
+                sourceComponent: MediaView {}
+            }
+
+            Timer {
+                id: mediaKeep
+
+                interval: 20000
+            }
+
+            onShownChanged: {
+                if (!shown)
+                    mediaKeep.restart();
+            }
         }
 
         IslandSlot {
@@ -460,13 +476,36 @@ Item {
 
             shown: root.mode === "dashboard"
 
-            IslandDashboard {
+            Loader {
                 id: dashboardView
+
+                active: dashboard.shown || dashboard.visible || dashboardKeep.running
+                sourceComponent: IslandDashboard {}
+                onLoaded: openPage()
+
+                // a page asked for by the palette, taken once
+                function openPage(): void {
+                    if (item && Actions.dashboardPage !== "") {
+                        item.page = Actions.dashboardPage;
+                        Actions.dashboardPage = "";
+                    }
+                }
+            }
+
+            Timer {
+                id: dashboardKeep
+
+                interval: 20000
             }
 
             onShownChanged: {
-                dashboardView.page = shown ? Actions.dashboardPage : "";
-                Actions.dashboardPage = "";
+                if (shown) {
+                    dashboardView.openPage();
+                } else {
+                    dashboardKeep.restart();
+                    if (dashboardView.item)
+                        dashboardView.item.page = "";
+                }
             }
         }
 
@@ -519,6 +558,8 @@ Item {
 
             LauncherView {
                 id: launcherView
+
+                active: launcher.visible
 
                 onDone: Actions.close("launcher")
             }

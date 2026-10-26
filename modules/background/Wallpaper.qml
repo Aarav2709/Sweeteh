@@ -17,8 +17,8 @@ PanelWindow {
     readonly property string path: Wallpapers.still
     readonly property string live: Wallpapers.isAnimated(Wallpapers.current) || (Wallpapers.isVideo(Wallpapers.current) && Wallpapers.videoSupport) ? Wallpapers.current : ""
     readonly property HyprlandMonitor monitor: Hyprland.monitorFor(screen)
-    // nobody sees the wallpaper under a fullscreen window, so playback rests
-    readonly property bool covered: monitor?.activeWorkspace?.toplevels.values.some(t => (t.lastIpcObject?.fullscreen ?? 0) > 0) ?? false
+    // nobody sees the wallpaper under a fullscreen window, so playback rests, and with the option also under tiled ones
+    readonly property bool covered: monitor?.activeWorkspace?.toplevels.values.some(t => (t.lastIpcObject?.fullscreen ?? 0) > 0 || (Config.options.wallpaper.pauseWithWindows && t.lastIpcObject?.floating === false)) ?? false
     readonly property string transition: Config.options.wallpaper.transition
     property real progress: 1
 

@@ -13,9 +13,11 @@ Item {
     id: root
 
     property string query: ""
+    // results only build while the view can be seen, a hidden launcher should not rerank on every clipboard change
+    property bool active: true
     property int current: 0
     readonly property var sum: Calc.evaluate(query)
-    readonly property var results: build()
+    readonly property var results: active ? build() : []
 
     signal done
 
@@ -37,7 +39,7 @@ Item {
             const cmd = q.slice(1).trim();
             out.length = 0;
             out.push(...Commands.answers(cmd));
-            const pool = cmd === "" ? Commands.list : Commands.list.concat(Commands.wallpapers);
+            const pool = cmd === "" ? Commands.all() : Commands.all().concat(Commands.wallpapers());
             const hits = pool.map(c => ({ c: c, s: (cmd === "" ? 1 : Fuzzy.best(cmd, [c.title, c.keywords])) })).filter(x => x.s > 0).map(x => ({ c: x.c, s: x.s + Commands.boost(x.c.title) })).sort((a, b) => b.s - a.s).slice(0, cmd === "" ? pool.length : 12);
             for (const x of hits)
                 out.push({ kind: "action", icon: x.c.icon, title: x.c.title, subtitle: Commands.boost(x.c.title) > 0 && cmd === "" ? "Recent" : "", keywords: x.c.keywords, remember: true, run: x.c.run });
@@ -59,7 +61,7 @@ Item {
         for (const app of Apps.search(q, limit))
             out.push({ kind: "app", image: Apps.icon(app.icon || app.id), title: app.name, subtitle: app.comment || app.genericName, run: () => Apps.launch(app) });
         if (q !== "") {
-            const cmds = Commands.list.map(c => ({ c: c, s: Fuzzy.best(q, [c.title, c.keywords]) })).filter(x => x.s > 0).sort((a, b) => b.s - a.s).slice(0, 4);
+            const cmds = Commands.all().map(c => ({ c: c, s: Fuzzy.best(q, [c.title, c.keywords]) })).filter(x => x.s > 0).sort((a, b) => b.s - a.s).slice(0, 4);
             for (const x of cmds)
                 out.push({ kind: "action", icon: x.c.icon, title: x.c.title, subtitle: "Shell action", run: x.c.run });
             if (Config.options.launcher.files)

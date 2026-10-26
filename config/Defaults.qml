@@ -83,7 +83,9 @@ Singleton {
             wallpaper: {
                 path: "",
                 transition: "circle",
-                duration: 900
+                duration: 900,
+                // live wallpapers also rest while tiled windows cover the workspace, not only under fullscreen
+                pauseWithWindows: true
             },
             notifications: {
                 // notifications from one app stack in the dashboard
