@@ -42,30 +42,6 @@ On other distros, install these yourself and then run the installer with `--no-d
 
 ## Use
 
-| Keys | Does |
-| --- | --- |
-| Super | Launcher for apps, files, actions, sums and web search |
-| Super A | The island with quick settings, calendar, media and notifications |
-| Super Period | Every keybind |
-| Super T, E, W | Terminal, files, browser |
-| Super Q | Close the window |
-| Super V, F, D | Float, fullscreen, maximize |
-| Super Arrows | Move focus |
-| Super 1 to 0 | Go to a workspace, add Shift to move the window there |
-| Super Tab | Workspace overview, arrows pick and Enter goes |
-| Super Shift V | Clipboard history |
-| Ctrl Shift Esc | System monitor |
-| Super Comma | Settings |
-| Super Escape | Power menu |
-| Super L | Lock the screen |
-| Super Shift W | Wallpapers |
-| Super Shift M | Switch between the Islands and Island layouts |
-| Print | Screenshot of a region, a window or the screen |
-| Super Shift R | Start or stop a screen recording |
-| Super Shift E | Arrange desktop widgets |
-
-Change any of them in Settings, Keybinds. They are saved to `~/.config/hypr/sweeteh/binds.lua`, which the Sweeteh `hyprland.lua` loads, so they keep working even if the shell is not running.
-
 Everything works from the keyboard. Tab moves between controls, Enter or Space presses them and Escape closes whatever is open.
 
 The `sweeteh` command:
