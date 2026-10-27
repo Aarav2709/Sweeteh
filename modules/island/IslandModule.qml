@@ -37,7 +37,7 @@ PanelWindow {
     // more notifications from the same app folded behind the one on screen
     property int notifGroup: 0
     // panels that live in the island, first match wins
-    readonly property string hosted: ["launcher", "clipboard", "monitor", "island", "media", "power", "wallpaper", "overview", "cheatsheet", "modeswitcher"].find(id => Actions.isOpen(id) && (id === "island" || Modes.enabled(id))) ?? ""
+    readonly property string hosted: ["welcome", "launcher", "clipboard", "monitor", "island", "media", "power", "wallpaper", "overview", "cheatsheet", "modeswitcher"].find(id => Actions.isOpen(id) && (id === "island" || id === "welcome" || Modes.enabled(id))) ?? ""
     // views driven by the keyboard take it whole, like the panels they replaced
     readonly property bool typing: ["launcher", "clipboard", "power", "wallpaper", "overview", "cheatsheet", "modeswitcher"].includes(hosted) || Auth.active || (Notifs.replying && flashing === "notification")
     readonly property bool expanded: hosted !== "" || Auth.active
@@ -230,6 +230,20 @@ PanelWindow {
             const p = Battery.profile;
             root.glow(p === PowerProfile.PowerSaver ? { kind: "profile", icon: "energy_savings_leaf", title: "Battery saver", sub: "On" } : p === PowerProfile.Performance ? { kind: "profile", icon: "speed", title: "Performance", sub: "Power mode" } : { kind: "profile", icon: "balance", title: "Balanced", sub: "Power mode" }, 2400);
         }
+    }
+
+    // the first start ever opens the tour once the island has slid in, a marker file keeps it from coming back
+    FileView {
+        path: Paths.state + "/welcomed"
+        printErrors: false
+        onLoadFailed: tour.start()
+    }
+
+    Timer {
+        id: tour
+
+        interval: 2200
+        onTriggered: Actions.open("welcome")
     }
 
     // coming back from the lockscreen gets a greeting

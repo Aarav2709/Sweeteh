@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
 import QtQuick.Effects
+import Quickshell.Io
 import Quickshell.Widgets
 import qs.config
 import qs.theme
@@ -34,7 +35,7 @@ Item {
     // the workspace number, or the workspace peek itself, under the pointer
     readonly property bool wsHovered: idle.wsHovered || (mode === "workspaces" && hover.hovered)
     readonly property color base: Theme.color.island
-    readonly property Item content: ({ idle: idle, peek: peek, workspaces: workspaces, message: message, glow: glow, osd: osd, track: track, notification: notification, media: media, launcher: launcher, clipboard: clipboard, monitor: monitor, dashboard: dashboard, auth: auth })[mode] ?? hostedSlot(mode) ?? idle
+    readonly property Item content: ({ idle: idle, peek: peek, workspaces: workspaces, message: message, glow: glow, osd: osd, track: track, notification: notification, media: media, launcher: launcher, clipboard: clipboard, monitor: monitor, dashboard: dashboard, auth: auth, welcome: welcome })[mode] ?? hostedSlot(mode) ?? idle
 
     function hostedSlot(id: string): Item {
         for (let i = 0; i < hostedViews.count; i++) {
@@ -220,13 +221,35 @@ Item {
     }
 
     // how bright the light under the island burns, it breathes with the bass and flares on a moment
-    readonly property real backlight: Math.min(1, 0.45 + (Cava.active ? Cava.bass * 0.55 : Media.playing ? 0.1 : 0) + glowView.glow * 0.4 + glowView.shine * 0.3)
+    readonly property real backlight: Math.min(1, 0.45 + (Cava.active ? Cava.bass * 0.55 : Media.playing ? 0.1 : 0) + glowView.glow * 0.4 + glowView.shine * 0.3 + keyFlare * 0.5)
+
+    // every key typed into the island flashes the light under it, the signature of the shell
+    property real keyFlare: 0
+
+    NumberAnimation on keyFlare {
+        id: flare
+
+        running: false
+        from: 1
+        to: 0
+        duration: 520
+        easing.type: Easing.OutCubic
+    }
+
+    Connections {
+        target: Actions
+
+        function onKeystroke(): void {
+            if (Theme.anim.speed > 0)
+                flare.restart();
+        }
+    }
 
     // the bloom, the island's own light spilling onto the desktop below it
     NotchShape {
         anchors.fill: parent
         anchors.topMargin: Theme.depth.offset * 2
-        anchors.bottomMargin: -Theme.depth.offset * 2
+        anchors.bottomMargin: -Theme.depth.offset * 2 - root.keyFlare * 10
         visible: Theme.depth.backlit && !Perf.active
         opacity: root.backlight * 0.8
         color: Theme.color.backlight
@@ -630,6 +653,31 @@ Item {
             onShownChanged: {
                 if (shown)
                     launcherView.reset();
+            }
+        }
+
+        IslandSlot {
+            id: welcome
+
+            shown: root.mode === "welcome"
+
+            Loader {
+                active: welcome.shown || welcome.visible
+
+                sourceComponent: IslandWelcome {
+                    onDone: {
+                        welcomed.setText("1");
+                        Actions.close("welcome");
+                    }
+                }
+                onLoaded: item.reset()
+            }
+
+            FileView {
+                id: welcomed
+
+                path: Paths.state + "/welcomed"
+                printErrors: false
             }
         }
 
