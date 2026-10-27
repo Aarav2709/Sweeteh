@@ -2,7 +2,7 @@
 
 A desktop shell for Hyprland, built with Quickshell.
 
-Everything lives in one island at the top of the screen. It morphs into the launcher, quick settings, media controls, notifications, the clipboard, a system monitor, the wallpaper picker, the workspace overview, the power menu, settings and password prompts, then shrinks back to the time. Every raised key is lit from underneath in your wallpaper's color, and that color carries over to window borders, kitty and GTK apps like Nautilus.
+https://github.com/user-attachments/assets/47775564-aa10-4187-a838-3ff012cb136e
 
 ## Install
 
