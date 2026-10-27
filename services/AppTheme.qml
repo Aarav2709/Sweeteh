@@ -84,10 +84,11 @@ Singleton {
         return out.join("");
     }
 
-    // folder icon blues swapped for the accent at matching tones, grey under monochrome
+    // folder icon blues swapped for the wallpaper's hue at matching tones, even on the monochrome scheme
+    // only a grey wallpaper gives grey folders
     function folderColors(): var {
-        const p = ColorMath.toLch(hex(c.primary));
-        const chroma = Config.options.theme.scheme === "scheme-monochrome" ? 0 : Math.max(20, Math.min(55, p.c));
+        const p = ColorMath.toLch(hex(c.hueSource));
+        const chroma = c.hueSource.hslSaturation < 0.06 ? 0 : Math.max(20, Math.min(55, p.c));
         const at = tone => ColorMath.fromLch(tone, chroma, p.h);
         return [["#62a0ea", at(64)], ["#438de6", at(57)], ["#a4caee", at(80)], ["#afd4ff", at(84)], ["#c0d5ea", at(85)]];
     }
