@@ -21,16 +21,30 @@ Singleton {
         id: quantizer
 
         source: root.still ? "file://" + root.still.replace(/^file:\/\//, "") : ""
-        depth: 0
-        rescaleSize: 64
+        depth: 3
+        rescaleSize: 96
     }
 
     Binding {
         target: Theme
         property: "wallpaper"
-        value: quantizer.colors[0] ?? "#000000"
+        value: root.signature(quantizer.colors)
         when: quantizer.colors.length > 0
     }
+    // the wallpaper's signature color, the most colorful of its main colors that is neither near black nor near white
+    // an average would turn a red and black wallpaper into mud, a grey wallpaper still gives grey
+    function signature(colors: list<color>): color {
+        let best = colors[0] ?? "#000000", score = -1;
+        for (const c of colors) {
+            const s = c.hslSaturation * (1 - Math.min(1, Math.abs(c.hslLightness - 0.5) * 1.6));
+            if (s > score) {
+                score = s;
+                best = c;
+            }
+        }
+        return best;
+    }
+
     // video wallpapers need the multimedia module, checked once at start
     property bool videoSupport: false
     property list<string> files: []
