@@ -26,7 +26,7 @@ running() {
 # five crashes inside a minute means something is really broken, so give up then
 run() {
   if running; then
-    say "sweeteh is already running"
+    say "Sweeteh is already running"
     exit 0
   fi
   local child status crashes=()
@@ -55,10 +55,10 @@ run() {
     crashes=("${crashes[@]}" "$now")
     crashes=($(for t in "${crashes[@]}"; do if (( now - t < 60 )); then echo "$t"; fi; done))
     if (( ${#crashes[@]} >= 5 )); then
-      say "sweeteh crashed ${#crashes[@]} times in a minute, not restarting"
+      say "Sweeteh crashed ${#crashes[@]} times in a minute, not restarting"
       break
     fi
-    say "sweeteh crashed with status $status, starting it again"
+    say "Sweeteh crashed with status $status, starting it again"
     sleep 1
   done
   rm -f "$stopflag"
@@ -76,7 +76,7 @@ stop() {
 restart() {
   stop
   setsid -f "$0" run >/dev/null 2>&1
-  say "sweeteh restarted"
+  say "Sweeteh restarted"
 }
 
 # the newest release tag, empty when the repository has none yet
@@ -99,37 +99,37 @@ check() {
 
 update() {
   if [[ ! -d "$repo/.git" ]]; then
-    say "this copy of sweeteh is not a git checkout, run the installer again to update"
+    say "This copy of Sweeteh is not a git checkout, run the installer again to update"
     exit 1
   fi
   if [[ -n "$(git -C "$repo" status --porcelain --untracked-files=no)" ]]; then
-    say "this checkout has local changes, commit or stash them first"
+    say "This checkout has local changes, commit or stash them first"
     exit 1
   fi
   local next
   next="$(check)"
   if [[ -z "$next" ]]; then
-    say "sweeteh $(current_version) is the newest release"
+    say "Sweeteh $(current_version) is the newest release"
     return
   fi
-  say "updating to $next"
+  say "Updating to $next"
   git -C "$repo" checkout --quiet "$next"
   bash "$repo/install.sh" --no-deps --keep-configs >/dev/null
   restart
-  say "sweeteh is now $next"
+  say "Sweeteh is now $next"
 }
 
 usage() {
   cat <<USAGE
-usage: sweeteh [command]
+Usage: sweeteh [command]
 
-  run         start the shell, this is the default
-  stop        stop the shell, its keybinds go away with it
-  restart     stop and start again
-  check       print the newest release if it is newer than this one
-  update      move to the newest release and restart
-  ipc ARGS    call the shell, for example sweeteh ipc launcher toggle
-  fingerprint enable|disable|status   use your finger for sudo and polkit prompts
+  run         Start the shell, this is the default
+  stop        Stop the shell, its keybinds go away with it
+  restart     Stop and start again
+  check       Print the newest release if it is newer than this one
+  update      Move to the newest release and restart
+  ipc ARGS    Call the shell, for example sweeteh ipc launcher toggle
+  fingerprint enable|disable|status   Use your finger for sudo and polkit prompts
 USAGE
 }
 
