@@ -87,6 +87,8 @@ Sweeteh was designed by studying these shells. Their ideas were recreated from s
 
 Sweeteh also bundles [Google Sans Flex](https://fonts.google.com/specimen/Google+Sans+Flex) under the SIL Open Font License and [Material Symbols](https://github.com/google/material-design-icons) under the Apache 2.0 license. Lyrics come from [LRCLIB](https://lrclib.net) and weather from [wttr.in](https://wttr.in).
 
+> I credit my friends, [@Antinity](https://github.com/Antinity) and [@Saturn](https://github.com/SleeperOfSaturn) too, who gave me valuable feedback upon asking and shaped a major portion on how this shell IS.
+
 ## License
 
 GPL 3.0, see [LICENSE](LICENSE).
