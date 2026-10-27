@@ -1,11 +1,13 @@
 import QtQuick
+import Quickshell.Widgets
 import qs.config
 import qs.theme
 import qs.services
 import qs.components
 
 // one workspace scaled down, accepts dropped windows
-Rectangle {
+// clipped to its rounded shape, a plain clip is square and left previews poking out at the corners
+ClippingRectangle {
     id: root
 
     required property int workspaceId
@@ -19,7 +21,6 @@ Rectangle {
     implicitHeight: overview.cellHeight
     radius: Theme.radius.large
     color: Theme.color.layer2
-    clip: true
 
     // the wallpaper behind each workspace, dimmed so previews stand out
     Image {

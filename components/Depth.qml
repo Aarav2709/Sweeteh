@@ -21,9 +21,10 @@ Rectangle {
             color: Theme.color.depthShadow
         }
 
+        // lit from where the corners start curving, so no dark sliver shows past a rounded corner
         GradientStop {
-            position: 0.7
-            color: Theme.color.depthShadow
+            position: Math.max(0, 1 - ((root.radius || 0) + Theme.depth.offset * 2) / Math.max(1, root.height))
+            color: Theme.mix(Theme.color.depthShadow, Theme.color.depthLit, 0.45)
         }
 
         GradientStop {

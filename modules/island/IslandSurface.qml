@@ -312,7 +312,8 @@ Item {
         anchors.bottomMargin: -Theme.depth.offset
         visible: Theme.depth.on
         radius: shape.radius
-        flare: shape.flare
+        // no flares, its top hides behind the island, flares would peek out black beside the island's own
+        flare: 0
         gradient: LinearGradient {
             y1: 0
             y2: root.height
@@ -324,9 +325,10 @@ Item {
                 color: Theme.color.depthShadow
             }
 
+            // the light starts where the bottom corners curve, so the ledge peeking past them is never black
             GradientStop {
-                position: 0.75
-                color: Theme.color.depthShadow
+                position: Math.max(0, 1 - (shape.radius + Theme.depth.offset * 2) / Math.max(1, root.height))
+                color: Theme.mix(Theme.color.depthShadow, Theme.color.depthLit, 0.45)
             }
 
             GradientStop {

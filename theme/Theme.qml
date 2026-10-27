@@ -117,9 +117,9 @@ Singleton {
         readonly property list<real> spatial: [0.34, 1.56, 0.4, 1, 1, 1]
         readonly property list<real> spatialFast: [0.3, 1.8, 0.4, 0.95, 1, 1]
         // physics for things that should land with a bounce, stiffer as the speed setting rises
-        // stiff enough to land in about half a second, a softer spring left big views wobbling and clipped for seconds
-        readonly property real spring: 7.5 * speed * speed
-        readonly property real damping: 0.4
+        // a bouncy landing that still settles in under a second
+        readonly property real spring: 4.2 * speed * speed
+        readonly property real damping: 0.3
         // content blurs while it fades so moves read as motion, off in perf mode
         readonly property bool blur: speed > 0 && root.opts.motionBlur
     }
