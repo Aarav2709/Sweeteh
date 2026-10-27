@@ -49,7 +49,7 @@ Singleton {
     }
 
     function request(params: string): void {
-        fetcher.command = ["curl", "-sf", "--max-time", "8", "-A", "sweeteh", "https://lrclib.net/api/search?" + params];
+        fetcher.command = ["curl", "-sf", "--max-time", "15", "-A", "sweeteh", "https://lrclib.net/api/search?" + params];
         fetcher.running = true;
     }
 
@@ -89,8 +89,23 @@ Singleton {
         return scored.length > 0 ? scored[0].r : null;
     }
 
-    onKeyChanged: debounce.restart()
+    onKeyChanged: {
+        retry.left = 3;
+        debounce.restart();
+    }
     onEnabledChanged: fetch()
+
+    Timer {
+        id: retry
+
+        property int left: 3
+
+        interval: 4000
+        onTriggered: {
+            if (root.lines.length === 0 && root.plain === "")
+                root.fetch();
+        }
+    }
 
     Timer {
         id: debounce
@@ -112,9 +127,20 @@ Singleton {
                     return;
                 }
                 let best = null;
+                let answered = false;
                 try {
                     best = root.pick(JSON.parse(text));
+                    answered = true;
                 } catch (e) {}
+                // lrclib is often slow, a failed request is not an answer, so nothing is cached and it tries again
+                if (!answered) {
+                    root.loading = false;
+                    if (retry.left > 0) {
+                        retry.left--;
+                        retry.restart();
+                    }
+                    return;
+                }
                 if (!best && fetcher.fallback !== "") {
                     const next = fetcher.fallback;
                     fetcher.fallback = "";

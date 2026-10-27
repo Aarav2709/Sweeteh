@@ -270,6 +270,12 @@ Item {
             Actions.open("welcome");
         }
 
+        // clears only notifications with this summary, say the shell's own recording saved ones
+        function dropNotifs(summary: string): void {
+            for (const n of Notifs.list.filter(e => e.summary === summary))
+                Notifs.dismiss(n);
+        }
+
         function welcomeNext(): void {
             welcomeLoader.item?.next();
         }
