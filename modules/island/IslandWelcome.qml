@@ -293,8 +293,9 @@ Item {
                     visible: caps.length > 0
                     spacing: Theme.spacing.medium
 
+                    // wide enough for three caps, a narrower column let super shift w run into its label
                     Row {
-                        Layout.preferredWidth: 120
+                        Layout.preferredWidth: Math.max(170, implicitWidth)
                         spacing: Theme.spacing.xs
 
                         Repeater {
