@@ -177,12 +177,25 @@ Singleton {
         }
     }
 
+    // per process load from top is per core, so it is divided by this to stay within 100%
+    property int cores: 1
+
+    Process {
+        running: true
+        command: ["nproc"]
+        stdout: StdioCollector {
+            onStreamFinished: root.cores = Math.max(1, Number(text.trim()) || 1)
+        }
+    }
+
     Process {
         id: procs
 
-        command: ["ps", "-eo", "pid,comm,%cpu,%mem", "--sort=-%cpu", "--no-headers"]
+        // a live sample from top, ps gives lifetime averages per core that read 200% on a busy app
+        // the second pass is the one measured over the delay, its columns are pid, command, cpu and mem
+        command: ["sh", "-c", "top -b -n 2 -d 0.8 -w 512 | awk '/^ *PID/ {n++; next} n == 2 && NF >= 12 {print $1, $12, $9, $10}'"]
         stdout: StdioCollector {
-            // apps with many processes show once, with their load added up
+            // apps with many processes show once, with their load added up, as a share of the whole machine
             onStreamFinished: {
                 const byName = {};
                 for (const l of text.trim().split("\n")) {
@@ -193,7 +206,7 @@ Singleton {
                             cpu: 0,
                             mem: 0
                         });
-                    e.cpu += Number(p[2]);
+                    e.cpu += Number(p[2]) / root.cores;
                     e.mem += Number(p[3]);
                 }
                 root.processes = Object.values(byName).sort((a, b) => b.cpu - a.cpu).slice(0, 6);
