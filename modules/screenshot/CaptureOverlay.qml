@@ -20,6 +20,35 @@ PanelWindow {
     readonly property var monitor: Hypr.focusedMonitor
     readonly property var windows: Hypr.toplevels.values.filter(t => t.workspace?.id === Hypr.activeWorkspace && t.lastIpcObject?.at).map(t => Qt.rect(t.lastIpcObject.at[0] - (monitor?.x ?? 0), t.lastIpcObject.at[1] - (monitor?.y ?? 0), t.lastIpcObject.size[0], t.lastIpcObject.size[1]))
     property rect hovered: Qt.rect(0, 0, 0, 0)
+    // the window the arrow keys picked, in window mode
+    property int windowIndex: -1
+
+    // everything works from the keyboard, tab flips the mode, arrows move, shift arrows resize, alt for single pixels
+    function nudge(dx: int, dy: int, resize: bool): void {
+        if (mode === "window") {
+            if (windows.length === 0)
+                return;
+            windowIndex = (windowIndex + (dx + dy > 0 ? 1 : -1) + windows.length) % windows.length;
+            hovered = windows[windowIndex];
+            return;
+        }
+        // the first arrow press starts from a centered half of the screen
+        let r = selection.width > 0 ? selection : Qt.rect(width / 4, height / 4, width / 2, height / 2);
+        if (selection.width > 0) {
+            if (resize)
+                r = Qt.rect(r.x, r.y, Math.max(8, r.width + dx), Math.max(8, r.height + dy));
+            else
+                r = Qt.rect(r.x + dx, r.y + dy, r.width, r.height);
+        }
+        selection = Qt.rect(Math.max(0, Math.min(width - r.width, r.x)), Math.max(0, Math.min(height - r.height, r.y)), Math.min(width, r.width), Math.min(height, r.height));
+    }
+
+    function capture(): void {
+        if (mode === "window" && hovered.width > 0)
+            save(hovered);
+        else
+            save(selection.width > 0 ? selection : Qt.rect(0, 0, width, height));
+    }
 
     signal finished
 
@@ -90,7 +119,31 @@ PanelWindow {
         visible: root.ready && root.kind !== "screen"
         focus: true
         Keys.onEscapePressed: root.finished()
-        Keys.onReturnPressed: root.save(root.selection.width > 0 ? root.selection : Qt.rect(0, 0, root.width, root.height))
+        Keys.onReturnPressed: root.capture()
+        Keys.onEnterPressed: root.capture()
+        Keys.onSpacePressed: root.capture()
+        Keys.onPressed: e => {
+            const step = (e.modifiers & Qt.AltModifier) ? 1 : 20;
+            const resize = (e.modifiers & Qt.ShiftModifier) !== 0;
+            const moves = { [Qt.Key_Left]: [-step, 0], [Qt.Key_Right]: [step, 0], [Qt.Key_Up]: [0, -step], [Qt.Key_Down]: [0, step] };
+            if (moves[e.key]) {
+                root.nudge(moves[e.key][0], moves[e.key][1], resize);
+            } else if (e.key === Qt.Key_Tab || e.key === Qt.Key_Backtab) {
+                root.mode = root.mode === "window" ? "region" : "window";
+                root.selection = Qt.rect(0, 0, 0, 0);
+                root.windowIndex = -1;
+                root.hovered = Qt.rect(0, 0, 0, 0);
+                if (root.mode === "window")
+                    root.nudge(1, 0, false);
+            } else if (e.key === Qt.Key_F) {
+                root.save(Qt.rect(0, 0, root.width, root.height));
+            } else if (e.key === Qt.Key_R) {
+                root.record = !root.record;
+            } else {
+                return;
+            }
+            e.accepted = true;
+        }
 
         // dim everything outside the selection
         Repeater {
@@ -180,8 +233,8 @@ PanelWindow {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
             anchors.bottomMargin: Theme.spacing.xxl
-            implicitWidth: bar.implicitWidth + Theme.spacing.small * 2
-            implicitHeight: bar.implicitHeight + Theme.spacing.small * 2
+            implicitWidth: Math.max(bar.implicitWidth, hint.implicitWidth + Theme.spacing.large * 2) + Theme.spacing.small * 2
+            implicitHeight: bar.implicitHeight + hint.implicitHeight + Theme.spacing.small * 3
             radius: Theme.radius.full
             color: Theme.color.panel
             border.width: Theme.depth.rim
@@ -189,10 +242,23 @@ PanelWindow {
 
             Depth {}
 
+            Label {
+                id: hint
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: Theme.spacing.small
+                text: root.mode === "window" ? "Tab region  ·  arrows pick a window  ·  R record  ·  F full screen  ·  Enter capture" : "Tab window  ·  arrows move  ·  shift resize  ·  alt fine  ·  R record  ·  F full screen  ·  Enter capture"
+                font.pixelSize: Theme.font.tiny
+                color: Theme.color.inkMeta
+            }
+
             RowLayout {
                 id: bar
 
-                anchors.centerIn: parent
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: Theme.spacing.small
                 spacing: Theme.spacing.xs
 
                 IconButton {

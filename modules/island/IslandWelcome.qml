@@ -6,7 +6,7 @@ import qs.theme
 import qs.services
 import qs.components
 
-// the first run tour, a few pages in the island, it never takes the keyboard until clicked
+// the first run tour, a few pages in the island, arrows and enter walk it, escape skips it
 Item {
     id: root
 
@@ -26,6 +26,7 @@ Item {
     function reset(): void {
         page = 0;
         Wallpapers.refresh();
+        forceActiveFocus();
     }
 
     function next(): void {
@@ -52,6 +53,8 @@ Item {
     Keys.onReturnPressed: next()
     Keys.onEnterPressed: next()
     Keys.onLeftPressed: page = Math.max(0, page - 1)
+    // skipping counts as seen, so it does not come back next start
+    Keys.onEscapePressed: done()
 
     ColumnLayout {
         id: column
