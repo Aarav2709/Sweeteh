@@ -111,6 +111,7 @@ Item {
 
     onQueryChanged: {
         current = 0;
+        Actions.keystroke();
         if (Config.options.launcher.files)
             Files.search(query.startsWith(">") ? "" : query);
     }

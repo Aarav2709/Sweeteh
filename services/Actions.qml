@@ -28,6 +28,8 @@ Singleton {
     signal screenshotRequested(string kind)
     signal desktopEditRequested
     signal settingsRequested(string page)
+    // a key landed in an island field, the backlight flares with it
+    signal keystroke
 
     // the island and the control center do the same job, so the island wins when it is around
     function route(id: string): string {
