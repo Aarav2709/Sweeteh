@@ -11,6 +11,8 @@ Item {
     required property var toplevel
     required property int workspaceId
     required property real scaleFactor
+    // the vertical scale, the workspace's used area is not always the screen's shape
+    property real scaleY: scaleFactor
     required property real originX
     required property real originY
     required property Item dragLayer
@@ -18,12 +20,12 @@ Item {
     readonly property var ipc: toplevel.lastIpcObject
     readonly property string address: toplevel.address
     readonly property real homeX: ((ipc?.at?.[0] ?? 0) - originX) * scaleFactor
-    readonly property real homeY: ((ipc?.at?.[1] ?? 0) - originY) * scaleFactor
+    readonly property real homeY: ((ipc?.at?.[1] ?? 0) - originY) * scaleY
 
     x: homeX
     y: homeY
     width: Math.max(24, (ipc?.size?.[0] ?? 200) * scaleFactor)
-    height: Math.max(24, (ipc?.size?.[1] ?? 120) * scaleFactor)
+    height: Math.max(24, (ipc?.size?.[1] ?? 120) * scaleY)
     z: area.drag.active ? 10 : (ipc?.floating ? 2 : 1)
 
     Drag.active: area.drag.active
