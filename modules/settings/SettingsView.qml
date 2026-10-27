@@ -46,7 +46,10 @@ Item {
         ColumnLayout {
             id: rail
 
+            // a fixed width, its keys fill it and would otherwise squeeze the page pane to nothing
             Layout.preferredWidth: 220
+            Layout.maximumWidth: 220
+            Layout.fillWidth: false
             Layout.fillHeight: true
             spacing: Theme.spacing.small
             focus: true

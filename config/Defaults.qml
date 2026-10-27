@@ -112,7 +112,7 @@ Singleton {
                 // hover the island during music for a small player, with the sung line in it
                 peek: true,
                 // how long the pointer rests on the island before the player peeks, in ms
-                peekDelay: 5000,
+                peekDelay: 3000,
                 peekLyrics: true,
                 // swipe to skip, pull down for the dashboard, double click to play or pause
                 gestures: true,
