@@ -216,12 +216,42 @@ Item {
             }
         }
 
-        // the level meter dances while music plays, or follows the real audio when the cava visualizer is on
+        // the level meter dances while music plays, with the cava visualizer on the real audio sets how tall
         // a fixed height, so a bar growing never re-centers its neighbours
         Row {
+            id: meter
+
+            // the smooth dance is the motion, the real audio only sets how tall it dances
+            // raw cava frames at 24 a second always read as twitchy on five tiny bars
+            property real loudness: 1
+
             visible: Media.active
             height: 16
             spacing: 2
+
+            Behavior on loudness {
+                NumberAnimation {
+                    duration: 260
+                    easing.type: Easing.OutCubic
+                }
+            }
+
+            Timer {
+                running: Cava.active && meter.visible && root.visible
+                repeat: true
+                interval: 120
+                onTriggered: {
+                    const v = Cava.values;
+                    let sum = 0;
+                    for (const x of v)
+                        sum += x;
+                    meter.loudness = 0.3 + 0.7 * Math.min(1, (v.length > 0 ? sum / v.length : 0) * 1.6);
+                }
+                onRunningChanged: {
+                    if (!running)
+                        meter.loudness = 1;
+                }
+            }
 
             Repeater {
                 model: 5
@@ -234,13 +264,13 @@ Item {
 
                     anchors.verticalCenter: parent.verticalCenter
                     width: 3
-                    height: 4 + 12 * (Cava.active ? Cava.values[index] ?? 0 : Media.playing ? level : 0.15)
+                    height: 4 + 12 * (Media.playing ? level * meter.loudness : 0.15)
                     radius: 1.5
                     color: root.accent
 
                     // a soft dance while music plays, each bar at its own pace
                     SequentialAnimation on level {
-                        running: Media.playing && root.visible && !Cava.active && !Perf.active
+                        running: Media.playing && root.visible && !Perf.active
                         loops: Animation.Infinite
 
                         NumberAnimation {
