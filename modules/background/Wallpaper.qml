@@ -125,8 +125,8 @@ PanelWindow {
         anchors.fill: parent
         active: root.live !== "" && root.progress >= 1
         opacity: status === Loader.Ready ? 1 : 0
-        source: Wallpapers.isVideo(root.live) ? "LiveVideo.qml" : ""
-        sourceComponent: Wallpapers.isAnimated(root.live) ? gif : undefined
+        // one source decides, a second sourceComponent binding could clear it on reload and leave the layer empty
+        source: Wallpapers.isVideo(root.live) ? "LiveVideo.qml" : Wallpapers.isAnimated(root.live) ? "LiveGif.qml" : ""
         onLoaded: {
             item.source = Paths.url(root.live);
             item.paused = Qt.binding(() => root.covered);
@@ -136,19 +136,6 @@ PanelWindow {
             Anim {
                 duration: Theme.anim.slow
             }
-        }
-    }
-
-    Component {
-        id: gif
-
-        AnimatedImage {
-            property bool paused: false
-
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
-            cache: false
-            playing: !paused
         }
     }
 
