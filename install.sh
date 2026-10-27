@@ -57,12 +57,12 @@ usage() {
   cat <<USAGE
 Usage: install.sh [options]
 
-  --dry-run        Show what would change without touching anything
-  --no-deps        Skip installing packages
-  --keep-configs   Keep your own Hyprland, kitty, fish and starship configs
-  --uninstall      Remove Sweeteh and put your previous configs back
-  --purge          With --uninstall, also delete Sweeteh settings, backups and cache
-  -y, --yes        Do not ask before installing packages
+  --dry-run        Show what would change without touching anything.
+  --no-deps        Skip installing packages.
+  --keep-configs   Keep your own Hyprland, kitty, fish and starship configs.
+  --uninstall      Remove Sweeteh and put your previous configs back.
+  --purge          With --uninstall, also delete Sweeteh settings, backups and cache.
+  -y, --yes        Do not ask before installing packages.
 USAGE
 }
 
@@ -75,7 +75,7 @@ for arg in "$@"; do
     --purge) purge=1 ;;
     -y|--yes) assume_yes=1 ;;
     -h|--help) usage; exit 0 ;;
-    *) echo "Unknown option $arg" >&2; usage; exit 1 ;;
+    *) echo "Unknown option $arg." >&2; usage; exit 1 ;;
   esac
 done
 
@@ -107,7 +107,7 @@ park() {
   rel="${path#"$HOME"/}"
   act mkdir -p "$backups/$(dirname "$rel")"
   act mv "$path" "$backups/$rel"
-  note "Backed up ${path/#$HOME/\~}"
+  note "Backed up ${path/#$HOME/\~}."
 }
 
 # the newest backup of a file, if there is one
@@ -117,14 +117,14 @@ latest_backup() {
 }
 
 if [[ $EUID -eq 0 ]]; then
-  echo "Run this as your normal user, it asks for sudo when it needs it" >&2
+  echo "Run this as your normal user, it asks for sudo when it needs it." >&2
   exit 1
 fi
 
 # piped from curl there is no checkout yet, so fetch one and run its installer
 here="$(cd "$(dirname "${BASH_SOURCE[0]:-.}")" 2>/dev/null && pwd || pwd)"
 if [[ ! -f "$here/shell.qml" || ! -d "$here/modules" ]]; then
-  command -v git >/dev/null || { echo "Git is needed, install it with sudo pacman -S git" >&2; exit 1; }
+  command -v git >/dev/null || { echo "Git is needed, install it with sudo pacman -S git." >&2; exit 1; }
   if [[ -d "$checkout/.git" ]]; then
     step "Updating Sweeteh"
     git -C "$checkout" fetch --tags --force --quiet origin
@@ -137,7 +137,7 @@ if [[ ! -f "$here/shell.qml" || ! -d "$here/modules" ]]; then
   latest="$(git -C "$checkout" tag -l 'v*' --sort=-v:refname | head -n 1)"
   if [[ -n "$latest" ]]; then
     git -C "$checkout" checkout --quiet "$latest"
-    say "Using release $latest"
+    say "Using release $latest."
   else
     git -C "$checkout" checkout --quiet main 2>/dev/null || true
     git -C "$checkout" pull --ff-only --quiet || true
@@ -149,8 +149,8 @@ repo="$here"
 if [[ $uninstall -eq 1 ]]; then
   step "Removing Sweeteh"
   [[ $dry -eq 0 ]] && pkill -f "^qs -c sweeteh( |$)" 2>/dev/null || true
-  [[ -L "$target" ]] && act rm "$target" && say "Removed the shell link"
-  [[ -L "$bin_dir/sweeteh" ]] && act rm "$bin_dir/sweeteh" && say "Removed the sweeteh command"
+  [[ -L "$target" ]] && act rm "$target" && say "Removed the shell link."
+  [[ -L "$bin_dir/sweeteh" ]] && act rm "$bin_dir/sweeteh" && say "Removed the sweeteh command."
   for entry in "${dots[@]}"; do
     dest="${entry#*:}"
     [[ -f "$dest" ]] && cmp -s "$repo/${entry%%:*}" "$dest" || continue
@@ -158,9 +158,9 @@ if [[ $uninstall -eq 1 ]]; then
     act rm -f "$dest"
     if [[ -n "$previous" ]]; then
       act cp -a "$previous" "$dest"
-      say "Restored your ${dest/#$HOME/\~}"
+      say "Restored your ${dest/#$HOME/\~}."
     else
-      say "Removed ${dest/#$HOME/\~}"
+      say "Removed ${dest/#$HOME/\~}."
     fi
   done
   for path in "${generated[@]}"; do
@@ -171,22 +171,22 @@ if [[ $uninstall -eq 1 ]]; then
   done
   if [[ -f "$profile" ]] && grep -qF "$mark_start" "$profile"; then
     act sed -i "/^$mark_start$/,/^$mark_end$/d" "$profile"
-    say "Hyprland no longer starts by itself on tty1"
+    say "Hyprland no longer starts by itself on tty1."
   fi
   if command -v gsettings >/dev/null && [[ "$(gsettings get org.gnome.desktop.interface icon-theme 2>/dev/null)" == "'Sweeteh'" ]]; then
     act gsettings set org.gnome.desktop.interface icon-theme Adwaita
   fi
   if [[ $purge -eq 1 ]]; then
     act rm -rf "$config_home/sweeteh" "$state_home/sweeteh" "$cache_home/sweeteh"
-    say "Deleted Sweeteh settings, backups and cache"
+    say "Deleted Sweeteh settings, backups and cache."
   else
-    say "Your Sweeteh settings and backups stay in ~/.config/sweeteh and ~/.local/state/sweeteh"
+    say "Your Sweeteh settings and backups stay in ~/.config/sweeteh and ~/.local/state/sweeteh."
   fi
   exit 0
 fi
 
 printf '\n%s  Sweeteh  %s %sOne shell, two layouts, all island%s\n' "$accent$bold" "$reset" "$dim" "$reset"
-[[ $dry -eq 1 ]] && note "Dry run, nothing will change"
+[[ $dry -eq 1 ]] && note "Dry run, nothing will change."
 
 if [[ $deps -eq 1 ]]; then
   step "Packages"
@@ -196,14 +196,14 @@ if [[ $deps -eq 1 ]]; then
       pacman -Qq "$p" >/dev/null 2>&1 || missing+=("$p")
     done
     if [[ ${#missing[@]} -eq 0 ]]; then
-      say "Everything is already installed"
+      say "Everything is already installed."
     elif ask "Install ${missing[*]}?"; then
       act sudo pacman -S --needed --noconfirm "${missing[@]}"
     else
-      say "Skipped, some features will stay off until these are installed"
+      say "Skipped, some features will stay off until these are installed."
     fi
   else
-    say "This is not an Arch based system, install these with your package manager"
+    say "This is not an Arch based system, install these with your package manager."
     note "${packages[*]}"
   fi
 
@@ -213,10 +213,10 @@ if [[ $deps -eq 1 ]]; then
     systemctl is-enabled --quiet "$svc" 2>/dev/null && continue
     # never start a second network manager next to one that already runs
     if [[ "$svc" == NetworkManager ]] && systemctl is-active --quiet iwd systemd-networkd connman 2>/dev/null; then
-      note "Another network service is running, leaving NetworkManager off"
+      note "Another network service is running, leaving NetworkManager off."
       continue
     fi
-    act sudo systemctl enable --now "$svc" && say "Enabled $svc"
+    act sudo systemctl enable --now "$svc" && say "Enabled $svc."
   done
 fi
 
@@ -229,15 +229,15 @@ elif [[ -e "$target" ]]; then
 fi
 act ln -s "$repo" "$target"
 act ln -sf "$repo/bin/sweeteh" "$bin_dir/sweeteh"
-say "Installed the shell and the sweeteh command"
+say "Installed the shell and the sweeteh command."
 case ":$PATH:" in
   *":$bin_dir:"*) ;;
-  *) note "Add $bin_dir to your PATH to use the sweeteh command" ;;
+  *) note "Add $bin_dir to your PATH to use the sweeteh command." ;;
 esac
 
 step "Configs"
 if [[ $keep -eq 1 ]]; then
-  say "Kept your own configs, add this to hyprland.lua so the shell starts on login"
+  say "Kept your own configs, add this to hyprland.lua so the shell starts on login:"
   note 'hl.on("hyprland.start", function() hl.exec_cmd("sweeteh run") end)'
 else
   for entry in "${dots[@]}"; do
@@ -250,39 +250,39 @@ else
     park "$dest"
     act cp "$src" "$dest"
   done
-  say "Hyprland, kitty, fish and starship are set up"
+  say "Hyprland, kitty, fish and starship are set up."
 fi
 
 step "Session"
 if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
-  say "Already in Hyprland"
+  say "Already in Hyprland."
 elif systemctl is-enabled --quiet display-manager 2>/dev/null; then
-  say "Pick Hyprland on your login screen next time you sign in"
+  say "Pick Hyprland on your login screen next time you sign in."
 elif ! grep -qF "$mark_start" "$profile" 2>/dev/null; then
   # no login screen, so start hyprland straight from the first console
   if [[ $dry -eq 1 ]]; then
-    note "Would make Hyprland start on tty1 login through $profile"
+    note "Would make Hyprland start on tty1 login through $profile."
   else
     printf '\n%s\nif [ -z "$WAYLAND_DISPLAY" ] && [ "$XDG_VTNR" = 1 ]; then exec start-hyprland; fi\n%s\n' "$mark_start" "$mark_end" >> "$profile"
   fi
-  say "Hyprland now starts when you log into tty1"
+  say "Hyprland now starts when you log into tty1."
 fi
 
 step "Wallpapers"
 act mkdir -p "$HOME/Pictures/Wallpapers" "$HOME/Pictures/Screenshots" "$HOME/Videos/Recordings"
 if [[ -z "$(ls -A "$HOME/Pictures/Wallpapers" 2>/dev/null)" ]]; then
   act cp -n "$repo"/assets/wallpapers/* "$HOME/Pictures/Wallpapers/"
-  say "Added the Sweeteh wallpapers to ~/Pictures/Wallpapers"
+  say "Added the Sweeteh wallpapers to ~/Pictures/Wallpapers."
 else
-  say "Using the wallpapers already in ~/Pictures/Wallpapers"
+  say "Using the wallpapers already in ~/Pictures/Wallpapers."
 fi
 
 step "Done"
 if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" && $dry -eq 0 ]]; then
   hyprctl reload >/dev/null 2>&1 || true
   pgrep -f "^qs -c sweeteh( |$)" >/dev/null || setsid -f "$bin_dir/sweeteh" run >/dev/null 2>&1
-  say "Sweeteh is running, it starts by itself from now on"
+  say "Sweeteh is running, it starts by itself from now on."
 else
-  say "Sweeteh starts by itself the next time Hyprland does"
+  say "Sweeteh starts by itself the next time Hyprland does."
 fi
-note "Tap Super for the launcher, Super A for the island, Super Period for every keybind"
+note "Tap Super for the launcher, Super A for the island, Super Period for every keybind."
