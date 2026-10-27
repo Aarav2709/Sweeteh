@@ -233,54 +233,6 @@ Item {
         onTriggered: root.beat = Cava.bass
     }
 
-    // the highlighted result runs a beat later, so a recording shows what was picked
-    Timer {
-        id: pick
-
-        interval: 500
-        onTriggered: launcherView.activate(launcherView.current, false)
-    }
-
-    // scripted control for recording demos, qs -c sweeteh ipc call demo ...
-    IpcHandler {
-        target: "demo"
-
-        function type(text: string): void {
-            launcherView.type(text);
-        }
-
-        function select(index: int): void {
-            launcherView.current = index;
-        }
-
-        function run(): void {
-            launcherView.activate(launcherView.current, false);
-        }
-
-        // highlights the result with exactly this title, then runs it, so a demo never hits a neighbour
-        function runTitle(title: string): void {
-            const index = launcherView.results.findIndex(r => r.title === title);
-            if (index < 0)
-                return;
-            launcherView.current = index;
-            pick.restart();
-        }
-
-        function welcome(): void {
-            Actions.open("welcome");
-        }
-
-        // clears only notifications with this summary, say the shell's own recording saved ones
-        function dropNotifs(summary: string): void {
-            for (const n of Notifs.list.filter(e => e.summary === summary))
-                Notifs.dismiss(n);
-        }
-
-        function welcomeNext(): void {
-            welcomeLoader.item?.next();
-        }
-    }
-
     // every key typed into the island flashes the light under it, the signature of the shell
     property real keyFlare: 0
 
@@ -722,8 +674,6 @@ Item {
             shown: root.mode === "welcome"
 
             Loader {
-                id: welcomeLoader
-
                 active: welcome.shown || welcome.visible
 
                 sourceComponent: IslandWelcome {

@@ -21,12 +21,6 @@ Item {
 
     signal done
 
-    // fills the field as if typed, for scripted demos
-    function type(text: string): void {
-        field.text = text;
-        query = text;
-    }
-
     function reset(): void {
         field.text = "";
         query = "";

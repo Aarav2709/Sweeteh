@@ -31,7 +31,8 @@ Singleton {
         else
             args.push("-o", Hypr.focusedScreenName);
         // the sound the speakers play, not the microphone, it is a screen recording
-        const audio = Config.options.recording.audio ? ` --audio="$(pactl get-default-sink).monitor"` : "";
+        // without pactl it falls back to the default input rather than failing the whole recording
+        const audio = Config.options.recording.audio ? ` $(s=$(pactl get-default-sink 2>/dev/null) && echo "--audio=$s.monitor" || echo --audio)` : "";
         // the gpu encodes when it can, software x264 took two cores and made the whole desktop lag while recording
         const codec = `$(vainfo 2>/dev/null | grep -q 'H264.*EncSlice' && [ -e /dev/dri/renderD128 ] && echo '-c h264_vaapi -d /dev/dri/renderD128' || echo '-x yuv420p -p crf=18 -p preset=veryfast')`;
         proc.command = ["sh", "-c", `mkdir -p ${Paths.quote(dir)} && exec ${args.map(Paths.quote).join(" ")} ${codec}${audio}`];

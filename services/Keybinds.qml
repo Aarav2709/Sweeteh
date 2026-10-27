@@ -32,7 +32,6 @@ Singleton {
     // blur for translucent surfaces and a floating settings window
     readonly property string rules: `
 hl.layer_rule({ name = "sweeteh-blur", match = { namespace = "^sweeteh-(bar|island|wallpaper)$" }, blur = true, ignore_alpha = 0.4 })
-hl.layer_rule({ name = "sweeteh-blur-dim", match = { namespace = "^sweeteh-(power|modeswitcher|cheatsheet|overview)$" }, blur = true, ignore_alpha = 0.01 })
 hl.layer_rule({ name = "sweeteh-no-anim", match = { namespace = "^sweeteh-.*$" }, no_anim = true })`
 
     function luaString(s: string): string {

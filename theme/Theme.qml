@@ -36,11 +36,6 @@ Singleton {
         return words.charAt(0).toUpperCase() + words.slice(1);
     }
 
-    // a dark or light shade of the wallpaper, whichever reads on this background
-    function contrast(bg: color): color {
-        return bg.hslLightness > 0.55 ? root.color.abyss : root.color.glint;
-    }
-
     // blend two colors, amount is how much of b is used
     function mix(a: color, b: color, amount: real): color {
         return Qt.rgba(a.r + (b.r - a.r) * amount, a.g + (b.g - a.g) * amount, a.b + (b.b - a.b) * amount, a.a + (b.a - a.a) * amount);
