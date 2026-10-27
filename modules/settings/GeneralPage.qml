@@ -20,30 +20,7 @@ ColumnLayout {
         font.weight: Font.DemiBold
     }
 
-    Repeater {
-        model: root.sections
-
-        Section {
-            id: section
-
-            required property string modelData
-
-            Layout.fillWidth: true
-            title: Theme.humanize(modelData)
-            icon: root.icons[modelData] ?? ""
-
-            Repeater {
-                model: Object.keys(Defaults.values[section.modelData]).filter(k => typeof Defaults.values[section.modelData][k] !== "object")
-
-                AutoOption {
-                    required property string modelData
-
-                    key: section.modelData + "." + modelData
-                }
-            }
-        }
-    }
-
+    // first on the page, so trying a moment is one click away
     Section {
         Layout.fillWidth: true
         title: "Preview moments"
@@ -64,6 +41,30 @@ ColumnLayout {
                     variant: "neutral"
                     text: modelData[1]
                     onClicked: Actions.momentPreview(modelData[0])
+                }
+            }
+        }
+    }
+
+    Repeater {
+        model: root.sections
+
+        Section {
+            id: section
+
+            required property string modelData
+
+            Layout.fillWidth: true
+            title: Theme.humanize(modelData)
+            icon: root.icons[modelData] ?? ""
+
+            Repeater {
+                model: Object.keys(Defaults.values[section.modelData]).filter(k => typeof Defaults.values[section.modelData][k] !== "object")
+
+                AutoOption {
+                    required property string modelData
+
+                    key: section.modelData + "." + modelData
                 }
             }
         }

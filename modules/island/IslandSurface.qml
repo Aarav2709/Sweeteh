@@ -233,6 +233,14 @@ Item {
         onTriggered: root.beat = Cava.bass
     }
 
+    // the highlighted result runs a beat later, so a recording shows what was picked
+    Timer {
+        id: pick
+
+        interval: 500
+        onTriggered: launcherView.activate(launcherView.current, false)
+    }
+
     // scripted control for recording demos, qs -c sweeteh ipc call demo ...
     IpcHandler {
         target: "demo"
@@ -247,6 +255,15 @@ Item {
 
         function run(): void {
             launcherView.activate(launcherView.current, false);
+        }
+
+        // highlights the result with exactly this title, then runs it, so a demo never hits a neighbour
+        function runTitle(title: string): void {
+            const index = launcherView.results.findIndex(r => r.title === title);
+            if (index < 0)
+                return;
+            launcherView.current = index;
+            pick.restart();
         }
 
         function welcome(): void {

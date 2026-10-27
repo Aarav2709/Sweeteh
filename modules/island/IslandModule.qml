@@ -123,7 +123,19 @@ PanelWindow {
             battery: { kind: "plugged" }
         };
         moment = samples[kind] ?? { kind: kind };
+        // settings would hide the moment, so it folds away for the preview and comes back after
+        if (hosted === "settings") {
+            Actions.close("settings");
+            backToSettings.restart();
+        }
         flash("glow", 3200);
+    }
+
+    Timer {
+        id: backToSettings
+
+        interval: 3400
+        onTriggered: Actions.openSettings("General")
     }
 
     screen: Hypr.screenFor(Hypr.focusedScreenName)
