@@ -124,12 +124,13 @@ PanelWindow {
 
         anchors.fill: parent
         active: root.live !== "" && root.progress >= 1
-        opacity: status === Loader.Ready ? 1 : 0
+        // shown once it has a picture, a fresh video is black for a moment and flashed over the still
+        opacity: item?.ready ? 1 : 0
         // one source decides, a second sourceComponent binding could clear it on reload and leave the layer empty
         source: Wallpapers.isVideo(root.live) ? "LiveVideo.qml" : Wallpapers.isAnimated(root.live) ? "LiveGif.qml" : ""
         onLoaded: {
             item.source = Paths.url(root.live);
-            item.paused = Qt.binding(() => root.covered);
+            item.resting = Qt.binding(() => root.covered);
         }
 
         Behavior on opacity {

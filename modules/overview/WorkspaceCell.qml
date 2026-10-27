@@ -33,7 +33,8 @@ Item {
         id: body
 
         anchors.fill: parent
-        radius: Theme.radius.large
+        // a number before the theme settles, undefined here logged a warning per cell
+        radius: Theme.radius.large ?? 20
         color: Theme.color.layer2
 
         // the wallpaper behind each workspace, dimmed so previews stand out
