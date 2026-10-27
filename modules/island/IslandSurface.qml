@@ -222,7 +222,16 @@ Item {
     }
 
     // how bright the light under the island burns, it breathes with the bass and flares on a moment
-    readonly property real backlight: Math.min(1, 0.45 + (Cava.active ? Cava.bass * 0.55 : Media.playing ? 0.1 : 0) + glowView.glow * 0.4 + glowView.shine * 0.3 + keyFlare * 0.5)
+    // the bass is sampled slowly, a per frame pulse kept the whole window repainting and made the bars stutter
+    readonly property real backlight: Math.min(1, 0.45 + (Media.playing ? 0.1 + beat * 0.35 : 0) + glowView.glow * 0.4 + glowView.shine * 0.3 + keyFlare * 0.5)
+    property real beat: 0
+
+    Timer {
+        running: Cava.active && root.mode === "idle"
+        repeat: true
+        interval: 400
+        onTriggered: root.beat = Cava.bass
+    }
 
     // scripted control for recording demos, qs -c sweeteh ipc call demo ...
     IpcHandler {

@@ -134,9 +134,9 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: typing ? WlrKeyboardFocus.Exclusive : expanded ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
     anchors.top: true
-    // wide and tall enough for the overview and the wallpaper grid, the mask keeps the rest click through
-    implicitWidth: screen?.width ?? 1920
-    implicitHeight: Math.min(screen?.height ?? 1080, 1000)
+    // every frame repaints the whole window, so it stays small and only widens for the overview
+    implicitWidth: hosted === "overview" ? (screen?.width ?? 1920) : 1120
+    implicitHeight: 720
     mask: Region {
         item: island
     }

@@ -62,8 +62,11 @@ Item {
         // the pages slide past each other, only the one in view is shown
         Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: 230
+            // tall enough for the fullest page, a squeezed layout would stack the buttons onto the text
+            Layout.preferredHeight: Math.max(280, tallest)
             clip: true
+
+            property real tallest: 0
 
             Repeater {
                 model: root.pages
@@ -90,8 +93,10 @@ Item {
                     }
 
                     Loader {
-                        anchors.fill: parent
+                        width: parent.width
+                        height: Math.max(parent.height, implicitHeight)
                         sourceComponent: [hello, look, keysPage, ready][pageItem.index]
+                        onImplicitHeightChanged: parent.parent.tallest = Math.max(parent.parent.tallest, implicitHeight)
                     }
                 }
             }
