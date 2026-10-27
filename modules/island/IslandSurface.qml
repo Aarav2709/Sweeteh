@@ -224,6 +224,31 @@ Item {
     // how bright the light under the island burns, it breathes with the bass and flares on a moment
     readonly property real backlight: Math.min(1, 0.45 + (Cava.active ? Cava.bass * 0.55 : Media.playing ? 0.1 : 0) + glowView.glow * 0.4 + glowView.shine * 0.3 + keyFlare * 0.5)
 
+    // scripted control for recording demos, qs -c sweeteh ipc call demo ...
+    IpcHandler {
+        target: "demo"
+
+        function type(text: string): void {
+            launcherView.type(text);
+        }
+
+        function select(index: int): void {
+            launcherView.current = index;
+        }
+
+        function run(): void {
+            launcherView.activate(launcherView.current, false);
+        }
+
+        function welcome(): void {
+            Actions.open("welcome");
+        }
+
+        function welcomeNext(): void {
+            welcomeLoader.item?.next();
+        }
+    }
+
     // every key typed into the island flashes the light under it, the signature of the shell
     property real keyFlare: 0
 
@@ -663,6 +688,8 @@ Item {
             shown: root.mode === "welcome"
 
             Loader {
+                id: welcomeLoader
+
                 active: welcome.shown || welcome.visible
 
                 sourceComponent: IslandWelcome {
