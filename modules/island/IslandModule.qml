@@ -146,8 +146,9 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: typing ? WlrKeyboardFocus.Exclusive : expanded ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
     anchors.top: true
-    // full width all the time, resizing the surface when the overview opened made it blink, and costs no more cpu
-    implicitWidth: screen?.width ?? 1920
+    // one fixed size, resizing the surface made the overview blink, and every pixel is redrawn each frame
+    // so it is no wider than the widest view, the overview with its corner flares
+    implicitWidth: Math.min(screen?.width ?? 1920, 1200)
     implicitHeight: 720
     mask: Region {
         item: island

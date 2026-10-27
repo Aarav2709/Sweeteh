@@ -25,14 +25,16 @@ Singleton {
         const dir = Paths.expand(Config.options.recording.dir);
         file = dir + "/Recording_" + Qt.formatDateTime(new Date(), "yyyy-MM-dd_HH-mm-ss") + ".mp4";
         // matroska survives an abrupt stop, it becomes an mp4 once recording ends
-        const args = ["wf-recorder", "-y", "-x", "yuv420p", "-p", "crf=18", "-p", "preset=veryfast", "-f", file.replace(/\.mp4$/, ".mkv")];
+        const args = ["wf-recorder", "-y", "-f", file.replace(/\.mp4$/, ".mkv")];
         if (geometry !== "")
             args.push("-g", geometry);
         else
             args.push("-o", Hypr.focusedScreenName);
         // the sound the speakers play, not the microphone, it is a screen recording
         const audio = Config.options.recording.audio ? ` --audio="$(pactl get-default-sink).monitor"` : "";
-        proc.command = ["sh", "-c", `mkdir -p ${Paths.quote(dir)} && exec ${args.map(Paths.quote).join(" ")}${audio}`];
+        // the gpu encodes when it can, software x264 took two cores and made the whole desktop lag while recording
+        const codec = `$(vainfo 2>/dev/null | grep -q 'H264.*EncSlice' && [ -e /dev/dri/renderD128 ] && echo '-c h264_vaapi -d /dev/dri/renderD128' || echo '-x yuv420p -p crf=18 -p preset=veryfast')`;
+        proc.command = ["sh", "-c", `mkdir -p ${Paths.quote(dir)} && exec ${args.map(Paths.quote).join(" ")} ${codec}${audio}`];
         startedAt = Date.now();
         now = startedAt;
         proc.running = true;
