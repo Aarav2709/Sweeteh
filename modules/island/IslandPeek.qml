@@ -10,6 +10,18 @@ import qs.components
 RowLayout {
     id: root
 
+    // a click anywhere off the controls opens quick settings, like clicking the resting island
+    MouseArea {
+        Layout.fillWidth: false
+        Layout.preferredWidth: 0
+        Layout.preferredHeight: 0
+        parent: root.parent
+        anchors.fill: parent
+        z: -1
+        cursorShape: Qt.PointingHandCursor
+        onClicked: Actions.open("island")
+    }
+
     readonly property color tint: Theme.color.primary
     readonly property real progress: Math.min(1, Media.position / Math.max(1, Media.length))
 

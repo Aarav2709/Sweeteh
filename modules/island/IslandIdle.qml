@@ -17,7 +17,8 @@ Item {
     readonly property bool alone: !Modes.islands
     // one color runs through the resting island, the cover while a song plays and the wallpaper otherwise
     readonly property color accent: Theme.color.primary
-    readonly property color onAccent: Theme.color.fgPrimary
+    // picked from the accent's own brightness, palette pairs can come out the same shade in light mode
+    readonly property color onAccent: Theme.contrast(accent)
     readonly property color ink: Theme.mix(Theme.color.ink, Theme.dark ? Qt.lighter(accent, 1.35) : Qt.darker(accent, 1.4), 0.55)
     readonly property color batteryColor: accent
     // a sideways swipe skips the track, the row follows the finger a little

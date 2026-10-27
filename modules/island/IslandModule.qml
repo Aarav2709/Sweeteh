@@ -522,8 +522,9 @@ PanelWindow {
 
     // the peek opens after a short hover and folds a moment after the pointer leaves
     Timer {
-        interval: island.hovered ? 450 : 350
-        running: island.hovered !== root.peeking && (root.peeking || (Media.active && Config.options.island.peek && root.flashing === "" && root.hosted === ""))
+        // a long wait, so a pointer on its way to click the island or the workspace number never gets the player
+        interval: island.hovered ? Config.options.island.peekDelay : 350
+        running: island.hovered !== root.peeking && (root.peeking || (Media.active && Config.options.island.peek && !root.wsHover && root.flashing === "" && root.hosted === ""))
         onTriggered: root.peeking = island.hovered && Media.active
     }
 
@@ -544,6 +545,15 @@ PanelWindow {
 
         interval: 80
         onTriggered: grab.active = root.expanded
+    }
+
+    // moving between a typing view and a plain one changes the keyboard focus, which drops the grab
+    // and would read as a click outside, so the grab is taken again once the change lands
+    onTypingChanged: {
+        if (expanded) {
+            grab.active = false;
+            grabDelay.restart();
+        }
     }
 
     onExpandedChanged: {
