@@ -28,7 +28,7 @@ Rectangle {
 
         GradientStop {
             position: 1
-            color: Theme.mix(Theme.color.depthLit, "#ffffff", 0.35 * root.sink)
+            color: Theme.mix(Theme.color.depthLit, Theme.color.glint, 0.35 * root.sink)
         }
     }
 
