@@ -1,7 +1,7 @@
 import QtQuick
 import qs.theme
 
-// material switch, the knob grows and shows a check when on
+// backlit switch, a keycap slides along a sunken track that lights up underneath when on
 Rectangle {
     id: root
 
@@ -10,55 +10,66 @@ Rectangle {
 
     signal toggled(bool value)
 
-    implicitWidth: 52
-    implicitHeight: 32
+    implicitWidth: 54
+    implicitHeight: 30
     radius: height / 2
-    color: checked ? Theme.color.primary : Theme.color.layer3
-    border.width: checked ? 0 : 2
-    border.color: Theme.color.outline
     opacity: disabled ? Theme.state.disabled : 1
+    // the track is sunk into the surface, its light comes up from below when on
+    gradient: Gradient {
+        GradientStop {
+            position: 0
+            color: Theme.color.depthShadow
+        }
 
+        GradientStop {
+            position: 1
+            color: Theme.mix(Theme.color.layer3, Theme.color.backlight, root.lit)
+        }
+    }
+    border.width: 1
+    border.color: Qt.alpha(root.checked ? Theme.color.backlight : Theme.color.outlineVariant, 0.6)
+
+    property real lit: checked ? 1 : 0
+
+    Behavior on lit {
+        Anim {}
+    }
+
+    // the keycap, it squashes while held and lands with a bounce
     Rectangle {
         id: knob
 
-        property real d: area.pressed ? 28 : root.checked ? 24 : 16
+        readonly property real d: root.height - 6
 
-        width: d
+        width: area.pressed ? d + 6 : d
         height: d
         radius: d / 2
         anchors.verticalCenter: parent.verticalCenter
-        x: root.checked ? root.width - d - (root.height - d) / 2 : (root.height - d) / 2
-        color: root.checked ? Theme.color.fgPrimary : Theme.color.outline
+        anchors.verticalCenterOffset: -1
+        x: root.checked ? root.width - width - 3 : 3
+        color: Theme.mix(Theme.color.layer2, Theme.color.glint, root.lit * 0.85)
+        border.width: Theme.depth.rim
+        border.color: Theme.color.depthRim
 
-        Icon {
-            anchors.centerIn: parent
-            name: "check"
-            size: 16
-            weight: 600
-            color: Theme.color.primary
-            opacity: root.checked ? 1 : 0
-
-            Behavior on opacity {
-                Anim {
-                    duration: Theme.anim.fast
-                }
-            }
+        Rectangle {
+            z: -1
+            y: 2
+            width: parent.width
+            height: parent.height
+            radius: parent.radius
+            color: Theme.color.depthShadow
         }
 
         Behavior on x {
-            Anim {
-                easing.bezierCurve: Theme.anim.spatial
-            }
+            enabled: Theme.anim.speed > 0
+
+            Spring {}
         }
 
-        Behavior on d {
+        Behavior on width {
             Anim {
                 duration: Theme.anim.fast
             }
-        }
-
-        Behavior on color {
-            ColorAnim {}
         }
     }
 
@@ -79,9 +90,5 @@ Rectangle {
         cursorShape: Qt.PointingHandCursor
         enabled: !root.disabled
         onClicked: root.toggled(!root.checked)
-    }
-
-    Behavior on color {
-        ColorAnim {}
     }
 }

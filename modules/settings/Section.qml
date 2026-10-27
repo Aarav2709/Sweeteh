@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import qs.theme
 import qs.components
 
-// titled group of option rows on a card
+// titled group of option rows on a raised backlit card
 ColumnLayout {
     id: root
 
@@ -24,13 +24,17 @@ ColumnLayout {
             implicitWidth: 34
             implicitHeight: 34
             radius: Theme.radius.medium
-            color: Theme.color.secondaryContainer
+            color: Theme.color.layer2
+            border.width: Theme.depth.rim
+            border.color: Theme.color.depthRim
+
+            Depth {}
 
             Icon {
                 anchors.centerIn: parent
                 name: root.icon
                 fill: 1
-                color: Theme.color.fgSecondaryContainer
+                color: Theme.color.backlight
             }
         }
 
@@ -57,8 +61,13 @@ ColumnLayout {
     Rectangle {
         Layout.fillWidth: true
         implicitHeight: body.implicitHeight + Theme.spacing.small * 2
+        Layout.bottomMargin: Theme.depth.offset
         color: Theme.color.layer1
         radius: Theme.radius.large
+        border.width: Theme.depth.rim
+        border.color: Theme.color.depthRim
+
+        Depth {}
 
         ColumnLayout {
             id: body

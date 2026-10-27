@@ -19,6 +19,7 @@ import qs.modules.wallpaper
 import qs.modules.overview
 import qs.modules.cheatsheet
 import qs.modules.modeswitcher
+import qs.modules.settings
 
 // the notch fused to the top edge, its size follows whichever content is showing
 Item {
@@ -690,7 +691,8 @@ Item {
                 { id: "wallpaper", view: wallpaperView },
                 { id: "overview", view: overviewView },
                 { id: "cheatsheet", view: cheatsheetView },
-                { id: "modeswitcher", view: modeSwitcherView }
+                { id: "modeswitcher", view: modeSwitcherView },
+                { id: "settings", view: settingsView }
             ]
 
             IslandSlot {
@@ -746,6 +748,12 @@ Item {
             id: modeSwitcherView
 
             ModeSwitcherView {}
+        }
+
+        Component {
+            id: settingsView
+
+            SettingsView {}
         }
     }
 }

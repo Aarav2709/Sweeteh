@@ -29,7 +29,7 @@ Singleton {
         { id: "modeswitcher", name: "Mode switcher", icon: "swap_horiz", entry: false, widget: false, panel: true, own: false, description: "Switch between shell modes." },
         { id: "desktop", name: "Desktop widgets", icon: "widgets", entry: true, widget: false, panel: false, own: true, description: "Widgets on the desktop with an edit mode." },
         { id: "monitor", name: "System monitor", icon: "monitoring", entry: false, widget: false, panel: true, own: false, description: "Processor, memory, disk, network and the busiest processes in the island." },
-        { id: "settings", name: "Settings", icon: "settings", entry: true, widget: false, panel: false, own: true, description: "Settings for every option." }
+        { id: "settings", name: "Settings", icon: "settings", entry: true, widget: false, panel: true, own: true, description: "Settings for every option, in the island." }
     ]
 
     function byId(id: string): var {

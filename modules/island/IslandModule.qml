@@ -37,9 +37,9 @@ PanelWindow {
     // more notifications from the same app folded behind the one on screen
     property int notifGroup: 0
     // panels that live in the island, first match wins
-    readonly property string hosted: ["welcome", "launcher", "clipboard", "monitor", "island", "media", "power", "wallpaper", "overview", "cheatsheet", "modeswitcher"].find(id => Actions.isOpen(id) && (id === "island" || id === "welcome" || Modes.enabled(id))) ?? ""
+    readonly property string hosted: ["welcome", "launcher", "clipboard", "monitor", "island", "media", "power", "wallpaper", "overview", "cheatsheet", "modeswitcher", "settings"].find(id => Actions.isOpen(id) && (id === "island" || id === "welcome" || id === "settings" || Modes.enabled(id))) ?? ""
     // views driven by the keyboard take it whole, like the panels they replaced
-    readonly property bool typing: ["launcher", "clipboard", "power", "wallpaper", "overview", "cheatsheet", "modeswitcher"].includes(hosted) || Auth.active || (Notifs.replying && flashing === "notification")
+    readonly property bool typing: ["launcher", "clipboard", "power", "wallpaper", "overview", "cheatsheet", "modeswitcher", "settings"].includes(hosted) || Auth.active || (Notifs.replying && flashing === "notification")
     readonly property bool expanded: hosted !== "" || Auth.active
     readonly property string state: Auth.active ? "auth" : hosted === "island" ? "dashboard" : hosted !== "" ? hosted : flashing !== "" ? flashing : wsPeek ? "workspaces" : peeking ? "peek" : "idle"
 
