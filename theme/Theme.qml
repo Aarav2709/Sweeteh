@@ -99,22 +99,18 @@ Singleton {
 
     readonly property QtObject anim: QtObject {
         readonly property real speed: Math.max(0, root.opts.animationSpeed)
-        readonly property int fast: speed > 0 ? Math.round(180 / speed) : 0
-        readonly property int normal: speed > 0 ? Math.round(320 / speed) : 0
-        readonly property int slow: speed > 0 ? Math.round(450 / speed) : 0
-        readonly property int extraSlow: speed > 0 ? Math.round(650 / speed) : 0
+        readonly property int fast: speed > 0 ? Math.round(150 / speed) : 0
+        readonly property int normal: speed > 0 ? Math.round(250 / speed) : 0
+        readonly property int slow: speed > 0 ? Math.round(350 / speed) : 0
+        readonly property int extraSlow: speed > 0 ? Math.round(500 / speed) : 0
 
-        // material 3 expressive motion curves
+        // calm curves, things glide in and settle without overshooting
         readonly property list<real> standard: [0.2, 0, 0, 1, 1, 1]
         readonly property list<real> emphasized: [0.05, 0, 0.133, 0.06, 0.166, 0.4, 0.208, 0.82, 0.25, 1, 1, 1]
         readonly property list<real> decel: [0.05, 0.7, 0.1, 1, 1, 1]
         readonly property list<real> accel: [0.3, 0, 0.8, 0.15, 1, 1]
-        readonly property list<real> spatial: [0.34, 1.56, 0.4, 1, 1, 1]
-        readonly property list<real> spatialFast: [0.3, 1.8, 0.4, 0.95, 1, 1]
-        // physics for things that should land with a bounce, stiffer as the speed setting rises
-        // a bouncy landing that still settles in under a second
-        readonly property real spring: 4.2 * speed * speed
-        readonly property real damping: 0.3
+        readonly property list<real> spatial: [0.05, 0.7, 0.1, 1, 1, 1]
+        readonly property list<real> spatialFast: [0.1, 0.8, 0.2, 1, 1, 1]
         // content blurs while it fades so moves read as motion, off in perf mode
         readonly property bool blur: speed > 0 && root.opts.motionBlur
     }

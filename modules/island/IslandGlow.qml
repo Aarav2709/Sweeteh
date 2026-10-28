@@ -113,9 +113,8 @@ Item {
                     target: root
                     property: "bolt"
                     to: 1
-                    duration: 520
-                    easing.type: Easing.OutBack
-                    easing.overshoot: 3
+                    duration: 420
+                    easing.type: Easing.OutCubic
                 }
             }
         }

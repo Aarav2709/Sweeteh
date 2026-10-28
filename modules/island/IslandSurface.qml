@@ -123,7 +123,7 @@ Item {
     // a plain value, not a binding, so a config change can never send the island back off screen
     property real intro: 1
 
-    // started once and left to finish, the bounce overshoots 1 on its way
+    // started once and left to finish, it glides down into place
     SequentialAnimation on intro {
         id: introAnim
 
@@ -135,9 +135,8 @@ Item {
 
         NumberAnimation {
             to: 1
-            duration: 650
-            easing.type: Easing.OutBack
-            easing.overshoot: 1.4
+            duration: 550
+            easing.type: Easing.OutCubic
         }
     }
 
@@ -161,7 +160,7 @@ Item {
             NumberAnimation {
                 target: squash
                 property: "xScale"
-                to: wobble.grow ? 1.035 : 0.97
+                to: wobble.grow ? 1.015 : 0.985
                 duration: 150
                 easing.type: Easing.OutQuad
             }
@@ -169,7 +168,7 @@ Item {
             NumberAnimation {
                 target: squash
                 property: "yScale"
-                to: wobble.grow ? 0.95 : 1.04
+                to: wobble.grow ? 0.98 : 1.015
                 duration: 150
                 easing.type: Easing.OutQuad
             }
@@ -180,18 +179,16 @@ Item {
                 target: squash
                 property: "xScale"
                 to: 1
-                duration: 380
-                easing.type: Easing.OutBack
-                easing.overshoot: 2.2
+                duration: 300
+                easing.type: Easing.OutCubic
             }
 
             NumberAnimation {
                 target: squash
                 property: "yScale"
                 to: 1
-                duration: 380
-                easing.type: Easing.OutBack
-                easing.overshoot: 2.2
+                duration: 300
+                easing.type: Easing.OutCubic
             }
         }
     }
@@ -212,13 +209,13 @@ Item {
     Behavior on width {
         enabled: Theme.anim.speed > 0
 
-        Spring {}
+        Glide {}
     }
 
     Behavior on height {
         enabled: Theme.anim.speed > 0
 
-        Spring {}
+        Glide {}
     }
 
     // how bright the light under the island burns, it breathes with the bass and flares on a moment

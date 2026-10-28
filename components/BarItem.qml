@@ -57,9 +57,8 @@ Item {
         target: root
         property: "intro"
         to: 1
-        duration: 520
-        easing.type: Easing.OutBack
-        easing.overshoot: 1.6
+        duration: 450
+        easing.type: Easing.OutCubic
     }
 
     Rectangle {

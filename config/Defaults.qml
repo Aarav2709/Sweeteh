@@ -117,7 +117,7 @@ Singleton {
                 // swipe to skip, pull down for the dashboard, double click to play or pause
                 gestures: true,
                 // a little squash and stretch as the island changes shape
-                squash: true,
+                squash: false,
                 // camera, microphone and screen share dots
                 privacyDots: true,
                 // browser downloads, their progress across the island

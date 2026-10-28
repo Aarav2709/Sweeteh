@@ -88,7 +88,7 @@ Item {
                     Behavior on x {
                         enabled: Theme.anim.speed > 0
 
-                        Spring {}
+                        Glide {}
                     }
 
                     Behavior on opacity {
