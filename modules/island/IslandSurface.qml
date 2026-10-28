@@ -256,16 +256,23 @@ Item {
     NotchShape {
         anchors.fill: parent
         anchors.topMargin: Theme.depth.offset * 2
-        anchors.bottomMargin: -Theme.depth.offset * 2 - root.keyFlare * 10
+        anchors.bottomMargin: -Theme.depth.offset * 2
         visible: Theme.depth.backlit && !Perf.active
         opacity: root.backlight * 0.8
         color: Theme.color.backlight
         radius: shape.radius
         flare: 0
+        // a key flare stretches the light downward with a transform, so the blurred shape is not rebuilt every frame
+        transform: Scale {
+            yScale: 1 + root.keyFlare * 10 / Math.max(1, root.height)
+        }
+        // blurred at half resolution, it reads the same and costs a quarter of the fill
         layer.enabled: visible
+        layer.smooth: true
+        layer.textureSize: Qt.size(Math.ceil(width / 2), Math.ceil(height / 2))
         layer.effect: MultiEffect {
             blurEnabled: true
-            blurMax: 40
+            blurMax: 32
             blur: 1
             autoPaddingEnabled: true
         }

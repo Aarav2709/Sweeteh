@@ -15,15 +15,9 @@ Shape {
     // a gradient takes over from the plain color when set
     property ShapeGradient gradient: null
 
-    readonly property string path: {
-        const w = width, h = height;
-        if (w <= 0 || h <= 0)
-            return "";
-        const r = Math.max(0, Math.min(radius, w / 2, h / 2));
-        const f = Math.max(0, Math.min(flare, h / 2));
-        const arc = (rad, sweep, x, y) => `A ${rad} ${rad} 0 0 ${sweep} ${x} ${y}`;
-        return [`M ${-f} 0`, `L ${w + f} 0`, arc(f, 0, w, f), `L ${w} ${h - r}`, arc(r, 1, w - r, h), `L ${r} ${h}`, arc(r, 1, 0, h - r), `L 0 ${f}`, arc(f, 0, -f, 0), "Z"].join(" ");
-    }
+    // clamped once per size change, the path below binds straight to these instead of parsing a string every frame
+    readonly property real r: Math.max(0, Math.min(radius, width / 2, height / 2))
+    readonly property real f: Math.max(0, Math.min(flare, height / 2))
 
     preferredRendererType: Shape.CurveRenderer
 
@@ -32,9 +26,57 @@ Shape {
         fillGradient: root.gradient
         strokeWidth: root.rimWidth > 0 ? root.rimWidth : -1
         strokeColor: root.rimWidth > 0 ? root.rim : "transparent"
+        startX: -root.f
+        startY: 0
 
-        PathSvg {
-            path: root.path
+        PathLine {
+            x: root.width + root.f
+            y: 0
+        }
+
+        PathArc {
+            x: root.width
+            y: root.f
+            radiusX: root.f
+            radiusY: root.f
+            direction: PathArc.Counterclockwise
+        }
+
+        PathLine {
+            x: root.width
+            y: root.height - root.r
+        }
+
+        PathArc {
+            x: root.width - root.r
+            y: root.height
+            radiusX: root.r
+            radiusY: root.r
+        }
+
+        PathLine {
+            x: root.r
+            y: root.height
+        }
+
+        PathArc {
+            x: 0
+            y: root.height - root.r
+            radiusX: root.r
+            radiusY: root.r
+        }
+
+        PathLine {
+            x: 0
+            y: root.f
+        }
+
+        PathArc {
+            x: -root.f
+            y: 0
+            radiusX: root.f
+            radiusY: root.f
+            direction: PathArc.Counterclockwise
         }
     }
 }

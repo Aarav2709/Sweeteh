@@ -37,29 +37,70 @@ Item {
         loops: Animation.Infinite
     }
 
-    Shape {
-        anchors.fill: parent
-        preferredRendererType: Shape.CurveRenderer
+    // the wave is built once across the bar and slid sideways inside a clip, so playing music never rebuilds its geometry
+    readonly property real waveStart: stroke / 2
+    readonly property real waveEnd: Math.max(waveStart, handleX - stroke - 3)
+    readonly property real shift: phase / (Math.PI * 2) * wavelength
 
-        ShapePath {
-            strokeColor: Theme.color.primary
-            strokeWidth: root.stroke
-            fillColor: "transparent"
-            capStyle: ShapePath.RoundCap
-            joinStyle: ShapePath.RoundJoin
+    function waveY(x: real): real {
+        return height / 2 + Math.sin(x / wavelength * Math.PI * 2 - phase) * amplitude;
+    }
 
-            PathPolyline {
-                path: {
-                    const end = Math.max(root.stroke / 2, root.handleX - root.stroke - 3);
-                    const mid = root.height / 2;
-                    const pts = [];
-                    for (let x = root.stroke / 2; x < end; x += 2)
-                        pts.push(Qt.point(x, mid + Math.sin(x / root.wavelength * Math.PI * 2 - root.phase) * root.amplitude));
-                    pts.push(Qt.point(end, mid + Math.sin(end / root.wavelength * Math.PI * 2 - root.phase) * root.amplitude));
-                    return pts;
+    Item {
+        x: root.waveStart
+        width: root.waveEnd - root.waveStart
+        height: root.height
+        clip: true
+
+        Shape {
+            x: -root.waveStart - root.wavelength + root.shift
+            width: root.width + root.wavelength
+            height: root.height
+            preferredRendererType: Shape.CurveRenderer
+
+            ShapePath {
+                strokeColor: Theme.color.primary
+                strokeWidth: root.stroke
+                fillColor: "transparent"
+                joinStyle: ShapePath.RoundJoin
+
+                PathPolyline {
+                    path: {
+                        const mid = root.height / 2, len = root.width + root.wavelength * 2, amp = root.amplitude, k = Math.PI * 2 / root.wavelength;
+                        const pts = [];
+                        for (let x = 0; x <= len; x += 2)
+                            pts.push(Qt.point(x, mid + Math.sin(x * k) * amp));
+                        return pts;
+                    }
                 }
             }
         }
+    }
+
+    // round caps at both ends of the played wave, they ride the wave so the clipped edges never show
+    Rectangle {
+        visible: root.waveEnd > root.waveStart
+        x: root.waveStart - width / 2
+        y: root.waveY(root.waveStart) - height / 2
+        width: root.stroke
+        height: root.stroke
+        radius: width / 2
+        color: Theme.color.primary
+    }
+
+    Rectangle {
+        visible: root.waveEnd > root.waveStart
+        x: root.waveEnd - width / 2
+        y: root.waveY(root.waveEnd) - height / 2
+        width: root.stroke
+        height: root.stroke
+        radius: width / 2
+        color: Theme.color.primary
+    }
+
+    Shape {
+        anchors.fill: parent
+        preferredRendererType: Shape.CurveRenderer
 
         ShapePath {
             strokeColor: Theme.color.secondaryContainer
