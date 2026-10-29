@@ -48,7 +48,8 @@ Singleton {
     Timer {
         running: !Perf.active
         repeat: true
-        interval: 2000
+        // without the usb power file every check spawns a process scan, so it runs less often
+        interval: root.powerPath ? 2000 : 6000
         onTriggered: root.powerPath ? power.reload() : who.running = true
     }
 

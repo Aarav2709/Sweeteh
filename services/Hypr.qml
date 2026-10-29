@@ -57,8 +57,18 @@ Singleton {
         target: Hyprland
 
         function onRawEvent(event: HyprlandEvent): void {
-            if (["openwindow", "closewindow", "movewindow", "movewindowv2", "changefloatingmode", "fullscreen", "resizewindow"].includes(event.name))
+            if (["openwindow", "closewindow", "changefloatingmode", "fullscreen"].includes(event.name))
                 Hyprland.refreshToplevels();
+            // dragging or resizing a window sends a stream of these, one refresh after it calms is enough
+            else if (["movewindow", "movewindowv2", "resizewindow"].includes(event.name))
+                settle.restart();
         }
+    }
+
+    Timer {
+        id: settle
+
+        interval: 120
+        onTriggered: Hyprland.refreshToplevels()
     }
 }
