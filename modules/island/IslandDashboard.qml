@@ -119,18 +119,30 @@ Item {
 
                 Layout.fillWidth: true
                 Layout.fillHeight: root.shownPage !== ""
-                sourceComponent: root.shownPage === "network" ? networkPage : root.shownPage === "bluetooth" ? bluetoothPage : togglesPage
+                sourceComponent: root.shownPage === "network" ? networkPage : root.shownPage === "bluetooth" ? bluetoothPage : root.shownPage === "sound" ? soundPage : togglesPage
                 transform: Translate {
                     id: pageSlide
                 }
             }
 
-            Slider {
+            RowLayout {
                 Layout.fillWidth: true
                 visible: root.shownPage === ""
-                icon: Audio.icon
-                value: Audio.volume
-                onMoved: v => Audio.setVolume(v)
+                spacing: Theme.spacing.small
+
+                Slider {
+                    Layout.fillWidth: true
+                    icon: Audio.icon
+                    value: Audio.volume
+                    onMoved: v => Audio.setVolume(v)
+                }
+
+                // devices and per app volume
+                IconButton {
+                    icon: "tune"
+                    filled: true
+                    onClicked: root.page = "sound"
+                }
             }
 
             Slider {
@@ -172,6 +184,14 @@ Item {
         id: networkPage
 
         NetworkPage {
+            onBack: root.page = ""
+        }
+    }
+
+    Component {
+        id: soundPage
+
+        SoundPage {
             onBack: root.page = ""
         }
     }
