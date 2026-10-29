@@ -227,7 +227,7 @@ Item {
         running: Cava.active && root.mode === "idle"
         repeat: true
         interval: 400
-        onTriggered: root.beat = Cava.bass
+        onTriggered: root.beat = Cava.bass()
     }
 
     // every key typed into the island flashes the light under it, the signature of the shell
@@ -564,7 +564,7 @@ Item {
             Timer {
                 id: mediaKeep
 
-                interval: 20000
+                interval: 6000
             }
 
             onShownChanged: {
@@ -597,7 +597,7 @@ Item {
             Timer {
                 id: dashboardKeep
 
-                interval: 20000
+                interval: 6000
             }
 
             onShownChanged: {
