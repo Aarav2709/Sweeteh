@@ -16,8 +16,8 @@ Item {
     // results only build while the view can be seen, a hidden launcher should not rerank on every clipboard change
     property bool active: true
     property int current: 0
-    readonly property var sum: Calc.evaluate(query)
-    readonly property var results: active ? build() : []
+    readonly property var sum: active ? Calc.evaluate(query) : null
+    readonly property var results: active ? build().map(r => Object.assign(r, { key: r.kind + "\u0001" + r.title + "\u0001" + (r.subtitle ?? "") })) : []
 
     signal done
 
@@ -165,7 +165,11 @@ Item {
             visible: count > 0
             clip: true
             spacing: Theme.spacing.xxs
-            model: root.results
+            // rows keep their delegates while typing, only the ones that change are created or removed
+            model: ScriptModel {
+                values: root.results
+                objectProp: "key"
+            }
             currentIndex: root.current
             boundsBehavior: Flickable.StopAtBounds
             highlightMoveDuration: Theme.anim.fast

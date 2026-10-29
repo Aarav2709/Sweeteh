@@ -13,15 +13,33 @@ Singleton {
     readonly property list<DesktopEntry> apps: DesktopEntries.applications.values.filter(a => !a.noDisplay)
     property var usage: ({})
 
+    // the searchable text and the usage rank of every app, built once per app list, launch or hour instead of per keystroke
+    property var index: []
+    property int indexHour: -1
+
+    function rebuild(): void {
+        indexHour = new Date().getHours();
+        index = apps.map(app => ({
+                    app: app,
+                    fields: [app.name, app.genericName, app.keywords.join(" "), app.comment],
+                    rank: rank(app.id)
+                }));
+    }
+
+    onAppsChanged: rebuild()
+    onUsageChanged: rebuild()
+
     function search(query: string, limit: int): list<var> {
+        if (new Date().getHours() !== indexHour)
+            rebuild();
         const q = query.trim();
         const scored = [];
-        for (const app of apps) {
-            const s = q === "" ? 1 : Fuzzy.best(q, [app.name, app.genericName, app.keywords.join(" "), app.comment]);
+        for (const it of index) {
+            const s = q === "" ? 1 : Fuzzy.best(q, it.fields);
             if (s > 0)
                 scored.push({
-                    app: app,
-                    score: s + rank(app.id)
+                    app: it.app,
+                    score: s + it.rank
                 });
         }
         scored.sort((a, b) => b.score - a.score || a.app.name.localeCompare(b.app.name));
