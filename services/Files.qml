@@ -36,7 +36,9 @@ Singleton {
         interval: 250
         onTriggered: {
             finder.forQuery = root.query;
-            finder.command = ["sh", "-c", `timeout 2 find "$HOME" -maxdepth 5 \\( -name '.*' -o -name node_modules -o -name refs \\) -prune -o -iname ${Paths.quote("*" + root.query + "*")} -print 2>/dev/null | head -n 12`];
+            // fd is far faster and skips what git ignores, find is the fallback when it is missing
+            const q = Paths.quote(root.query);
+            finder.command = ["sh", "-c", `if command -v fd >/dev/null; then timeout 2 fd -i -F -d 5 --max-results 12 --exclude node_modules -- ${q} "$HOME"; else timeout 2 find "$HOME" -maxdepth 5 \\( -name '.*' -o -name node_modules -o -name refs \\) -prune -o -iname ${Paths.quote("*" + root.query + "*")} -print | head -n 12; fi 2>/dev/null`];
             finder.running = true;
         }
     }
@@ -49,7 +51,7 @@ Singleton {
         stdout: StdioCollector {
             onStreamFinished: {
                 if (finder.forQuery === root.query)
-                    root.results = text.split("\n").filter(l => l !== "");
+                    root.results = text.split("\n").filter(l => l !== "").map(l => l.replace(/\/$/, ""));
             }
         }
     }
