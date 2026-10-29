@@ -24,7 +24,7 @@ DeskCard {
             asynchronous: true
             sourceSize: Qt.size(48, 48)
             opacity: 0.45
-            layer.enabled: true
+            layer.enabled: visible
             layer.effect: MultiEffect {
                 blurEnabled: true
                 blur: 1

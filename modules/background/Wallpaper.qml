@@ -79,7 +79,8 @@ PanelWindow {
         id: mask
 
         anchors.fill: parent
-        layer.enabled: true
+        // a full screen texture is only kept while a circle or wipe is actually running
+        layer.enabled: root.progress < 1 && (root.transition === "circle" || root.transition === "wipe")
         visible: false
 
         Rectangle {
