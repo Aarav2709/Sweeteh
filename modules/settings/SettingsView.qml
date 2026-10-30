@@ -21,6 +21,64 @@ Item {
         { name: "About", icon: "info", hint: "Version and updates" }
     ]
     readonly property int index: pages.findIndex(p => p.name === page)
+    readonly property string query: search.text.trim()
+    readonly property var found: searchIndex.search(query)
+    // the option a search result points at, found and lit once its page is on screen
+    property string pendingRow: ""
+    property string pendingSection: ""
+
+    function jump(e: var): void {
+        search.text = "";
+        pendingRow = e.row;
+        pendingSection = e.section ?? "";
+        if (page === e.page)
+            reveal.restart();
+        else
+            page = e.page;
+        rail.forceActiveFocus();
+    }
+
+    // a row by its label, or a section by its title when section is set
+    function findRow(item: Item, label: string, section: bool): Item {
+        if (!item)
+            return null;
+        if (section ? item.title === label && item.rows !== undefined : item.label === label && item.hint !== undefined)
+            return item;
+        for (const c of item.children) {
+            const hit = findRow(c, label, section);
+            if (hit)
+                return hit;
+        }
+        return null;
+    }
+
+    SettingsIndex {
+        id: searchIndex
+
+        pages: root.pages
+    }
+
+    // waits a beat for the page to lay out, then scrolls the option into view and lights it
+    Timer {
+        id: reveal
+
+        interval: 80
+        onTriggered: {
+            const scope = root.pendingSection !== "" ? root.findRow(pageLoader.item, root.pendingSection, true) ?? pageLoader.item : pageLoader.item;
+            const row = root.findRow(scope, root.pendingRow, false);
+            root.pendingRow = "";
+            root.pendingSection = "";
+            if (!row)
+                return;
+            const pos = row.mapToItem(pageLoader, 0, 0);
+            flick.contentY = Math.max(0, Math.min(flick.contentHeight - flick.height, pos.y + Theme.spacing.xl - flick.height / 3));
+            spot.x = pageLoader.x + pos.x - Theme.spacing.small;
+            spot.y = pageLoader.y + pos.y - Theme.spacing.xxs;
+            spot.width = row.width + Theme.spacing.small * 2;
+            spot.height = row.height + Theme.spacing.xxs * 2;
+            spotFade.restart();
+        }
+    }
 
     function reset(): void {
         if (Actions.settingsPage !== "" && pages.some(p => p.name === Actions.settingsPage))
@@ -66,6 +124,55 @@ Item {
                 font.weight: Font.DemiBold
             }
 
+            Field {
+                id: search
+
+                Layout.fillWidth: true
+                Layout.bottomMargin: Theme.spacing.xs
+                implicitHeight: 38
+                icon: "search"
+                placeholder: "Search settings"
+                onAccepted: {
+                    if (root.found.length > 0)
+                        root.jump(root.found[0]);
+                }
+                Keys.onDownPressed: results.itemAt(0)?.forceActiveFocus()
+                Keys.onEscapePressed: event => {
+                    if (search.text !== "") {
+                        search.text = "";
+                        event.accepted = true;
+                    } else {
+                        event.accepted = false;
+                    }
+                }
+            }
+
+            Repeater {
+                id: results
+
+                model: root.found
+
+                ListRow {
+                    required property var modelData
+                    required property int index
+
+                    Layout.fillWidth: true
+                    icon: "subdirectory_arrow_right"
+                    title: modelData.label
+                    subtitle: modelData.hint
+                    onClicked: root.jump(modelData)
+                    Keys.onDownPressed: results.itemAt(index + 1)?.forceActiveFocus()
+                    Keys.onUpPressed: index > 0 ? results.itemAt(index - 1).forceActiveFocus() : search.focusInput()
+                }
+            }
+
+            Label {
+                Layout.leftMargin: Theme.spacing.xs
+                visible: root.query !== "" && root.found.length === 0
+                text: "Nothing matches."
+                color: Theme.color.inkMeta
+            }
+
             Repeater {
                 model: root.pages
 
@@ -78,6 +185,7 @@ Item {
 
                     Layout.fillWidth: true
                     Layout.bottomMargin: Theme.depth.offset
+                    visible: root.query === ""
                     implicitHeight: 52
                     radius: Theme.radius.large
                     color: selected ? Theme.mix(Theme.color.layer2, Theme.color.backlight, 0.18) : Theme.color.layer1
@@ -183,6 +291,37 @@ Item {
                         id: slide
                     }
                 }
+
+                // the light that marks an option a search jumped to
+                Rectangle {
+                    id: spot
+
+                    x: Theme.spacing.xl
+                    y: Theme.spacing.xl
+                    radius: Theme.radius.medium
+                    color: Theme.color.backlight
+                    opacity: 0
+
+                    SequentialAnimation on opacity {
+                        id: spotFade
+
+                        running: false
+
+                        NumberAnimation {
+                            to: 0.22
+                            duration: Theme.anim.fast
+                        }
+
+                        PauseAnimation {
+                            duration: 600
+                        }
+
+                        NumberAnimation {
+                            to: 0
+                            duration: Theme.anim.slow
+                        }
+                    }
+                }
             }
         }
     }
@@ -214,6 +353,8 @@ Item {
                 root.shownPage = root.page;
                 flick.contentY = 0;
                 slide.y = swap.dir * 36;
+                if (root.pendingRow !== "")
+                    reveal.restart();
             }
         }
 
