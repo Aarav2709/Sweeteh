@@ -47,6 +47,13 @@ Item {
                 out.push({ kind: "run", icon: "terminal", title: cmd, subtitle: "Run in a shell", run: () => Actions.shell(cmd) });
             return out;
         }
+        // : picks an emoji or symbol to copy
+        if (q.startsWith(":")) {
+            out.length = 0;
+            for (const e of Emoji.search(q.slice(1), Math.max(limit, 12)))
+                out.push({ kind: "emoji", emoji: e.c, title: e.n.charAt(0).toUpperCase() + e.n.slice(1), subtitle: "", run: () => Actions.copy(e.c) });
+            return out;
+        }
         // with nothing typed, what was just copied can be acted on
         if (q === "" && Config.options.launcher.clipboardActions) {
             const clip = (Quickshell.clipboardText ?? "").trim();
@@ -113,7 +120,7 @@ Item {
         current = 0;
         Actions.keystroke();
         if (Config.options.launcher.files)
-            Files.search(query.startsWith(">") ? "" : query);
+            Files.search(query.startsWith(">") || query.startsWith(":") ? "" : query);
     }
 
     ColumnLayout {
@@ -129,7 +136,7 @@ Item {
             color: Theme.color.layer1
             outlineOnFocus: false
             icon: "search"
-            placeholder: "Search apps, files and sums, or > for commands"
+            placeholder: "Search apps, files and sums, > for commands, : for emoji"
             onEdited: root.query = text
             onAccepted: root.activate(root.current, false)
             input.Keys.onPressed: e => {
@@ -185,7 +192,7 @@ Item {
                 required property var modelData
                 required property int index
                 readonly property bool selected: index === root.current
-                readonly property string hint: ({ sum: "Copy", copy: "Copy", run: "Shell", action: "Action", file: "File", web: "Web" })[modelData.kind] ?? ""
+                readonly property string hint: ({ sum: "Copy", copy: "Copy", emoji: "Copy", run: "Shell", action: "Action", file: "File", web: "Web" })[modelData.kind] ?? ""
 
                 width: list.width
                 height: list.rowHeight
@@ -200,6 +207,13 @@ Item {
                         implicitWidth: 38
                         implicitHeight: 38
 
+                        Text {
+                            anchors.centerIn: parent
+                            visible: !!row.modelData.emoji
+                            text: row.modelData.emoji ?? ""
+                            font.pixelSize: 26
+                        }
+
                         Image {
                             anchors.fill: parent
                             anchors.margins: 2
@@ -211,7 +225,7 @@ Item {
 
                         Rectangle {
                             anchors.fill: parent
-                            visible: !row.modelData.image
+                            visible: !row.modelData.image && !row.modelData.emoji
                             radius: row.modelData.kind === "sum" || row.modelData.swatch ? Theme.radius.medium : width / 2
                             color: row.modelData.swatch ?? (row.modelData.kind === "sum" ? Theme.color.primary : Theme.color.layer2)
 

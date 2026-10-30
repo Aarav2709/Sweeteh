@@ -64,7 +64,7 @@ Sweeteh follows tagged releases. It checks for a new one a minute after login an
 - **Two layouts.** Islands splits the bar into raised pills around the island. Island shows only the island.
 - **The island.** Launcher, quick settings with Wifi and Bluetooth pages, media with synced lyrics, notifications, volume and brightness, clipboard, system monitor, wallpaper picker, workspace overview, keybind cheat sheet, power menu, settings, a polkit password prompt and a recording indicator, all in one surface. It flares as you type, breathes with the bass of your music and glows for moments like charging, downloads and copies.
 - **Backlit look.** Pills, keys and cards sit on a ledge lit from below in the wallpaper's hue, and every move glides into place.
-- **Command palette.** Type `>` in the launcher for every shell action, then things like `>wifi`, `>date -3d`, `>time +4h`, `>timer 5m`, `>vol 40`, `>ws 3`, `>close firefox`, `>#ff8800` or `>uuid`. Enter runs or copies, Ctrl and a number picks a row, Tab completes a word, and what you use most comes first.
+- **Command palette.** Type `>` in the launcher for every shell action, then things like `>wifi`, `>date -3d`, `>time +4h`, `>timer 5m`, `>vol 40`, `>ws 3`, `>close firefox`, `>#ff8800` or `>uuid`. Enter runs or copies, Ctrl and a number picks a row, Tab completes a word, and what you use most comes first. Type `:` to pick an emoji or symbol to copy.
 - **A welcome tour** on first start, and again any time with `>welcome`.
 - **Wallpapers.** Images, GIFs and videos, with circle, wipe, fade and zoom transitions. Video wallpapers pause under fullscreen windows, and can also pause behind tiled ones.
 - **A themed terminal.** Kitty runs fish with a starship prompt, both colored from the wallpaper.
