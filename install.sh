@@ -49,8 +49,8 @@ packages=(
   quickshell matugen qt6-multimedia qt6-multimedia-ffmpeg ffmpeg
   pipewire wireplumber playerctl brightnessctl upower power-profiles-daemon
   networkmanager bluez bluez-utils cava hyprsunset fprintd
-  cliphist wl-clipboard wf-recorder libnotify curl git glib2
-  kitty nautilus ttf-jetbrains-mono-nerd fish starship eza
+  cliphist wl-clipboard wf-recorder hyprpicker libnotify curl git glib2
+  kitty nautilus ttf-jetbrains-mono-nerd fish starship eza fd
 )
 
 usage() {

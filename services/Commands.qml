@@ -63,6 +63,7 @@ Singleton {
             { icon: "screenshot_region", title: "Capture a region", keywords: "screenshot capture", run: () => Actions.screenshot("region") },
             { icon: "screenshot_monitor", title: "Capture the screen", keywords: "screenshot capture full", run: () => Actions.screenshot("screen") },
             Recorder.recording ? { icon: "stop_circle", title: "Stop recording", keywords: "record recording screen video stop", run: () => Recorder.stop() } : { icon: "screen_record", title: "Record the screen", keywords: "record recording screen video", run: () => Recorder.start("") },
+            { icon: "colorize", title: "Pick a color from the screen", keywords: "color colour picker eyedropper hex hyprpicker", run: () => root.pickColor() },
             { icon: "content_paste", title: "Clipboard history", keywords: "clipboard paste copy", run: () => Actions.open("clipboard") },
             { icon: "overview", title: "Workspace overview", keywords: "overview windows", run: () => Actions.open("overview") },
             { icon: "keyboard", title: "Keybind cheat sheet", keywords: "keys shortcuts", run: () => Actions.open("cheatsheet") },
@@ -239,6 +240,28 @@ Singleton {
         onTriggered: {
             Actions.say("timer", "Timer done, " + root.timerLabel);
             Quickshell.execDetached(["notify-send", "-a", "Sweeteh", "-i", "alarm", "Timer done", root.timerLabel]);
+        }
+    }
+
+    // the launcher closes first, then hyprpicker freezes the screen for a click and the hex is copied
+    function pickColor(): void {
+        picker.running = true;
+    }
+
+    Process {
+        id: picker
+
+        command: ["sh", "-c", "command -v hyprpicker >/dev/null || exit 3; sleep 0.25; hyprpicker -f hex"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const hex = text.trim();
+                if (/^#[0-9a-fA-F]{6}$/.test(hex))
+                    Actions.copy(hex);
+            }
+        }
+        onExited: code => {
+            if (code === 3)
+                Actions.say("colorize", "Install hyprpicker to pick colors");
         }
     }
 
