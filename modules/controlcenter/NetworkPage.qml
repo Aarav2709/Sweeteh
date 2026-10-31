@@ -13,7 +13,8 @@ DevicePage {
     icon: "wifi"
     on: Network.wifiEnabled
     empty: Network.wifiEnabled ? "Searching for networks." : "Wifi is off."
-    model: Network.networks.filter(n => root.matches(n.name))
+    // saved vpns sit above the wifi networks
+    model: Network.vpns.filter(v => root.matches(v.name)).map(v => ({ name: v.name, vpn: true, connected: v.active, secured: false, strength: 1 })).concat(Network.networks.filter(n => root.matches(n.name)))
     onSwitched: on => Network.setWifi(on)
     Component.onCompleted: Network.scan(true)
     Component.onDestruction: Network.scan(false)
@@ -30,12 +31,14 @@ DevicePage {
 
         ListRow {
             width: parent.width
-            icon: row.modelData.strength > 0.66 ? "network_wifi" : row.modelData.strength > 0.33 ? "network_wifi_2_bar" : "network_wifi_1_bar"
+            icon: row.modelData.vpn ? "vpn_key" : row.modelData.strength > 0.66 ? "network_wifi" : row.modelData.strength > 0.33 ? "network_wifi_2_bar" : "network_wifi_1_bar"
             title: row.modelData.name
-            subtitle: row.busy ? "Connecting" : Network.failed === row.modelData.name ? "Could not connect" : row.modelData.connected ? "Connected" : row.known ? "Saved" : row.modelData.secured ? "Secured" : "Open"
+            subtitle: row.modelData.vpn ? (Network.vpnBusy === row.modelData.name ? "Switching" : row.modelData.connected ? "VPN, connected" : "VPN") : row.busy ? "Connecting" : Network.failed === row.modelData.name ? "Could not connect" : row.modelData.connected ? "Connected" : row.known ? "Saved" : row.modelData.secured ? "Secured" : "Open"
             selected: row.modelData.connected
             onClicked: {
-                if (row.modelData.connected)
+                if (row.modelData.vpn)
+                    Network.setVpn(row.modelData.name, !row.modelData.connected);
+                else if (row.modelData.connected)
                     Network.disconnect();
                 else if (row.modelData.secured && !row.known) {
                     root.asking = root.asking === row.modelData.name ? "" : row.modelData.name;
@@ -45,7 +48,7 @@ DevicePage {
                     Network.connect(row.modelData.name, "");
             }
             onRightClicked: {
-                if (row.known)
+                if (row.known && !row.modelData.vpn)
                     Network.forget(row.modelData.name);
             }
 

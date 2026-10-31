@@ -23,6 +23,9 @@ Singleton {
     // scanned networks, one entry per name with the strongest signal
     property var networks: []
     property var known: []
+    // saved vpn and wireguard connections, each with whether it is up
+    property var vpns: []
+    property string vpnBusy: ""
     property bool scanning: false
     property string connecting: ""
     property string failed: ""
@@ -60,6 +63,12 @@ Singleton {
             Quickshell.execDetached(["nmcli", "device", "disconnect", wifiDevice.name]);
     }
 
+    function setVpn(name: string, on: bool): void {
+        vpnBusy = name;
+        vpnSwitch.command = ["nmcli", "connection", on ? "up" : "down", "id", name];
+        vpnSwitch.running = true;
+    }
+
     function forget(ssid: string): void {
         Quickshell.execDetached(["nmcli", "connection", "delete", "id", ssid]);
         saved.running = true;
@@ -95,9 +104,28 @@ Singleton {
     Process {
         id: saved
 
-        command: ["nmcli", "-t", "-f", "NAME,TYPE", "connection", "show"]
+        command: ["nmcli", "-t", "-f", "NAME,TYPE,ACTIVE", "connection", "show"]
         stdout: StdioCollector {
-            onStreamFinished: root.known = text.split("\n").filter(l => l.endsWith(":802-11-wireless")).map(l => l.slice(0, l.lastIndexOf(":")).replace(/\\:/g, ":"))
+            onStreamFinished: {
+                // names may hold escaped colons, the type and state are always the last two fields
+                const rows = text.split("\n").filter(l => l !== "").map(l => {
+                    const b = l.lastIndexOf(":"), a = l.lastIndexOf(":", b - 1);
+                    return { name: l.slice(0, a).replace(/\\:/g, ":"), type: l.slice(a + 1, b), active: l.slice(b + 1) === "yes" };
+                });
+                root.known = rows.filter(c => c.type === "802-11-wireless").map(c => c.name);
+                root.vpns = rows.filter(c => c.type === "vpn" || c.type === "wireguard").map(c => ({ name: c.name, active: c.active }));
+            }
+        }
+    }
+
+    Process {
+        id: vpnSwitch
+
+        onExited: code => {
+            if (code !== 0)
+                Actions.say("vpn_key_off", "Could not switch " + root.vpnBusy);
+            root.vpnBusy = "";
+            saved.running = true;
         }
     }
 
