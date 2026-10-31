@@ -67,19 +67,6 @@ Singleton {
         objects: [root.sink, root.source]
     }
 
-    // the island names the new output when sound moves, like headphones connecting
-    // the first sink pipewire reports at startup is not a switch
-    property string lastSink: ""
-
-    onSinkChanged: {
-        const name = sink?.name ?? "";
-        if (name === "" || name === lastSink)
-            return;
-        if (lastSink !== "")
-            Actions.say(name.includes("bluez") ? "headphones" : name.includes("hdmi") ? "tv" : "speaker", label(sink));
-        lastSink = name;
-    }
-
     // device and app volumes are only live while a page shows them
     property bool watching: false
 
