@@ -62,9 +62,9 @@ Sweeteh follows tagged releases. It checks for a new one a minute after login an
 ## Features
 
 - **Two layouts.** Islands splits the bar into raised pills around the island. Island shows only the island.
-- **The island.** Launcher, quick settings with Wifi and Bluetooth pages, media with synced lyrics, notifications, volume and brightness, clipboard, system monitor, wallpaper picker, workspace overview, keybind cheat sheet, power menu, settings, a polkit password prompt and a recording indicator, all in one surface. It flares as you type, breathes with the bass of your music and glows for moments like charging, downloads and copies.
+- **The island.** Launcher, quick settings with Wifi and VPN, Bluetooth and Sound pages, where each app gets its own volume, media with synced lyrics, notifications, volume and brightness, clipboard, system monitor, wallpaper picker, workspace overview, keybind cheat sheet, power menu, settings, a polkit password prompt and a recording indicator, all in one surface. It flares as you type, breathes with the bass of your music and glows for moments like charging, downloads and copies.
 - **Backlit look.** Pills, keys and cards sit on a ledge lit from below in the wallpaper's hue, and every move glides into place.
-- **Command palette.** Type `>` in the launcher for every shell action, then things like `>wifi`, `>date -3d`, `>time +4h`, `>timer 5m`, `>vol 40`, `>ws 3`, `>close firefox`, `>#ff8800` or `>uuid`. Enter runs or copies, Ctrl and a number picks a row, Tab completes a word, and what you use most comes first. Type `:` to pick an emoji or symbol to copy.
+- **Command palette.** Type `>` in the launcher for every shell action, then things like `>wifi`, `>date -3d`, `>time +4h`, `>timer 5m`, `>vol 40`, `>ws 3`, `>close firefox`, `>#ff8800`, `>uuid` or `>pick a color` from the screen. Enter runs or copies, Ctrl and a number picks a row, Tab completes a word, and what you use most comes first. Type `:` to pick an emoji or symbol to copy.
 - **A welcome tour** on first start, and again any time with `>welcome`.
 - **Wallpapers.** Images, GIFs and videos, with circle, wipe, fade and zoom transitions. Video wallpapers pause under fullscreen windows, and can also pause behind tiled ones.
 - **A themed terminal.** Kitty runs fish with a starship prompt, both colored from the wallpaper.
@@ -74,7 +74,7 @@ Sweeteh follows tagged releases. It checks for a new one a minute after login an
 - **Lockscreen** with a blurred wallpaper, clock and media controls.
 - **Password prompts** from apps that need admin rights appear in the island.
 - **Screenshots and recordings** of a region, a window or the whole screen, driven by mouse or arrows, Tab and Enter. Recordings encode on the GPU when it can and can carry the system sound.
-- **Settings** for every option, in the island, including a keybind editor and previews of every island moment. Everything is also in `~/.config/sweeteh/config.json`, which reloads as you save it.
+- **Settings** for every option, in the island and searchable, including a keybind editor and previews of every island moment. Everything is also in `~/.config/sweeteh/config.json`, which reloads as you save it.
 
 ## Credits
 
