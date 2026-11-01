@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell.Widgets
+import Quickshell.Services.Mpris
 import qs.config
 import qs.theme
 import qs.services
@@ -140,7 +141,9 @@ ColumnLayout {
                 Label {
                     Layout.fillWidth: true
                     visible: text !== ""
-                    text: Media.artist
+                    // a song names its album too, a video only its channel
+                    text: Media.video ? Media.artist : [Media.artist, Media.album].filter(t => t !== "" && t !== Media.title).join("  ·  ")
+                    elide: Text.ElideRight
                     color: Theme.color.inkSoft
                 }
             }
@@ -192,6 +195,14 @@ ColumnLayout {
         spacing: Theme.spacing.medium
 
         IconButton {
+            visible: Media.player?.shuffleSupported ?? false
+            icon: "shuffle"
+            size: 36
+            checked: Media.player?.shuffle ?? false
+            onClicked: Media.shuffle()
+        }
+
+        IconButton {
             icon: "skip_previous"
             size: 44
             filled: true
@@ -233,6 +244,14 @@ ColumnLayout {
             filled: true
             disabled: !(Media.player?.canGoNext ?? false)
             onClicked: Media.next()
+        }
+
+        IconButton {
+            visible: Media.player?.loopSupported ?? false
+            icon: Media.player?.loopState === MprisLoopState.Track ? "repeat_one" : "repeat"
+            size: 36
+            checked: (Media.player?.loopState ?? MprisLoopState.None) !== MprisLoopState.None
+            onClicked: Media.loop()
         }
     }
 
@@ -311,11 +330,41 @@ ColumnLayout {
 
     Label {
         Layout.fillWidth: true
-        visible: root.showLyrics && Lyrics.lines.length === 0 && Media.active
+        visible: root.showLyrics && Lyrics.lines.length === 0 && Media.active && !Media.video
         text: Lyrics.loading ? "Looking for lyrics." : Lyrics.plain !== "" ? "Only unsynced lyrics are available." : "No lyrics found."
         horizontalAlignment: Text.AlignHCenter
         font.pixelSize: Theme.font.small
         color: Theme.color.inkMeta
+    }
+
+    // every app playing something, a click brings it to the front
+    ColumnLayout {
+        Layout.fillWidth: true
+        Layout.topMargin: Theme.spacing.small
+        visible: Media.players.length > 1
+        spacing: Theme.spacing.xxs
+
+        Label {
+            text: "Playing now"
+            font.pixelSize: Theme.font.small
+            font.weight: Font.DemiBold
+            color: Theme.color.inkMeta
+        }
+
+        Repeater {
+            model: Media.players
+
+            ListRow {
+                required property var modelData
+
+                Layout.fillWidth: true
+                selected: modelData === Media.player
+                title: (modelData.trackTitle || modelData.identity || "Unknown").replace(/^\(\d+\)\s*/, "").replace(/\s+[-–]\s+YouTube$/, "")
+                subtitle: (modelData.isPlaying ? "Playing" : "Paused") + "  ·  " + (modelData.identity ?? "")
+                icon: modelData.isPlaying ? "graphic_eq" : "pause"
+                onClicked: Media.manual = modelData
+            }
+        }
     }
 
     // what played lately, a click picks the player back up or opens the app again

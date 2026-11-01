@@ -11,12 +11,18 @@ import qs.theme
 Singleton {
     id: root
 
-    readonly property list<MprisPlayer> players: Mpris.players.values
+    // playerctld only mirrors other players, and with the plasma browser bridge running the browser's own player is a copy too
+    readonly property bool bridged: Mpris.players.values.some(p => (p.dbusName ?? "").includes("plasma-browser-integration"))
+    readonly property list<MprisPlayer> players: Mpris.players.values.filter(p => {
+        const bus = p.dbusName ?? "";
+        return !bus.includes("playerctld") && !(bridged && /MediaPlayer2\.(firefox|chromium|zen|brave)/.test(bus));
+    })
     property MprisPlayer manual: null
     readonly property MprisPlayer player: (manual && players.includes(manual)) ? manual : players.find(p => p.isPlaying) ?? players[0] ?? null
     readonly property bool active: player !== null
     readonly property bool playing: player?.isPlaying ?? false
-    readonly property string title: player?.trackTitle || "Nothing playing"
+    // browser tabs carry an unread count in front and the site name behind
+    readonly property string title: (player?.trackTitle ?? "").replace(/^\(\d+\)\s*/, "").replace(/\s+[-–]\s+YouTube$/, "") || "Nothing playing"
     readonly property string artist: player?.trackArtist ?? ""
     readonly property string album: player?.trackAlbum ?? ""
     readonly property string art: player?.trackArtUrl ?? ""
@@ -29,12 +35,13 @@ Singleton {
         const u = url;
         if (/music\.youtube\.com/.test(u))
             return "";
-        if (/(youtube\.com\/(watch|shorts|live)|youtu\.be\/)/.test(u))
+        // the url can be the bare site while a video plays, so any youtube page counts
+        if (/(youtube\.com|youtu\.be)/.test(u))
             return "YouTube";
         const sites = [["twitch.tv", "Twitch"], ["netflix.com", "Netflix"], ["vimeo.com", "Vimeo"], ["primevideo.com", "Prime Video"], ["disneyplus.com", "Disney+"], ["max.com", "Max"], ["crunchyroll.com", "Crunchyroll"], ["dailymotion.com", "Dailymotion"]];
         return sites.find(s => u.includes(s[0]))?.[1] ?? "";
     }
-    readonly property bool musicUpload: / - Topic$|VEVO$/i.test(artist) || /official (music )?(video|audio)|lyric video|\(audio\)|\[audio\]|visuali[sz]er/i.test(title)
+    readonly property bool musicUpload: / - Topic$|VEVO$/i.test(artist) || /official (music )?(video|audio)|\(lyrics?\)|lyric video|\(audio\)|\[audio\]|visuali[sz]er/i.test(title)
     readonly property bool video: site !== "" && !musicUpload
     // who made it, the channel for a video and the artist for a song
     readonly property string source: video ? site : (player?.identity ?? "")
@@ -166,6 +173,18 @@ Singleton {
             player.position = seconds;
             position = seconds;
         }
+    }
+
+    function shuffle(): void {
+        if (player?.shuffleSupported)
+            player.shuffle = !player.shuffle;
+    }
+
+    // off, then the whole list, then the one track
+    function loop(): void {
+        if (!player?.loopSupported)
+            return;
+        player.loopState = player.loopState === MprisLoopState.None ? MprisLoopState.Playlist : player.loopState === MprisLoopState.Playlist ? MprisLoopState.Track : MprisLoopState.None;
     }
 
     function cycle(): void {
