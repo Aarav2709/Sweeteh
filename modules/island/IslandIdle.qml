@@ -218,6 +218,15 @@ Item {
             }
         }
 
+        // a video shows a screen instead of the music meter
+        Icon {
+            visible: Media.active && Media.video
+            name: "smart_display"
+            size: 16
+            fill: Media.playing ? 1 : 0
+            color: root.accent
+        }
+
         // the level meter dances while music plays, with the cava visualizer on the real audio sets how tall
         // a fixed height, so a bar growing never re-centers its neighbours
         Row {
@@ -227,7 +236,7 @@ Item {
             // raw cava frames at 24 a second always read as twitchy on five tiny bars
             property real loudness: 1
 
-            visible: Media.active
+            visible: Media.active && !Media.video
             height: 16
             spacing: 2
 

@@ -63,9 +63,10 @@ ColumnLayout {
             anchors.margins: Theme.spacing.medium
             spacing: Theme.spacing.large
 
+            // a video keeps its wide thumbnail, a song its square cover
             ClippingRectangle {
-                implicitWidth: 104
-                implicitHeight: 104
+                implicitWidth: Media.video ? 160 : 104
+                implicitHeight: Media.video ? 90 : 104
                 radius: Theme.radius.large
                 color: Theme.color.secondaryContainer
 
@@ -74,13 +75,13 @@ ColumnLayout {
                     source: Media.art
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
-                    sourceSize: Qt.size(208, 208)
+                    sourceSize: Media.video ? Qt.size(320, 180) : Qt.size(208, 208)
                 }
 
                 Icon {
                     anchors.centerIn: parent
                     visible: Media.art === ""
-                    name: "music_note"
+                    name: Media.video ? "smart_display" : "music_note"
                     size: 40
                     color: Theme.color.fgSecondaryContainer
                 }
@@ -105,14 +106,14 @@ ColumnLayout {
 
                         Icon {
                             anchors.verticalCenter: parent.verticalCenter
-                            name: Media.players.length > 1 ? "swap_horiz" : "graphic_eq"
+                            name: Media.players.length > 1 ? "swap_horiz" : Media.video ? "smart_display" : "graphic_eq"
                             size: 14
                             color: Theme.color.inkSoft
                         }
 
                         Label {
                             anchors.verticalCenter: parent.verticalCenter
-                            text: Media.player?.identity ?? ""
+                            text: Media.source
                             font.pixelSize: Theme.font.tiny
                             font.weight: Font.DemiBold
                             color: Theme.color.inkSoft

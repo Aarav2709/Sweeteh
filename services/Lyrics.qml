@@ -57,7 +57,8 @@ Singleton {
         lines = [];
         plain = "";
         fetcher.running = false;
-        if (!enabled || !Media.active || !Media.player?.trackTitle)
+        // a video has no lyrics, asking would only find a wrong song
+        if (!enabled || !Media.active || !Media.player?.trackTitle || Media.video)
             return;
         if (cache[key]) {
             lines = cache[key].lines;

@@ -22,6 +22,22 @@ Singleton {
     readonly property string art: player?.trackArtUrl ?? ""
     readonly property real length: player?.length ?? 0
     property real position: 0
+    // the page a browser player is on, empty for music apps
+    readonly property string url: player?.metadata?.["xesam:url"] ?? ""
+    // the video site behind a browser player, youtube music and official music uploads still count as songs
+    readonly property string site: {
+        const u = url;
+        if (/music\.youtube\.com/.test(u))
+            return "";
+        if (/(youtube\.com\/(watch|shorts|live)|youtu\.be\/)/.test(u))
+            return "YouTube";
+        const sites = [["twitch.tv", "Twitch"], ["netflix.com", "Netflix"], ["vimeo.com", "Vimeo"], ["primevideo.com", "Prime Video"], ["disneyplus.com", "Disney+"], ["max.com", "Max"], ["crunchyroll.com", "Crunchyroll"], ["dailymotion.com", "Dailymotion"]];
+        return sites.find(s => u.includes(s[0]))?.[1] ?? "";
+    }
+    readonly property bool musicUpload: / - Topic$|VEVO$/i.test(artist) || /official (music )?(video|audio)|lyric video|\(audio\)|\[audio\]|visuali[sz]er/i.test(title)
+    readonly property bool video: site !== "" && !musicUpload
+    // who made it, the channel for a video and the artist for a song
+    readonly property string source: video ? site : (player?.identity ?? "")
     readonly property real volume: player?.volume ?? 0
     readonly property bool volumeSupported: player?.volumeSupported ?? false
     // covers from the web are fetched once into the runtime dir, the quantizer only reads local files
@@ -52,7 +68,8 @@ Singleton {
 
         interval: 4000
         onTriggered: {
-            if (!Config.options.media.history || !root.playing || !root.player?.trackTitle)
+            // videos are not tracks, the history is for music
+            if (!Config.options.media.history || !root.playing || !root.player?.trackTitle || root.video)
                 return;
             const item = { title: root.title, artist: root.artist, art: root.art.startsWith("http") || root.art.startsWith("file:") ? root.art : "", app: root.player.desktopEntry || root.player.identity || "" };
             root.history = [item].concat(root.history.filter(h => h.title !== item.title || h.artist !== item.artist)).slice(0, 20);
