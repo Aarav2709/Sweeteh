@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Shapes
 import Quickshell.Widgets
 import qs.config
 import qs.theme
@@ -54,6 +55,88 @@ Item {
             }
         }
         spacing: Theme.spacing.small
+
+        // a running timer, a ring that empties and the time left beside it
+        Rectangle {
+            id: timerPill
+
+            property real now: Date.now()
+            readonly property real remaining: Math.max(0, Commands.timerEnd - now)
+            readonly property real share: Commands.timerEnd > Commands.timerStart ? remaining / (Commands.timerEnd - Commands.timerStart) : 0
+
+            visible: Commands.timerRunning
+            implicitWidth: timerRow.implicitWidth + Theme.spacing.small * 2
+            implicitHeight: 22
+            radius: height / 2
+            color: Theme.color.secondaryContainer
+
+            Timer {
+                running: timerPill.visible && root.visible
+                repeat: true
+                interval: 1000
+                triggeredOnStart: true
+                onTriggered: timerPill.now = Date.now()
+            }
+
+            Row {
+                id: timerRow
+
+                anchors.centerIn: parent
+                spacing: Theme.spacing.xs
+
+                Shape {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 12
+                    height: 12
+                    preferredRendererType: Shape.CurveRenderer
+
+                    ShapePath {
+                        strokeColor: Qt.alpha(Theme.color.fgSecondaryContainer, 0.25)
+                        strokeWidth: 2
+                        fillColor: "transparent"
+
+                        PathAngleArc {
+                            centerX: 6
+                            centerY: 6
+                            radiusX: 5
+                            radiusY: 5
+                            startAngle: 0
+                            sweepAngle: 360
+                        }
+                    }
+
+                    ShapePath {
+                        strokeColor: Theme.color.fgSecondaryContainer
+                        strokeWidth: 2
+                        fillColor: "transparent"
+                        capStyle: ShapePath.RoundCap
+
+                        PathAngleArc {
+                            centerX: 6
+                            centerY: 6
+                            radiusX: 5
+                            radiusY: 5
+                            startAngle: -90
+                            sweepAngle: 360 * timerPill.share
+                        }
+                    }
+                }
+
+                Label {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: {
+                        const s = Math.ceil(timerPill.remaining / 1000);
+                        return s >= 3600 ? Math.floor(s / 3600) + ":" + String(Math.floor(s / 60) % 60).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0") : Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+                    }
+                    font.pixelSize: Theme.font.small
+                    font.weight: Font.DemiBold
+                    font.features: ({
+                            "tnum": 1
+                        })
+                    color: Theme.color.fgSecondaryContainer
+                }
+            }
+        }
 
         // a recording in progress, click to stop it
         Rectangle {

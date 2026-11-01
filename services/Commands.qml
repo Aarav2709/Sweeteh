@@ -224,10 +224,13 @@ Singleton {
     }
 
     property real timerEnd: 0
+    property real timerStart: 0
     property string timerLabel: ""
+    readonly property bool timerRunning: countdown.running
 
     function startTimer(ms: real, label: string): void {
-        timerEnd = Date.now() + ms;
+        timerStart = Date.now();
+        timerEnd = timerStart + ms;
         timerLabel = label.trim();
         countdown.interval = ms;
         countdown.restart();
