@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
+import Quickshell.Io
 import qs.config
 import qs.theme
 import qs.services
@@ -16,6 +17,37 @@ Item {
     property bool ready: false
     // blurred while locked, it clears as the lock lets go
     readonly property bool shown: ready && !context.leaving
+    // the full name from the account, the login name until it is known
+    property string userName: Quickshell.env("USER") ?? ""
+    // power off and restart ask for a second click, there may be unsaved work behind the lock
+    property string armed: ""
+
+    Process {
+        running: true
+        command: ["sh", "-c", "getent passwd \"$USER\" | cut -d: -f5 | cut -d, -f1"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (text.trim() !== "")
+                    root.userName = text.trim();
+            }
+        }
+    }
+
+    Timer {
+        id: disarm
+
+        interval: 3000
+        onTriggered: root.armed = ""
+    }
+
+    function arm(what: string): void {
+        if (armed === what) {
+            what === "off" ? Session.poweroff() : Session.reboot();
+            return;
+        }
+        armed = what;
+        disarm.restart();
+    }
 
     focus: true
     Component.onCompleted: {
@@ -122,12 +154,23 @@ Item {
             }
         }
 
-        Label {
+        // each digit rolls over on its own as the minute turns
+        Row {
             Layout.alignment: Qt.AlignHCenter
-            text: Time.hours + ":" + Time.minutes
-            font.pixelSize: Theme.font.hero * 1.4
-            font.weight: Font.DemiBold
-            color: Theme.color.ink
+
+            Repeater {
+                model: 5
+
+                RollingText {
+                    required property int index
+
+                    text: (Time.hours + ":" + Time.minutes).charAt(index)
+                    font.family: Theme.font.family
+                    font.pixelSize: Theme.font.hero * 1.4
+                    font.weight: Font.DemiBold
+                    color: Theme.color.ink
+                }
+            }
         }
 
         Label {
@@ -139,12 +182,56 @@ Item {
             color: Theme.color.primary
         }
 
+        // who is locked out, the account picture when there is one and the name
+        Row {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: Theme.spacing.xl
+            spacing: Theme.spacing.small
+
+            ClippingRectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 32
+                height: 32
+                radius: 16
+                color: Theme.color.secondaryContainer
+
+                Label {
+                    anchors.centerIn: parent
+                    visible: avatar.status !== Image.Ready
+                    text: root.userName.charAt(0).toUpperCase()
+                    font.weight: Font.DemiBold
+                    color: Theme.color.fgSecondaryContainer
+                }
+
+                Image {
+                    id: avatar
+
+                    anchors.fill: parent
+                    source: "file:///var/lib/AccountsService/icons/" + Quickshell.env("USER")
+                    fillMode: Image.PreserveAspectCrop
+                    sourceSize: Qt.size(64, 64)
+                    asynchronous: true
+                    onStatusChanged: {
+                        if (status === Image.Error && !source.toString().endsWith("/.face"))
+                            source = "file://" + Paths.home + "/.face";
+                    }
+                }
+            }
+
+            Label {
+                anchors.verticalCenter: parent.verticalCenter
+                text: root.userName
+                font.weight: Font.Medium
+                color: Theme.color.ink
+            }
+        }
+
         // keys go straight into the context, no text field, so input methods cannot swallow them
         Rectangle {
             id: field
 
             Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: Theme.spacing.xxl
+            Layout.topMargin: Theme.spacing.medium
             implicitWidth: 340
             implicitHeight: Theme.size.buttonLarge
             radius: height / 2
@@ -163,7 +250,8 @@ Item {
                 anchors.left: parent.left
                 anchors.leftMargin: Theme.spacing.large
                 anchors.verticalCenter: parent.verticalCenter
-                name: root.context.busy ? "hourglass_top" : "lock"
+                // the padlock opens as the lock lets go
+                name: root.context.leaving ? "lock_open" : root.context.busy ? "hourglass_top" : "lock"
                 color: Theme.color.inkMeta
             }
 
@@ -387,9 +475,24 @@ Item {
         }
 
         IconButton {
+            icon: "restart_alt"
+            filled: true
+            checked: root.armed === "restart"
+            onClicked: root.arm("restart")
+        }
+
+        IconButton {
             icon: "power_settings_new"
             filled: true
-            onClicked: Session.poweroff()
+            checked: root.armed === "off"
+            onClicked: root.arm("off")
+        }
+
+        Label {
+            visible: root.armed !== ""
+            text: root.armed === "off" ? "Click again to shut down" : "Click again to restart"
+            font.pixelSize: Theme.font.small
+            color: Theme.color.inkMeta
         }
     }
 }
