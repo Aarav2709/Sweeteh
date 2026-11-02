@@ -16,6 +16,8 @@ Item {
     // results only build while the view can be seen, a hidden launcher should not rerank on every clipboard change
     property bool active: true
     property int current: 0
+    // an app opened up to show its own actions, like a private window, cleared by typing
+    property var expanded: null
     readonly property var sum: active ? Calc.evaluate(query) : null
     readonly property var results: active ? build().map(r => Object.assign(r, { key: r.kind + "\u0001" + r.title + "\u0001" + (r.subtitle ?? "") })) : []
 
@@ -24,7 +26,15 @@ Item {
     function reset(): void {
         field.text = "";
         query = "";
+        expanded = null;
         current = 0;
+        field.focusInput();
+    }
+
+    function setQuery(text: string): void {
+        field.text = text;
+        query = text;
+        field.input.cursorPosition = text.length;
         field.focusInput();
     }
 
@@ -32,6 +42,19 @@ Item {
         const q = query.trim();
         const limit = Config.options.launcher.maxResults;
         const out = [];
+        if (expanded) {
+            const app = expanded;
+            out.push({ kind: "app", image: Apps.icon(app.icon || app.id), title: app.name, subtitle: "Open", run: () => Apps.launch(app) });
+            for (const a of app.actions)
+                out.push({ kind: "action", icon: "subdirectory_arrow_right", title: a.name, subtitle: app.name, run: () => a.execute() });
+            return out;
+        }
+        // ? lists what each prefix does
+        if (q === "?")
+            return [
+                { kind: "prefix", icon: "terminal", title: "> Commands", subtitle: "Every shell action, timers, dates, colors and more", keep: true, run: () => root.setQuery(">") },
+                { kind: "prefix", icon: "mood", title: ": Emoji and symbols", subtitle: "Search by name, Enter copies", keep: true, run: () => root.setQuery(":") }
+            ];
         if (sum !== null)
             out.push({ kind: "sum", icon: "calculate", title: String(sum), subtitle: "Press enter to copy", run: () => Actions.copy(String(sum)) });
         // > is the command palette, every shell action plus dates to copy, with a shell run as the last resort
@@ -51,7 +74,10 @@ Item {
         if (q.startsWith(":")) {
             out.length = 0;
             for (const e of Emoji.search(q.slice(1), Math.max(limit, 12)))
-                out.push({ kind: "emoji", emoji: e.c, title: e.n.charAt(0).toUpperCase() + e.n.slice(1), subtitle: "", run: () => Actions.copy(e.c) });
+                out.push({ kind: "emoji", emoji: e.c, title: e.n.charAt(0).toUpperCase() + e.n.slice(1), subtitle: q.length === 1 && Emoji.recent.includes(e.c) ? "Recent" : "", run: () => {
+                        Emoji.used(e.c);
+                        Actions.copy(e.c);
+                    } });
             return out;
         }
         // with nothing typed, what was just copied can be acted on
@@ -66,7 +92,7 @@ Item {
                 out.push({ kind: "file", icon: "folder_open", title: "Open copied path", subtitle: clip, run: () => Files.open(clip) });
         }
         for (const app of Apps.search(q, limit))
-            out.push({ kind: "app", image: Apps.icon(app.icon || app.id), title: app.name, subtitle: app.comment || app.genericName, run: () => Apps.launch(app) });
+            out.push({ kind: "app", image: Apps.icon(app.icon || app.id), title: app.name, subtitle: app.comment || app.genericName, more: app.actions.length > 0, run: () => Apps.launch(app), alt: app.actions.length > 0 ? () => root.expand(app) : undefined });
         if (q !== "") {
             const cmds = Commands.all().map(c => ({ c: c, s: Fuzzy.best(q, [c.title, c.keywords]) })).filter(x => x.s > 0).sort((a, b) => b.s - a.s).slice(0, 4);
             for (const x of cmds)
@@ -80,6 +106,11 @@ Item {
         return out;
     }
 
+    function expand(app: var): void {
+        expanded = app;
+        current = 1;
+    }
+
     function activate(index: int, alt: bool): void {
         const r = results[index];
         if (!r)
@@ -87,7 +118,9 @@ Item {
         if (r.remember)
             Commands.used(r.title);
         alt && r.alt ? r.alt() : r.run();
-        done();
+        // opening an app's actions or picking a prefix keeps the launcher up
+        if (!r.keep && !(alt && r.more))
+            done();
     }
 
     // the last word typed after > grows into the first longer word the top results know
@@ -118,6 +151,7 @@ Item {
 
     onQueryChanged: {
         current = 0;
+        expanded = null;
         Actions.keystroke();
         if (Config.options.launcher.files)
             Files.search(query.startsWith(">") || query.startsWith(":") ? "" : query);
@@ -136,7 +170,7 @@ Item {
             color: Theme.color.layer1
             outlineOnFocus: false
             icon: "search"
-            placeholder: "Search apps, files and sums, > for commands, : for emoji"
+            placeholder: "Search apps, files and sums, or ? for more"
             onEdited: root.query = text
             onAccepted: root.activate(root.current, false)
             input.Keys.onPressed: e => {
@@ -192,7 +226,7 @@ Item {
                 required property var modelData
                 required property int index
                 readonly property bool selected: index === root.current
-                readonly property string hint: ({ sum: "Copy", copy: "Copy", emoji: "Copy", run: "Shell", action: "Action", file: "File", web: "Web" })[modelData.kind] ?? ""
+                readonly property string hint: modelData.more ? "Ctrl Enter, more" : ({ sum: "Copy", copy: "Copy", emoji: "Copy", run: "Shell", action: "Action", file: "File", web: "Web" })[modelData.kind] ?? ""
 
                 width: list.width
                 height: list.rowHeight
@@ -271,8 +305,10 @@ Item {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
                     onEntered: root.current = row.index
-                    onClicked: root.activate(row.index, false)
+                    // a right click opens an app's own actions
+                    onClicked: e => root.activate(row.index, e.button === Qt.RightButton)
                 }
             }
         }

@@ -28,9 +28,11 @@ Singleton {
 
     onAppsChanged: rebuild()
     onUsageChanged: rebuild()
+    // the app list may already be filled when this service starts, so build once up front too
+    Component.onCompleted: rebuild()
 
     function search(query: string, limit: int): list<var> {
-        if (new Date().getHours() !== indexHour)
+        if (new Date().getHours() !== indexHour || index.length !== apps.length)
             rebuild();
         const q = query.trim();
         const scored = [];
