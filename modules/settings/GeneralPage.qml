@@ -32,7 +32,7 @@ ColumnLayout {
             spacing: Theme.spacing.small
 
             Repeater {
-                model: [["battery", "Charging"], ["unplugged", "Unplugged"], ["low", "Low"], ["critical", "Critical"], ["welcome", "Welcome"], ["bluetooth", "Bluetooth"], ["network", "Wi-Fi"], ["toggles", "Toggle"], ["privacy", "Privacy"], ["downloads", "Download"], ["clipboard", "Clipboard"], ["audio", "Audio output"]]
+                model: [["battery", "Charging"], ["unplugged", "Unplugged"], ["low", "Low"], ["critical", "Critical"], ["welcome", "Welcome"], ["bluetooth", "Bluetooth"], ["network", "Wi-Fi"], ["toggles", "Toggle"], ["downloads", "Download"], ["clipboard", "Clipboard"], ["audio", "Audio output"]]
 
                 Button {
                     required property var modelData

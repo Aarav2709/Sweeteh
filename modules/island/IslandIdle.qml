@@ -258,26 +258,6 @@ Item {
                 })
         }
 
-        // the microphone, camera or screen in use by an app
-        Row {
-            visible: Config.options.island.privacyDots && (Privacy.mic || Privacy.camera || Privacy.screen)
-            spacing: 3
-
-            Repeater {
-                model: [Privacy.camera ? "#30d158" : "", Privacy.mic ? "#ff9f0a" : "", Privacy.screen ? "#bf5af2" : ""].filter(c => c !== "")
-
-                Rectangle {
-                    required property string modelData
-
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 7
-                    height: 7
-                    radius: 3.5
-                    color: modelData
-                }
-            }
-        }
-
         // a browser download in progress
         Row {
             visible: Downloads.active
@@ -382,14 +362,6 @@ Item {
 
                 }
             }
-        }
-
-        Rectangle {
-            visible: Notifs.list.length > 0 && !Notifs.dnd
-            implicitWidth: 6
-            implicitHeight: 6
-            radius: 3
-            color: Theme.color.primary
         }
 
         Icon {

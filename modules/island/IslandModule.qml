@@ -52,7 +52,7 @@ PanelWindow {
     // a colored moment, a notification on screen keeps its turn and a newer moment replaces an older one
     // which moments switch a kind belongs to
     function category(kind: string): string {
-        return ["plugged", "unplugged", "low", "critical", "profile"].includes(kind) ? "battery" : kind === "clipboard" ? "clipboard" : kind === "audio" ? "audio" : kind.startsWith("bluetooth") ? "bluetooth" : kind === "network" ? "network" : kind.startsWith("privacy") ? "privacy" : kind === "download" ? "downloads" : kind === "welcome" ? "welcome" : "toggles";
+        return ["plugged", "unplugged", "low", "critical", "profile"].includes(kind) ? "battery" : kind === "clipboard" ? "clipboard" : kind === "audio" ? "audio" : kind.startsWith("bluetooth") ? "bluetooth" : kind === "network" ? "network" : kind === "download" ? "downloads" : kind === "welcome" ? "welcome" : "toggles";
     }
 
     function glow(m: var, ms: int): void {
@@ -116,7 +116,6 @@ PanelWindow {
             bluetooth: { kind: "bluetooth", icon: "headphones", title: "Headphones", sub: "Connected  ·  80%" },
             network: { kind: "network", icon: "wifi", title: "Home", sub: "Connected" },
             toggles: { kind: "toggle Caps Lock", icon: "keyboard_capslock", title: "Caps Lock", sub: "On" },
-            privacy: { kind: "privacy mic", icon: "mic", title: "Microphone in use", sub: "Discord" },
             downloads: { kind: "download", icon: "download_done", title: "Downloaded", sub: "photo.png" },
             clipboard: { kind: "clipboard", icon: "content_paste", title: "Copied", sub: "Hello from the clipboard" },
             audio: { kind: "audio", icon: "headphones", title: "Headphones", sub: "Audio output" },
@@ -314,25 +313,6 @@ PanelWindow {
 
         interval: 600
         onTriggered: root.glow(Network.connected ? { kind: "network", icon: Network.wired ? "lan" : "wifi", title: Network.name || "Connected", sub: "Connected" } : { kind: "network", icon: "wifi_off", title: "Wi-Fi dropped", sub: "Offline", run: () => Actions.open("island") }, 2800)
-    }
-
-    Connections {
-        target: Privacy
-
-        function onMicChanged(): void {
-            if (Privacy.mic && armed.ready)
-                root.glow({ kind: "privacy mic", icon: "mic", title: "Microphone in use", sub: Privacy.micApp }, 2600);
-        }
-
-        function onCameraChanged(): void {
-            if (Privacy.camera && armed.ready)
-                root.glow({ kind: "privacy camera", icon: "videocam", title: "Camera in use", sub: Privacy.cameraApp }, 2600);
-        }
-
-        function onScreenChanged(): void {
-            if (Privacy.screen && armed.ready)
-                root.glow({ kind: "privacy screen", icon: "screen_share", title: "Screen shared" }, 2600);
-        }
     }
 
     // headphones and the like warn once when they run low, and again after a charge

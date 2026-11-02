@@ -118,8 +118,6 @@ Singleton {
                 gestures: true,
                 // a little squash and stretch as the island changes shape
                 squash: false,
-                // camera, microphone and screen share dots
-                privacyDots: true,
                 // browser downloads, their progress across the island
                 downloads: true,
                 // how much the wallpaper color shows through the island, 0 keeps it plain
@@ -170,7 +168,6 @@ Singleton {
                 bluetooth: true,
                 network: true,
                 toggles: true,
-                privacy: true,
                 downloads: true,
                 welcome: true,
                 clipboard: true,
