@@ -26,7 +26,13 @@ Singleton {
     readonly property string artist: player?.trackArtist ?? ""
     readonly property string album: player?.trackAlbum ?? ""
     readonly property string art: player?.trackArtUrl ?? ""
-    readonly property real length: player?.length ?? 0
+    // some players only put the length in the metadata, in microseconds
+    readonly property real length: player?.length || Number(player?.metadata?.["mpris:length"] ?? 0) / 1000000
+    // firefox and its forks always report position 0 over mpris, so their time is only a count from when the shell noticed
+    // the plasma browser bridge reports the real one
+    readonly property bool guessedPosition: !bridged && /firefox|zen|librewolf|floorp|waterfox|mozilla/i.test((player?.identity ?? "") + " " + (player?.desktopEntry ?? ""))
+    // a progress bar and times only when both ends are real
+    readonly property bool timed: length > 0 && !guessedPosition
     property real position: 0
     // the page a browser player is on, empty for music apps
     readonly property string url: player?.metadata?.["xesam:url"] ?? ""
@@ -194,6 +200,8 @@ Singleton {
 
     function format(seconds: real): string {
         const s = Math.max(0, Math.floor(seconds));
+        if (s >= 3600)
+            return Math.floor(s / 3600) + ":" + String(Math.floor(s / 60) % 60).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
         return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
     }
 

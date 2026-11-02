@@ -484,7 +484,7 @@ Item {
     Rectangle {
         readonly property int inset: Theme.radius.medium
 
-        visible: Media.active && Media.length > 0
+        visible: Media.active && Media.timed
         x: inset
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 2

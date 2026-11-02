@@ -31,7 +31,7 @@ RowLayout {
     WheelHandler {
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
         onWheel: e => {
-            if (Media.length > 0)
+            if (Media.timed)
                 Media.seek(Math.max(0, Math.min(Media.length, Media.position + (e.angleDelta.y > 0 ? 5 : -5))));
         }
     }
@@ -105,7 +105,7 @@ RowLayout {
         Item {
             Layout.fillWidth: true
             implicitHeight: 12
-            visible: Media.length > 0
+            visible: Media.timed
 
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter

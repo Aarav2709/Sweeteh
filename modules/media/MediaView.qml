@@ -154,7 +154,7 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.leftMargin: Theme.spacing.xs
         Layout.rightMargin: Theme.spacing.xs
-        visible: Media.length > 0
+        visible: Media.timed
         spacing: 0
 
         WavyProgress {
@@ -188,6 +188,18 @@ ColumnLayout {
                 color: Theme.color.inkMeta
             }
         }
+    }
+
+    // a browser tab never says how far in it is, so only its full length is shown
+    Label {
+        Layout.alignment: Qt.AlignHCenter
+        visible: !Media.timed && Media.guessedPosition && Media.length > 0
+        text: Media.format(Media.length) + " long"
+        font.pixelSize: Theme.font.tiny
+        font.features: ({
+                "tnum": 1
+            })
+        color: Theme.color.inkMeta
     }
 
     RowLayout {
