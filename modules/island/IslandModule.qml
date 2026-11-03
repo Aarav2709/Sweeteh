@@ -197,6 +197,21 @@ PanelWindow {
                 flashTimer.restart();
         }
 
+        // closing the one on screen ends the moment, the ones waiting behind it stay in the list instead of popping up next
+        function onListChanged(): void {
+            if (root.flashing !== "notification" || (root.notif && Notifs.list.includes(root.notif)))
+                return;
+            // the moment ends first, hiding the rest changes the list again
+            flashTimer.stop();
+            Notifs.replying = false;
+            root.flashing = "";
+            root.notif = null;
+            root.notifGroup = 0;
+            for (const p of Notifs.popups)
+                Notifs.hide(p);
+            Qt.callLater(root.advance);
+        }
+
         // a newer one from the app on screen takes its place and adds to the count
         function onArrived(entry: NotifEntry): void {
             if (root.flashing !== "notification") {
