@@ -70,7 +70,7 @@ Sweeteh follows tagged releases. It checks for a new one a minute after login an
 - **A themed terminal.** Kitty runs fish with a starship prompt, both colored from the wallpaper.
 - **Tray menus** drawn by the shell instead of plain app menus.
 - **Colors from the wallpaper.** Matugen builds the palette. The shell, window borders, kitty, Nautilus and other GTK apps, folder icons, Vesktop and Zed all follow it. Pick the Sweeteh theme in Zed to use it.
-- **Desktop widgets.** Analog clock, weather, calendar, media and system load, arranged with Super Shift E.
+- **Desktop widgets.** Analog clock, weather, calendar, media, system load, synced lyrics and a live spectrum, arranged with Super Shift E.
 - **Lockscreen** with a blurred wallpaper, clock and media controls.
 - **Password prompts** from apps that need admin rights appear in the island.
 - **Screenshots and recordings** of a region, a window or the whole screen, driven by mouse or arrows, Tab and Enter. Recordings encode on the GPU when it can and can carry the system sound.

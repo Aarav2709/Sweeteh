@@ -74,7 +74,7 @@ ColumnLayout {
         Layout.fillWidth: true
         title: "Arrange widgets"
         icon: "dashboard_customize"
-        subtitle: "Place clock, dial, weather, calendar, media and tasks widgets on the desktop."
+        subtitle: "Place clock, dial, weather, calendar, media, system, lyrics and spectrum widgets on the desktop."
 
         OptionRow {
             label: "Edit the desktop"

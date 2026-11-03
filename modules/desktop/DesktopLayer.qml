@@ -21,7 +21,9 @@ PanelWindow {
         { type: "weather", icon: "partly_cloudy_day", name: "Weather" },
         { type: "calendar", icon: "calendar_month", name: "Calendar" },
         { type: "media", icon: "music_note", name: "Media" },
-        { type: "system", icon: "monitoring", name: "System" }
+        { type: "system", icon: "monitoring", name: "System" },
+        { type: "lyrics", icon: "lyrics", name: "Lyrics" },
+        { type: "spectrum", icon: "graphic_eq", name: "Spectrum" }
     ]
 
     signal done

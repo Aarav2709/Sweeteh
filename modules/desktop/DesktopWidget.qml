@@ -23,7 +23,7 @@ Item {
     Loader {
         id: loader
 
-        source: ({ clock: "ClockWidget.qml", analog: "AnalogWidget.qml", weather: "WeatherWidget.qml", media: "MediaWidget.qml", system: "SystemWidget.qml", calendar: "CalendarWidget.qml" })[root.spec.type] ?? ""
+        source: ({ clock: "ClockWidget.qml", analog: "AnalogWidget.qml", weather: "WeatherWidget.qml", media: "MediaWidget.qml", system: "SystemWidget.qml", calendar: "CalendarWidget.qml", lyrics: "LyricsWidget.qml", spectrum: "SpectrumWidget.qml" })[root.spec.type] ?? ""
     }
 
     Rectangle {
