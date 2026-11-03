@@ -145,19 +145,37 @@ PanelWindow {
             e.accepted = true;
         }
 
-        // dim everything outside the selection
-        Repeater {
-            model: [Qt.rect(0, 0, root.width, root.selection.y), Qt.rect(0, root.selection.y + root.selection.height, root.width, root.height), Qt.rect(0, root.selection.y, root.selection.x, root.selection.height), Qt.rect(root.selection.x + root.selection.width, root.selection.y, root.width, root.selection.height)]
+        // dim everything outside the selection, four fixed strips that follow it instead of being rebuilt on every move
+        Item {
+            anchors.fill: parent
+            opacity: 0.45
 
             Rectangle {
-                required property rect modelData
-
-                x: modelData.x
-                y: modelData.y
-                width: Math.max(0, modelData.width)
-                height: Math.max(0, modelData.height)
+                width: root.width
+                height: Math.max(0, root.selection.y)
                 color: Theme.color.scrim
-                opacity: 0.45
+            }
+
+            Rectangle {
+                y: root.selection.y + root.selection.height
+                width: root.width
+                height: Math.max(0, root.height - y)
+                color: Theme.color.scrim
+            }
+
+            Rectangle {
+                y: root.selection.y
+                width: Math.max(0, root.selection.x)
+                height: Math.max(0, root.selection.height)
+                color: Theme.color.scrim
+            }
+
+            Rectangle {
+                x: root.selection.x + root.selection.width
+                y: root.selection.y
+                width: Math.max(0, root.width - x)
+                height: Math.max(0, root.selection.height)
+                color: Theme.color.scrim
             }
         }
 
@@ -233,8 +251,8 @@ PanelWindow {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
             anchors.bottomMargin: Theme.spacing.xxl
-            implicitWidth: Math.max(bar.implicitWidth, hint.implicitWidth + Theme.spacing.large * 2) + Theme.spacing.small * 2
-            implicitHeight: bar.implicitHeight + hint.implicitHeight + Theme.spacing.small * 3
+            implicitWidth: bar.implicitWidth + Theme.spacing.small * 2
+            implicitHeight: bar.implicitHeight + Theme.spacing.small * 2
             radius: Theme.radius.full
             color: Theme.color.panel
             border.width: Theme.depth.rim
@@ -242,23 +260,10 @@ PanelWindow {
 
             Depth {}
 
-            Label {
-                id: hint
-
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: Theme.spacing.small
-                text: root.mode === "window" ? "Tab region  ·  arrows pick a window  ·  R record  ·  F full screen  ·  Enter capture" : "Tab window  ·  arrows move  ·  shift resize  ·  alt fine  ·  R record  ·  F full screen  ·  Enter capture"
-                font.pixelSize: Theme.font.tiny
-                color: Theme.color.inkMeta
-            }
-
             RowLayout {
                 id: bar
 
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-                anchors.topMargin: Theme.spacing.small
+                anchors.centerIn: parent
                 spacing: Theme.spacing.xs
 
                 IconButton {
