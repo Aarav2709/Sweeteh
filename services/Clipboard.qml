@@ -84,7 +84,7 @@ Singleton {
     // each store also prints a line, so the island can say what was copied without asking again
     Process {
         running: root.watching
-        command: ["wl-paste", "--watch", "sh", "-c", `f=$(mktemp); cat > "$f"; cliphist -max-items ${Config.options.clipboard.maxItems} store < "$f"; head -c 120 "$f" | tr '\\n\\t\\r' '   '; echo; rm -f "$f"`]
+        command: ["wl-paste", "--watch", "sh", "-c", `f=$(mktemp); cat > "$f"; cliphist -max-items ${Config.options.clipboard.maxItems} store < "$f"; head -c 2048 "$f" | tr '\\n\\t\\r' '   '; echo; rm -f "$f"`]
         stdout: SplitParser {
             onRead: line => {
                 root.lastCopy = line.trim();

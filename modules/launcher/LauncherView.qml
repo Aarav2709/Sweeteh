@@ -82,7 +82,8 @@ Item {
         }
         // with nothing typed, what was just copied can be acted on
         if (q === "" && Config.options.launcher.clipboardActions) {
-            const clip = (Quickshell.clipboardText ?? "").trim();
+            // the watcher's copy, asking wayland for the clipboard blocks the whole shell while the app that owns it stalls
+            const clip = Clipboard.lastCopy.trim();
             const clipSum = clip.length < 80 ? Calc.evaluate(clip) : null;
             if (/^https?:\/\/\S+$/.test(clip))
                 out.push({ kind: "action", icon: "open_in_new", title: "Open copied link", subtitle: clip, run: () => Qt.openUrlExternally(clip) });
