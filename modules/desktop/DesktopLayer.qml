@@ -64,6 +64,22 @@ PanelWindow {
         }
     }
 
+    // a right click on the bare desktop opens a small menu of what people reach for there
+    MouseArea {
+        anchors.fill: parent
+        enabled: !root.editing
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: e => {
+            if (e.button === Qt.RightButton) {
+                menu.x = Math.min(e.x, root.width - menu.width - Theme.spacing.small);
+                menu.y = Math.min(e.y, root.height - menu.height - Theme.spacing.small);
+                menu.open = true;
+            } else {
+                menu.open = false;
+            }
+        }
+    }
+
     Repeater {
         model: root.widgets
 
@@ -144,6 +160,74 @@ PanelWindow {
                 icon: "check"
                 text: "Done"
                 onClicked: root.save()
+            }
+        }
+    }
+
+    Rectangle {
+        id: menu
+
+        property bool open: false
+        readonly property var items: [
+            { icon: "wallpaper", text: "Change wallpaper", run: () => Actions.open("wallpaper") },
+            { icon: "shuffle", text: "Random wallpaper", run: () => Wallpapers.random() },
+            { icon: "widgets", text: "Edit widgets", run: () => Actions.editDesktop() },
+            { icon: "terminal", text: "Open a terminal", run: () => Quickshell.execDetached([Config.options.general.terminal]) },
+            { icon: "folder", text: "Open files", run: () => Quickshell.execDetached([Config.options.general.fileManager, Paths.home]) },
+            { icon: "screenshot_region", text: "Take a screenshot", run: () => Actions.screenshot("region") },
+            { icon: "settings", text: "Settings", run: () => Actions.openSettings("Appearance") }
+        ]
+
+        visible: open || opacity > 0
+        opacity: open ? 1 : 0
+        scale: open ? 1 : 0.96
+        transformOrigin: Item.TopLeft
+        implicitWidth: 220
+        implicitHeight: menuColumn.implicitHeight + Theme.spacing.xs * 2
+        radius: Theme.radius.large
+        color: Theme.wallpaperSurface
+        border.width: Theme.depth.rim
+        border.color: Theme.wall.depthRim
+
+        Behavior on opacity {
+            Anim {
+                duration: Theme.anim.fast
+            }
+        }
+
+        Behavior on scale {
+            Anim {
+                duration: Theme.anim.fast
+                easing.bezierCurve: Theme.anim.decel
+            }
+        }
+
+        Depth {
+            color: Theme.wall.depthShadow
+        }
+
+        Column {
+            id: menuColumn
+
+            anchors.fill: parent
+            anchors.margins: Theme.spacing.xs
+
+            Repeater {
+                model: menu.items
+
+                ListRow {
+                    required property var modelData
+
+                    width: menuColumn.width
+                    implicitHeight: 40
+                    icon: modelData.icon
+                    title: modelData.text
+                    badge: false
+                    onClicked: {
+                        menu.open = false;
+                        modelData.run();
+                    }
+                }
             }
         }
     }
