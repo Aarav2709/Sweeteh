@@ -77,6 +77,7 @@ Singleton {
             { icon: "balance", title: "Balanced power", keywords: "power profile balanced", run: () => Battery.setProfile(PowerProfile.Balanced) },
             { icon: "bolt", title: "Performance power", keywords: "power profile performance fast", run: () => Battery.setProfile(PowerProfile.Performance) },
             { icon: "system_update", title: "Check for updates", keywords: "updates upgrade packages", run: () => Updates.check() },
+            { icon: "upgrade", title: Packages.count > 0 ? "Update the system, " + Packages.count + " packages" : "Update the system", keywords: "pacman yay paru upgrade packages system update syu", run: () => Packages.upgrade() },
             { icon: "waving_hand", title: "Show the welcome tour", keywords: "welcome tour intro help start", run: () => Actions.open("welcome") },
             { icon: "refresh", title: "Reload the shell", keywords: "reload restart shell quickshell", run: () => Quickshell.reload(false) },
             { icon: "logout", title: "Log out", keywords: "exit logout session", run: () => Session.logout() },

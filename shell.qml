@@ -29,6 +29,7 @@ ShellRoot {
         Auth.registered;
         AppTheme.enabled;
         Updates.available;
+        Packages.count;
     }
 
     // bundled fonts, loaded here so nothing has to be installed
