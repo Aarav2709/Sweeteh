@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import Quickshell.Wayland
 import qs.config
 import qs.theme
@@ -12,8 +13,10 @@ PanelWindow {
     id: root
 
     required property string kind
-    property string mode: kind === "screen" || kind === "record" ? "region" : kind
+    property string mode: kind === "screen" || kind === "record" || kind === "text" ? "region" : kind
     property bool record: kind === "record"
+    // reads the words in the picked area and copies them instead of saving a picture
+    property bool ocr: kind === "text"
     property rect selection: Qt.rect(0, 0, 0, 0)
     property bool ready: frozen.hasContent
     readonly property real dpr: screen?.devicePixelRatio ?? 1
@@ -82,6 +85,16 @@ PanelWindow {
         crop.sourceRect = r;
         crop.width = r.width;
         crop.height = r.height;
+        if (ocr) {
+            const shot = Paths.runtime + "/ocr.png";
+            crop.grabToImage(result => {
+                result.saveToFile(shot);
+                reader.command = ["sh", "-c", `command -v tesseract >/dev/null || { echo __none__; exit; }; tesseract ${Paths.quote(shot)} - 2>/dev/null; rm -f ${Paths.quote(shot)}`];
+                reader.running = true;
+                root.visible = false;
+            }, Qt.size(Math.round(r.width * dpr), Math.round(r.height * dpr)));
+            return;
+        }
         const dir = Paths.expand(Config.options.general.screenshotDir);
         const file = dir + "/Screenshot_" + Qt.formatDateTime(new Date(), "yyyy-MM-dd_HH-mm-ss") + ".png";
         Quickshell.execDetached(["mkdir", "-p", dir]);
@@ -95,6 +108,25 @@ PanelWindow {
             Actions.say("screenshot", "Screenshot saved and copied.");
             root.finished();
         }, Qt.size(Math.round(r.width * dpr), Math.round(r.height * dpr)));
+    }
+
+    Process {
+        id: reader
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const words = text.trim();
+                if (words === "__none__")
+                    Actions.say("text_fields", "Install tesseract to copy text from the screen");
+                else if (words === "")
+                    Actions.say("text_fields", "No text found there");
+                else {
+                    Actions.copy(words);
+                    Actions.say("text_fields", "Copied " + words.split(/\s+/).length + " words");
+                }
+                root.finished();
+            }
+        }
     }
 
     ScreencopyView {
@@ -293,11 +325,25 @@ PanelWindow {
                 }
 
                 IconButton {
+                    icon: "text_fields"
+                    checked: root.ocr
+                    onClicked: {
+                        root.ocr = !root.ocr;
+                        if (root.ocr)
+                            root.record = false;
+                    }
+                }
+
+                IconButton {
                     icon: root.record ? "videocam" : "photo_camera"
                     checked: root.record
                     background: root.record ? Theme.color.error : "transparent"
                     foreground: root.record ? Theme.color.fgError : Theme.color.inkMeta
-                    onClicked: root.record = !root.record
+                    onClicked: {
+                        root.record = !root.record;
+                        if (root.record)
+                            root.ocr = false;
+                    }
                 }
 
                 IconButton {

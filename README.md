@@ -38,7 +38,7 @@ To install from a clone instead, run `./install.sh` inside it. The shell then ru
 
 On other distros, install these yourself and then run the installer with `--no-deps`:
 
-`hyprland xdg-desktop-portal-hyprland xdg-desktop-portal-gtk qt5-wayland qt6-wayland polkit quickshell matugen qt6-multimedia ffmpeg pipewire wireplumber playerctl brightnessctl upower power-profiles-daemon networkmanager bluez cliphist wl-clipboard wf-recorder hyprpicker libnotify curl git pacman-contrib kitty nautilus fish starship eza fd` and a Nerd Font such as JetBrains Mono Nerd Font.
+`hyprland xdg-desktop-portal-hyprland xdg-desktop-portal-gtk qt5-wayland qt6-wayland polkit quickshell matugen qt6-multimedia ffmpeg pipewire wireplumber playerctl brightnessctl upower power-profiles-daemon networkmanager bluez cliphist wl-clipboard wf-recorder hyprpicker tesseract tesseract-data-eng libnotify curl git pacman-contrib kitty nautilus fish starship eza fd` and a Nerd Font such as JetBrains Mono Nerd Font.
 
 ## Use
 
