@@ -101,26 +101,35 @@ PanelWindow {
         RowLayout {
             id: toolbar
 
+            property string hovering: ""
+
             anchors.centerIn: parent
             spacing: Theme.spacing.small
 
+            // a plain hint, or the name of the widget under the pointer
             Label {
                 Layout.leftMargin: Theme.spacing.small
-                Layout.rightMargin: Theme.spacing.small
-                text: "Drag widgets to move them."
+                Layout.rightMargin: Theme.spacing.xs
+                Layout.preferredWidth: 150
+                text: toolbar.hovering !== "" ? "Add " + toolbar.hovering.toLowerCase() : "Drag to move"
                 color: Theme.wall.inkMeta
             }
 
             Repeater {
                 model: root.types
 
-                Button {
+                IconButton {
+                    id: add
+
                     required property var modelData
 
-                    variant: "neutral"
                     icon: modelData.icon
-                    text: modelData.name
+                    filled: true
                     onClicked: root.draft = [...root.draft, { type: modelData.type, x: 0.4, y: 0.4 }]
+
+                    HoverHandler {
+                        onHoveredChanged: toolbar.hovering = hovered ? add.modelData.name : (toolbar.hovering === add.modelData.name ? "" : toolbar.hovering)
+                    }
                 }
             }
 
