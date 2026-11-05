@@ -43,7 +43,7 @@ GridLayout {
         title: "Do not disturb"
         subtitle: Notifs.dnd ? "On" : "Off"
         checked: Notifs.dnd
-        onToggled: Notifs.setDnd(!Config.options.notifications.dnd)
+        onToggled: Notifs.setDnd(!Notifs.dnd)
     }
 
     QuickToggle {

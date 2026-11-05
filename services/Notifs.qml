@@ -14,7 +14,22 @@ Singleton {
     // a reply field has the keyboard, the island holds the card open meanwhile
     property bool replying: false
     readonly property list<NotifEntry> popups: list.filter(n => n.popup)
-    readonly property bool dnd: Config.options.notifications.dnd
+    // the switch, or the quiet hours unless they were waved off for tonight
+    readonly property bool quiet: {
+        const o = Config.options.notifications;
+        if (!o.quietHours)
+            return false;
+        const at = t => {
+            const [h, m] = String(t).split(":").map(Number);
+            return (h || 0) * 60 + (m || 0);
+        };
+        const now = Time.now.getHours() * 60 + Time.now.getMinutes(), from = at(o.quietFrom), to = at(o.quietTo);
+        return from <= to ? now >= from && now < to : now >= from || now < to;
+    }
+    property bool quietSkipped: false
+    readonly property bool dnd: Config.options.notifications.dnd || (quiet && !quietSkipped)
+
+    onQuietChanged: quietSkipped = false
     property int nextKey: 1
 
     signal arrived(NotifEntry entry)
@@ -74,7 +89,12 @@ Singleton {
     }
 
     function setDnd(on: bool): void {
-        Config.set("notifications.dnd", on);
+        // turning it off during quiet hours skips them until they come round again
+        if (!on && quiet)
+            quietSkipped = true;
+        if (on && quiet)
+            quietSkipped = false;
+        Config.set("notifications.dnd", on && !quiet);
     }
 
     // short relative time for cards
@@ -136,7 +156,7 @@ Singleton {
         }
 
         function dnd(): void {
-            root.setDnd(!Config.options.notifications.dnd);
+            root.setDnd(!root.dnd);
         }
 
         function count(): int {

@@ -89,7 +89,11 @@ Singleton {
                 group: true,
                 timeout: 6000,
                 historyLimit: 100,
-                dnd: false
+                dnd: false,
+                // quiet hours, do not disturb turns itself on between these times
+                quietHours: false,
+                quietFrom: "23:00",
+                quietTo: "07:00"
             },
             osd: {
                 timeout: 1500
