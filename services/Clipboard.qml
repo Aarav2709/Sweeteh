@@ -17,6 +17,44 @@ Singleton {
 
     signal copied(string preview, bool image)
 
+    // texts kept at the top of the history, they survive a wipe and a restart
+    property list<string> pins: []
+
+    function pin(entry: var): void {
+        pinner.command = ["sh", "-c", `printf '%s' ${Paths.quote(entry.id + "\t")} | cliphist decode`];
+        pinner.running = true;
+    }
+
+    function unpin(text: string): void {
+        pins = pins.filter(p => p !== text);
+        pinStore.setText(JSON.stringify(pins));
+    }
+
+    Process {
+        id: pinner
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (text === "" || root.pins.includes(text))
+                    return;
+                root.pins = [text].concat(root.pins).slice(0, 30);
+                pinStore.setText(JSON.stringify(root.pins));
+            }
+        }
+    }
+
+    FileView {
+        id: pinStore
+
+        path: Paths.state + "/clipboard-pins.json"
+        printErrors: false
+        onLoaded: {
+            try {
+                root.pins = JSON.parse(text());
+            } catch (e) {}
+        }
+    }
+
     function refresh(): void {
         if (available)
             lister.running = true;

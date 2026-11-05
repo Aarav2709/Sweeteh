@@ -11,7 +11,10 @@ ColumnLayout {
     id: root
 
     property string filter: ""
-    readonly property var matches: filter === "" ? Clipboard.entries : Clipboard.entries.filter(e => !e.image && Fuzzy.score(filter, e.text) > 0)
+    // pinned texts first, then the history without the ones already pinned
+    readonly property var pinned: Clipboard.pins.map((t, i) => ({ id: "pin" + i, pinned: true, image: false, text: t.replace(/\s+/g, " ").trim(), full: t }))
+    readonly property var all: pinned.concat(Clipboard.entries.filter(e => e.image || !Clipboard.pins.some(p => p.replace(/\s+/g, " ").trim().startsWith(e.text.trim()))))
+    readonly property var matches: filter === "" ? all : all.filter(e => !e.image && Fuzzy.score(filter, e.text) > 0)
 
     signal done
 
@@ -27,7 +30,10 @@ ColumnLayout {
         const e = matches[index];
         if (!e)
             return;
-        Clipboard.copy(e);
+        if (e.pinned)
+            Actions.copy(e.full);
+        else
+            Clipboard.copy(e);
         done();
     }
 
@@ -104,7 +110,8 @@ ColumnLayout {
                 spacing: Theme.spacing.medium
 
                 Icon {
-                    name: row.modelData.image ? "image" : "notes"
+                    name: row.modelData.pinned ? "keep" : row.modelData.image ? "image" : "notes"
+                    fill: row.modelData.pinned ? 1 : 0
                     color: Theme.color.inkMeta
                 }
 
@@ -130,14 +137,21 @@ ColumnLayout {
 
                 IconButton {
                     size: 32
+                    visible: !row.modelData.image && !row.modelData.pinned
+                    icon: "keep"
+                    onClicked: Clipboard.pin(row.modelData)
+                }
+
+                IconButton {
+                    size: 32
                     icon: "close"
-                    onClicked: Clipboard.remove(row.modelData)
+                    onClicked: row.modelData.pinned ? Clipboard.unpin(row.modelData.full) : Clipboard.remove(row.modelData)
                 }
             }
 
             MouseArea {
                 anchors.fill: parent
-                anchors.rightMargin: 40
+                anchors.rightMargin: 76
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onEntered: list.currentIndex = row.index
