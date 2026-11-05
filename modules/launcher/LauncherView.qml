@@ -57,6 +57,11 @@ Item {
             ];
         if (sum !== null)
             out.push({ kind: "sum", icon: "calculate", title: String(sum), subtitle: "Press enter to copy", run: () => Actions.copy(String(sum)) });
+        // conversions like 10 km to mi or 20 usd in eur come back from qalc a moment later
+        else if (Qalc.answer !== "" && Qalc.answerFor === q) {
+            const a = Qalc.answer;
+            out.push({ kind: "sum", icon: "calculate", title: a, subtitle: "Press enter to copy", run: () => Actions.copy(a.replace(/^.*=\s*/, "")) });
+        }
         // > is the command palette, every shell action plus dates to copy, with a shell run as the last resort
         if (q.startsWith(">")) {
             const cmd = q.slice(1).trim();
@@ -156,6 +161,8 @@ Item {
         Actions.keystroke();
         if (Config.options.launcher.files)
             Files.search(query.startsWith(">") || query.startsWith(":") ? "" : query);
+        if (Calc.evaluate(query) === null && !query.startsWith(">") && !query.startsWith(":"))
+            Qalc.ask(query);
     }
 
     ColumnLayout {
