@@ -60,8 +60,9 @@ Singleton {
     }
 
     // copy text and let the island say so, the clipboard watcher says it by itself when it runs
+    // wl-copy holds the text, if the shell owned the clipboard its own text fields would wait on themselves to read it and freeze
     function copy(text: string): void {
-        Quickshell.clipboardText = text;
+        Quickshell.execDetached(["wl-copy", "--", text]);
         if (!Clipboard.watching)
             Clipboard.copied(text.length > 60 ? text.slice(0, 60) + "…" : text, false);
     }
