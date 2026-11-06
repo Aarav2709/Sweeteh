@@ -49,7 +49,7 @@ packages=(
   quickshell matugen qt6-multimedia qt6-multimedia-ffmpeg ffmpeg
   pipewire wireplumber playerctl brightnessctl upower power-profiles-daemon
   networkmanager bluez bluez-utils cava hyprsunset fprintd
-  cliphist wl-clipboard wf-recorder hyprpicker tesseract tesseract-data-eng libqalculate libnotify curl git glib2 pacman-contrib
+  cliphist wl-clipboard wf-recorder hyprpicker tesseract tesseract-data-eng libqalculate translate-shell libnotify curl git glib2 pacman-contrib
   kitty nautilus ttf-jetbrains-mono-nerd fish starship eza fd
 )
 

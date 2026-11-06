@@ -160,6 +160,13 @@ Singleton {
     function answers(cmd: string): list<var> {
         const out = moments(cmd);
         const lower = cmd.toLowerCase();
+        // tr hola, or tr good morning in japanese
+        const tr = cmd.match(/^(?:tr|translate)\s+(.+)$/i);
+        if (tr) {
+            Qt.callLater(() => Translator.ask(tr[1]));
+            const a = Translator.answerFor === tr[1].trim() ? Translator.answer : "";
+            out.push({ kind: "copy", icon: "translate", title: !Translator.installed ? "Install translate-shell to translate" : a || (Translator.loading ? "Translating" : "Translate " + tr[1].trim()), subtitle: a ? "Press enter to copy" : "", run: () => a ? Actions.copy(a) : null });
+        }
         const num = lower.match(/^(volume|vol|brightness|bright|ws|workspace|go)\s+(\d+)%?$/);
         if (num) {
             const n = Number(num[2]);
