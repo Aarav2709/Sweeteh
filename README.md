@@ -66,7 +66,7 @@ Sweeteh follows tagged releases. It checks for a new one a minute after login an
 - **Backlit look.** Pills, keys and cards sit on a ledge lit from below in the wallpaper's hue, and every move glides into place.
 - **Command palette.** Type `>` in the launcher for every shell action, then things like `>wifi`, `>date -3d`, `>time +4h`, `>timer 5m`, `>vol 40`, `>ws 3`, `>close firefox`, `>#ff8800`, `>uuid` or `>pick a color` from the screen. Enter runs or copies, Ctrl and a number picks a row, Tab completes a word, and what you use most comes first. Type `:` to pick an emoji or symbol to copy.
 - **A welcome tour** on first start, and again any time with `>welcome`.
-- **Wallpapers.** Images, GIFs and videos, with circle, wipe, fade and zoom transitions. Video wallpapers pause under fullscreen windows, and can also pause behind tiled ones.
+- **Wallpapers.** Images, GIFs and videos, plus a search of [wallhaven](https://wallhaven.cc) right in the picker, with circle, wipe, fade and zoom transitions. Video wallpapers pause under fullscreen windows, and can also pause behind tiled ones.
 - **A themed terminal.** Kitty runs fish with a starship prompt, both colored from the wallpaper.
 - **Tray menus** drawn by the shell instead of plain app menus.
 - **Colors from the wallpaper.** Matugen builds the palette. The shell, window borders, kitty, Nautilus and other GTK apps, folder icons, Vesktop and Zed all follow it. Pick the Sweeteh theme in Zed to use it.

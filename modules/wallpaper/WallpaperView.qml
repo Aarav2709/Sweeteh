@@ -11,6 +11,8 @@ Item {
     id: root
 
     property string filter: ""
+    // browsing wallhaven instead of the local folder
+    property bool online: false
     readonly property var matches: Wallpapers.files.filter(f => f.toLowerCase().includes(filter.toLowerCase()))
 
     implicitWidth: column.width
@@ -41,10 +43,15 @@ Item {
                 color: Theme.color.layer1
                 outlineOnFocus: false
                 icon: "search"
-                placeholder: "Filter wallpapers"
-                onEdited: root.filter = text
+                placeholder: root.online ? "Search wallhaven, enter to look" : "Filter wallpapers"
+                onEdited: {
+                    if (!root.online)
+                        root.filter = text;
+                }
                 onAccepted: {
-                    if (root.matches[grid.currentIndex])
+                    if (root.online)
+                        Wallhaven.search(text);
+                    else if (root.matches[grid.currentIndex])
                         Wallpapers.set(root.matches[grid.currentIndex]);
                 }
                 input.Keys.onPressed: e => {
@@ -65,6 +72,20 @@ Item {
             }
 
             Button {
+                variant: root.online ? "filled" : "neutral"
+                icon: "travel_explore"
+                text: root.online ? "Online" : "Local"
+                onClicked: {
+                    root.online = !root.online;
+                    search.text = "";
+                    root.filter = "";
+                    if (root.online && Wallhaven.results.length === 0)
+                        Wallhaven.search("");
+                }
+            }
+
+            Button {
+                visible: !root.online
                 variant: "neutral"
                 icon: "shuffle"
                 text: "Random"
@@ -86,7 +107,7 @@ Item {
 
             Layout.fillWidth: true
             Layout.preferredHeight: Math.min(cellHeight * 2.5, Math.max(cellHeight, contentHeight))
-            visible: count > 0
+            visible: count > 0 && !root.online
             clip: true
             cellWidth: width / columns
             cellHeight: cellWidth * 0.62
@@ -196,10 +217,91 @@ Item {
             }
         }
 
+        // wallhaven results, a click downloads into the wallpaper folder and sets it
+        GridView {
+            id: web
+
+            Layout.fillWidth: true
+            Layout.preferredHeight: grid.cellHeight * 2.5
+            visible: root.online && count > 0
+            clip: true
+            cellWidth: grid.cellWidth
+            cellHeight: grid.cellHeight
+            model: Wallhaven.results
+
+            delegate: Item {
+                id: shot
+
+                required property var modelData
+
+                width: web.cellWidth
+                height: web.cellHeight
+
+                ClippingRectangle {
+                    anchors.fill: parent
+                    anchors.margins: Theme.spacing.xs
+                    radius: Theme.radius.large
+                    color: Theme.color.layer2
+                    scale: webHover.hovered ? 1.03 : 1
+
+                    Behavior on scale {
+                        Anim {
+                            duration: Theme.anim.fast
+                        }
+                    }
+
+                    Image {
+                        anchors.fill: parent
+                        source: shot.modelData.thumb
+                        fillMode: Image.PreserveAspectCrop
+                        asynchronous: true
+                        sourceSize: Qt.size(400, 250)
+                    }
+
+                    Rectangle {
+                        anchors.left: parent.left
+                        anchors.bottom: parent.bottom
+                        anchors.margins: Theme.spacing.small
+                        width: sizeLabel.implicitWidth + Theme.spacing.small * 2
+                        height: 22
+                        radius: height / 2
+                        color: Theme.color.panel
+
+                        Label {
+                            id: sizeLabel
+
+                            anchors.centerIn: parent
+                            text: Wallhaven.fetching === shot.modelData.id ? "Downloading" : shot.modelData.size
+                            font.pixelSize: Theme.font.tiny
+                            font.weight: Font.DemiBold
+                        }
+                    }
+                }
+
+                HoverHandler {
+                    id: webHover
+
+                    cursorShape: Qt.PointingHandCursor
+                }
+
+                TapHandler {
+                    onTapped: Wallhaven.pick(shot.modelData)
+                }
+            }
+        }
+
+        Label {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.margins: Theme.spacing.xl
+            visible: root.online && web.count === 0
+            text: Wallhaven.loading ? "Looking on wallhaven." : Wallhaven.failed ? "Could not reach wallhaven." : "Nothing found, try other words."
+            color: Theme.color.inkMeta
+        }
+
         ColumnLayout {
             Layout.fillWidth: true
             Layout.margins: Theme.spacing.xl
-            visible: grid.count === 0
+            visible: grid.count === 0 && !root.online
             spacing: Theme.spacing.medium
 
             Icon {
