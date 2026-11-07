@@ -11,7 +11,22 @@ repo="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
 say() { printf '%s\n' "$*"; }
 
 # take the shell keybinds out of hyprland once the shell is gone
+# the shell's long running helpers outlive it when it stops or crashes, and each restart would add another set
+# only ones left without a parent are ended, a running shell keeps its own
+reap() {
+  local pat pid
+  for pat in "^(/usr/bin/)?wl-paste --watch sh -c f=" "^(/usr/bin/)?wl-paste --type image --watch sh -c cliphist" \
+    "^(/usr/bin/)?udevadm monitor --udev -s backlight" "^(/usr/bin/)?gdbus monitor --system --dest org.freedesktop.login1" \
+    "^(/usr/bin/)?dbus-monitor --session type='signal',interface='com.canonical.Unity.LauncherEntry'" "^(/usr/bin/)?cava -p .*cava.conf"; do
+    for pid in $(pgrep -f "$pat" 2>/dev/null); do
+      [[ "$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d ' ')" == 1 ]] && kill "$pid" 2>/dev/null
+    done
+  done
+  return 0
+}
+
 cleanup() {
+  reap
   if [[ -s "$unbind" ]]; then
     hyprctl eval "$(cat "$unbind")" >/dev/null 2>&1 || true
     rm -f "$unbind"
@@ -39,6 +54,7 @@ run() {
   trap 'stopping=1; kill "$child" 2>/dev/null' INT TERM
   stopping=0
   while true; do
+    reap
     qs -c "$name" --log-rules "qt.qpa.wayland.textinput=false" "$@" &
     child=$!
     status=0
