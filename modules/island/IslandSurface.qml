@@ -116,9 +116,21 @@ Item {
         // at start the island slides out of the top edge
         // never below zero, a bounce past the edge would leave a gap above the island
         Translate {
-            y: Math.min(0, -(1 - root.intro) * (root.height + Theme.depth.offset + 4))
+            y: Math.min(0, -Math.max(1 - root.intro, root.tuck) * (root.height + Theme.depth.offset + 4))
         }
     ]
+
+    // tucked above the edge while something is fullscreen, and not drawn at all once it is out of sight
+    property bool tucked: false
+    property real tuck: tucked ? 1 : 0
+
+    visible: tuck < 1
+
+    Behavior on tuck {
+        enabled: Theme.anim.speed > 0
+
+        Glide {}
+    }
 
     // a plain value, not a binding, so a config change can never send the island back off screen
     property real intro: 1

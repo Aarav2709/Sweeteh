@@ -41,6 +41,8 @@ PanelWindow {
     // views driven by the keyboard take it whole, like the panels they replaced
     readonly property bool typing: ["welcome", "launcher", "clipboard", "power", "wallpaper", "overview", "cheatsheet", "modeswitcher", "settings"].includes(hosted) || Auth.active || (Notifs.replying && flashing === "notification")
     readonly property bool expanded: hosted !== "" || Auth.active
+    // over a fullscreen window the resting island tucks away, anything it has to say still brings it out
+    readonly property bool tucked: Perf.fullscreen && Config.options.island.hideFullscreen && !expanded && flashing === ""
     readonly property string state: Auth.active ? "auth" : hosted === "island" ? "dashboard" : hosted !== "" ? hosted : flashing !== "" ? flashing : wsPeek ? "workspaces" : peeking ? "peek" : "idle"
 
     function flash(kind: string, ms: int): void {
@@ -149,8 +151,9 @@ PanelWindow {
     // so it is no wider than the widest view, the overview with its corner flares
     implicitWidth: Math.min(screen?.width ?? 1920, 1200)
     implicitHeight: 720
+    // tucked away it lets every click through to the window under it
     mask: Region {
-        item: island
+        item: root.tucked ? null : island
     }
 
     // setting a zone forces normal exclusion, so it is only bound while the island stands alone
@@ -585,6 +588,7 @@ PanelWindow {
         id: island
 
         anchors.horizontalCenter: parent.horizontalCenter
+        tucked: root.tucked
         mode: root.state
         messageIcon: root.messageIcon
         messageText: root.messageText

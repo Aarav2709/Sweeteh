@@ -113,6 +113,8 @@ Singleton {
                 workspacePeek: true,
                 // the island grows out of the edge and the pills drop in at start
                 intro: true,
+                // the island tucks away over a fullscreen game or video, panels and alerts still come out
+                hideFullscreen: true,
                 // hover the island during music for a small player, with the sung line in it
                 peek: true,
                 // how long the pointer rests on the island before the player peeks, in ms
