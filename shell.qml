@@ -34,6 +34,13 @@ ShellRoot {
         Zoom.level;
         SongSearch.listening;
         Tablet.tablet;
+        // the launcher's own services, created here so none is first built in the middle of a keystroke
+        Emoji.recent;
+        Commands.recent;
+        Qalc.installed;
+        Files.query;
+        Translator.installed;
+        Apps.usage;
     }
 
     // bundled fonts, loaded here so nothing has to be installed
