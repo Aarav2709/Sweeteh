@@ -41,7 +41,6 @@ Item {
 
     function play(): void {
         outro.stop();
-        breathe.stop();
         fill = plugged ? 0 : Battery.level;
         bolt = 0;
         intro.restart();
@@ -52,8 +51,7 @@ Item {
             play();
         } else {
             intro.stop();
-            breathe.stop();
-            shine = 0;
+                shine = 0;
             outro.restart();
         }
     }
@@ -64,7 +62,7 @@ Item {
             play();
     }
 
-    // burst of color and the shine, then a calm breathing until the flash ends
+    // the color eases in once and holds, the turning shape is the only motion, no flashes or breathing
     SequentialAnimation {
         id: intro
 
@@ -72,28 +70,9 @@ Item {
             NumberAnimation {
                 target: root
                 property: "glow"
-                to: 1
+                to: 0.8
                 duration: 320
                 easing.type: Easing.OutCubic
-            }
-
-            SequentialAnimation {
-                NumberAnimation {
-                    target: root
-                    property: "shine"
-                    from: 0
-                    to: 1
-                    duration: 300
-                    easing.type: Easing.OutCubic
-                }
-
-                NumberAnimation {
-                    target: root
-                    property: "shine"
-                    to: 0
-                    duration: 1000
-                    easing.type: Easing.InOutSine
-                }
             }
 
             NumberAnimation {
@@ -119,33 +98,6 @@ Item {
             }
         }
 
-        ScriptAction {
-            script: {
-                breathe.restart();
-            }
-        }
-    }
-
-    SequentialAnimation {
-        id: breathe
-
-        loops: Animation.Infinite
-
-        NumberAnimation {
-            target: root
-            property: "glow"
-            to: root.warning ? 0.35 : 0.55
-            duration: root.kind === "critical" ? 380 : 900
-            easing.type: Easing.InOutSine
-        }
-
-        NumberAnimation {
-            target: root
-            property: "glow"
-            to: root.warning ? 1 : 0.8
-            duration: root.kind === "critical" ? 380 : 900
-            easing.type: Easing.InOutSine
-        }
     }
 
     // back to the plain notch while the island shrinks to rest

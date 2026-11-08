@@ -234,7 +234,7 @@ Item {
 
     // how bright the light under the island burns, it breathes with the bass and flares on a moment
     // the bass is sampled slowly, a per frame pulse kept the whole window repainting and made the bars stutter
-    readonly property real backlight: Math.min(1, 0.45 + (Media.playing ? 0.1 + beat * 0.35 : 0) + glowView.glow * 0.4 + glowView.shine * 0.3 + keyFlare * 0.5)
+    readonly property real backlight: Math.min(1, 0.45 + (Media.playing ? 0.1 + beat * 0.35 : 0) + keyFlare * 0.5)
     property real beat: 0
 
     Timer {
