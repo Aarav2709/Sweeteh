@@ -3,6 +3,8 @@
 //@ pragma DefaultEnv QSG_RENDER_LOOP=threaded
 //@ pragma DefaultEnv QT_QUICK_CONTROLS_STYLE=Basic
 //@ pragma DefaultEnv QT_QUICK_FLICKABLE_WHEEL_DECELERATION=10000
+// qt 6.12's jit leaves untagged values on the script stack and the collector then crashes on them, the interpreter does not
+//@ pragma Env QV4_FORCE_INTERPRETER=1
 
 import QtQuick
 import Quickshell

@@ -55,7 +55,8 @@ run() {
   stopping=0
   while true; do
     reap
-    qs -c "$name" --log-rules "qt.qpa.wayland.textinput=false" "$@" &
+    # quickshell's own crash window keeps the dead shell's parent alive, so the restart below would never happen
+    QS_DISABLE_CRASH_HANDLER=1 QV4_FORCE_INTERPRETER=1 qs -c "$name" --log-rules "qt.qpa.wayland.textinput=false" "$@" &
     child=$!
     status=0
     wait "$child" || status=$?
