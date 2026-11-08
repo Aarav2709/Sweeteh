@@ -172,6 +172,7 @@ Item {
             size: 26
             color: root.accent
             glyph: root.alert ? Theme.color.fgError : Theme.color.fgPrimary
+            spin: root.shown
             scale: root.bolt
         }
 
