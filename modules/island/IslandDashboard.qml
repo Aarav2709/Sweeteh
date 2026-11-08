@@ -77,62 +77,19 @@ Item {
             Layout.alignment: Qt.AlignTop
             spacing: Theme.spacing.medium
 
-            RowLayout {
-                Layout.fillWidth: true
+            ColumnLayout {
                 Layout.leftMargin: Theme.spacing.small
-                Layout.rightMargin: Theme.spacing.small
-                spacing: Theme.spacing.small
+                spacing: 0
 
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 0
-
-                    Label {
-                        text: Qt.formatDate(Time.now, "dddd")
-                        font.pixelSize: Theme.font.headline
-                        font.weight: Font.DemiBold
-                    }
-
-                    Label {
-                        text: Qt.formatDate(Time.now, "d MMMM yyyy")
-                        color: Theme.color.inkMeta
-                    }
+                Label {
+                    text: Qt.formatDate(Time.now, "dddd")
+                    font.pixelSize: Theme.font.headline
+                    font.weight: Font.DemiBold
                 }
 
-                // the sky outside next to the date, a click asks again
-                ColumnLayout {
-                    visible: Weather.ready
-                    spacing: 0
-
-                    RowLayout {
-                        Layout.alignment: Qt.AlignRight
-                        spacing: Theme.spacing.xxs
-
-                        Icon {
-                            name: Weather.icon
-                            fill: 1
-                            size: 22
-                            color: Theme.color.primary
-                        }
-
-                        Label {
-                            text: Weather.temp
-                            font.pixelSize: Theme.font.large
-                            font.weight: Font.DemiBold
-                        }
-                    }
-
-                    Label {
-                        Layout.alignment: Qt.AlignRight
-                        Layout.maximumWidth: 120
-                        text: Weather.condition
-                        font.pixelSize: Theme.font.small
-                        color: Theme.color.inkMeta
-                    }
-
-                    TapHandler {
-                        onTapped: Weather.refresh()
-                    }
+                Label {
+                    text: Qt.formatDate(Time.now, "d MMMM yyyy")
+                    color: Theme.color.inkMeta
                 }
             }
 
