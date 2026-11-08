@@ -8,177 +8,158 @@ import qs.theme
 import qs.services
 import qs.components
 
-// on screen keyboard for tablet mode, keys go out through wtype so the app in front keeps its focus
+// on screen keyboard laid out like end-4's, a floating card of tonal keys along the bottom edge
+// keys go out through wtype, so the app in front keeps its focus
 Scope {
     id: root
 
-    // one shot shift, and modifiers that stay down until the next key
-    property bool shift: false
-    property var held: []
+    // 0 off, 1 for the next key, 2 locked like caps lock, a second tap on shift within 300 ms locks it
+    property int shiftMode: 0
+    property real shiftTapped: 0
+    property bool ctrl: false
+    property bool alt: false
+    // pinned, windows make room for the keyboard instead of sliding under it
+    property bool pinned: false
 
-    // label, what it types or the keysym it sends, and how wide it is in units
-    readonly property var rows: [[["`", "~"], ["1", "!"], ["2", "@"], ["3", "#"], ["4", "$"], ["5", "%"], ["6", "^"], ["7", "&"], ["8", "*"], ["9", "("], ["0", ")"], ["-", "_"], ["=", "+"],
-            {
-                label: "backspace",
-                sym: "BackSpace",
-                w: 1.6,
-                icon: true,
-                repeat: true
-            }
-        ], [
-            {
-                label: "Tab",
-                sym: "Tab",
-                w: 1.4
-            },
-            "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", ["[", "{"], ["]", "}"], ["\\", "|"]], [
-            {
-                label: "Esc",
-                sym: "Escape",
-                w: 1.7
-            },
-            "a", "s", "d", "f", "g", "h", "j", "k", "l", [";", ":"], ["'", "\""],
-            {
-                label: "keyboard_return",
-                sym: "Return",
-                w: 1.9,
-                icon: true
-            }
-        ], [
-            {
-                label: "shift",
-                mod: "shift",
-                w: 2.2,
-                icon: true
-            },
-            "z", "x", "c", "v", "b", "n", "m", [",", "<"], [".", ">"], ["/", "?"],
-            {
-                label: "keyboard_arrow_up",
-                sym: "Up",
-                icon: true,
-                repeat: true
-            },
-            {
-                label: "shift",
-                mod: "shift",
-                w: 1.4,
-                icon: true
-            }
-        ], [
-            {
-                label: "Ctrl",
-                mod: "ctrl",
-                w: 1.4
-            },
-            {
-                label: "Super",
-                mod: "logo",
-                w: 1.4
-            },
-            {
-                label: "Alt",
-                mod: "alt",
-                w: 1.4
-            },
-            {
-                label: "",
-                sym: "space",
-                w: 6.6
-            },
-            {
-                label: "keyboard_arrow_left",
-                sym: "Left",
-                icon: true,
-                repeat: true
-            },
-            {
-                label: "keyboard_arrow_down",
-                sym: "Down",
-                icon: true,
-                repeat: true
-            },
-            {
-                label: "keyboard_arrow_right",
-                sym: "Right",
-                icon: true,
-                repeat: true
-            },
-            {
-                label: "keyboard_hide",
-                hide: true,
-                w: 1.4,
-                icon: true
-            }
-        ]]
-    // keysym names for characters typed while a modifier is held
-    readonly property var names: ({
-            "-": "minus",
-            "=": "equal",
-            "[": "bracketleft",
-            "]": "bracketright",
-            "\\": "backslash",
-            ";": "semicolon",
-            "'": "apostrophe",
-            ",": "comma",
-            ".": "period",
-            "/": "slash",
-            "`": "grave"
+    readonly property real unit: 45
+    readonly property var widths: ({
+            normal: 1,
+            fn: 1,
+            tab: 1.6,
+            caps: 1.9,
+            shift: 2.5,
+            control: 1.3
+        })
+    readonly property var heights: ({
+            normal: 1,
+            fn: 0.7,
+            tab: 1,
+            caps: 1,
+            shift: 1,
+            control: 1
         })
 
-    function spec(k: var): var {
-        if (k === undefined || k === null)
-            return {
-                label: "",
-                w: 1
-            };
-        if (typeof k === "string")
-            return {
-                label: k,
-                text: k,
-                shifted: k.toUpperCase(),
-                w: 1
-            };
-        if (Array.isArray(k))
-            return {
-                label: k[0],
-                text: k[0],
-                shifted: k[1],
-                w: 1
-            };
-        return Object.assign({
-            w: 1
-        }, k);
+    // label, its shifted label, the keysym it sends, and its shape
+    function k(label: string, shifted: string, sym: string, shape: string): var {
+        return {
+            label: label,
+            shifted: shifted || label,
+            sym: sym,
+            shape: shape || "normal"
+        };
     }
 
-    function press(k: var): void {
-        if (k.hide) {
-            Tablet.keyboard = false;
+    function letters(s: string): var {
+        return s.split("").map(c => k(c, c.toUpperCase(), c, "normal"));
+    }
+
+    readonly property var rows: [[k("Esc", "", "Escape", "fn"), k("F1", "", "F1", "fn"), k("F2", "", "F2", "fn"), k("F3", "", "F3", "fn"), k("F4", "", "F4", "fn"), k("F5", "", "F5", "fn"), k("F6", "", "F6", "fn"), k("F7", "", "F7", "fn"), k("F8", "", "F8", "fn"), k("F9", "", "F9", "fn"), k("F10", "", "F10", "fn"), k("F11", "", "F11", "fn"), k("F12", "", "F12", "fn"), k("PrtSc", "", "Print", "fn"), k("Del", "", "Delete", "fn")], [k("`", "~", "grave"), k("1", "!", "1"), k("2", "@", "2"), k("3", "#", "3"), k("4", "$", "4"), k("5", "%", "5"), k("6", "^", "6"), k("7", "&", "7"), k("8", "*", "8"), k("9", "(", "9"), k("0", ")", "0"), k("-", "_", "minus"), k("=", "+", "equal"), Object.assign(k("Backspace", "", "BackSpace", "expand"), {
+                icon: "backspace",
+                repeat: true
+            })], [k("Tab", "", "Tab", "tab")].concat(letters("qwertyuiop"), [k("[", "{", "bracketleft"), k("]", "}", "bracketright"), k("\\", "|", "backslash", "expand")]), [
+            {
+                shape: "empty"
+            },
+            {
+                shape: "empty"
+            }
+        ].concat(letters("asdfghjkl"), [k(";", ":", "semicolon"), k("'", "\"", "apostrophe"), Object.assign(k("Enter", "", "Return", "expand"), {
+                icon: "subdirectory_arrow_left"
+            })]), [Object.assign(k("Shift", "Shift", "", "shift"), {
+                mod: "shift"
+            })].concat(letters("zxcvbnm"), [k(",", "<", "comma"), k(".", ">", "period"), k("/", "?", "slash"), Object.assign(k("Shift", "Shift", "", "expand"), {
+                mod: "shift"
+            })]), [Object.assign(k("Ctrl", "", "", "control"), {
+                mod: "ctrl"
+            }), Object.assign(k("Alt", "", "", "normal"), {
+                mod: "alt"
+            }), k("Space", "", "space", "space"), Object.assign(k("Left", "", "Left"), {
+                icon: "keyboard_arrow_left",
+                repeat: true
+            }), Object.assign(k("Down", "", "Down"), {
+                icon: "keyboard_arrow_down",
+                repeat: true
+            }), Object.assign(k("Up", "", "Up"), {
+                icon: "keyboard_arrow_up",
+                repeat: true
+            }), Object.assign(k("Right", "", "Right"), {
+                icon: "keyboard_arrow_right",
+                repeat: true
+            }), Object.assign(k("Alt", "", "", "normal"), {
+                mod: "alt"
+            }), Object.assign(k("Ctrl", "", "", "control"), {
+                mod: "ctrl"
+            })]]
+
+    function tapShift(): void {
+        const now = Date.now();
+        if (shiftMode === 0)
+            shiftMode = 1;
+        else if (shiftMode === 1 && now - shiftTapped < 300)
+            shiftMode = 2;
+        else
+            shiftMode = 0;
+        shiftTapped = now;
+    }
+
+    function send(key: var): void {
+        if (key.mod === "shift") {
+            tapShift();
             return;
         }
-        if (k.mod) {
-            if (k.mod === "shift")
-                shift = !shift;
+        if (key.mod === "ctrl") {
+            ctrl = !ctrl;
+            return;
+        }
+        if (key.mod === "alt") {
+            alt = !alt;
+            return;
+        }
+        const mods = [];
+        if (ctrl)
+            mods.push("ctrl");
+        if (alt)
+            mods.push("alt");
+        const printable = key.label.length === 1;
+        const args = ["wtype"];
+        if (printable && mods.length === 0) {
+            // a plain character is typed as text, so the app gets the right symbol whatever the layout
+            const text = shiftMode > 0 ? key.shifted : key.label;
+            if (text === "-")
+                args.push("-k", "minus");
             else
-                held = held.includes(k.mod) ? held.filter(m => m !== k.mod) : held.concat([k.mod]);
-            return;
+                args.push(text);
+        } else {
+            // named keys and shortcuts press the keysym with the held modifiers around it
+            if (shiftMode > 0)
+                mods.push("shift");
+            for (const m of mods)
+                args.push("-M", m);
+            args.push("-k", key.sym);
+            for (const m of mods)
+                args.push("-m", m);
         }
-        const down = held.flatMap(m => ["-M", m]);
-        const up = held.flatMap(m => ["-m", m]);
-        let send;
-        if (k.sym)
-            send = ["-k", k.sym];
-        else if (held.length > 0)
-            send = (names[k.text] ? ["-k", names[k.text]] : [k.text]);
-        else {
-            const t = shift ? k.shifted : k.text;
-            send = t === "-" ? ["-k", "minus"] : [t];
+        Quickshell.execDetached(args);
+        if (shiftMode === 1)
+            shiftMode = 0;
+    }
+
+    function close(): void {
+        Tablet.keyboard = false;
+    }
+
+    Connections {
+        target: Tablet
+
+        function onKeyboardChanged(): void {
+            if (Tablet.keyboard) {
+                probe.running = true;
+            } else {
+                root.shiftMode = 0;
+                root.ctrl = false;
+                root.alt = false;
+            }
         }
-        // shift with another modifier is held down for real, alone it already picked the character
-        const withShift = held.length > 0 && shift ? ["-M", "shift"] : [];
-        const releaseShift = held.length > 0 && shift ? ["-m", "shift"] : [];
-        Quickshell.execDetached(["wtype"].concat(withShift, down, send, up, releaseShift));
-        shift = false;
-        held = [];
     }
 
     // missing wtype is offered once when the keyboard opens
@@ -194,22 +175,10 @@ Scope {
         }
     }
 
-    Connections {
-        target: Tablet
-
-        function onKeyboardChanged(): void {
-            if (Tablet.keyboard)
-                probe.running = true;
-        }
-    }
-
-    // the keyboard itself, along the bottom of the focused screen, windows move up to make room
     LazyLoader {
         active: Tablet.keyboard
 
         PanelWindow {
-            id: board
-
             screen: Hypr.screenFor(Hypr.focusedScreenName)
             color: "transparent"
             WlrLayershell.namespace: "sweeteh-keyboard"
@@ -218,107 +187,174 @@ Scope {
             anchors.bottom: true
             anchors.left: true
             anchors.right: true
-            implicitHeight: Math.round(Math.min(340, (screen?.height ?? 1080) * 0.36))
-            exclusiveZone: implicitHeight
+            implicitHeight: card.height + Theme.spacing.medium * 2
+            exclusiveZone: root.pinned ? implicitHeight : 0
+            mask: Region {
+                item: card
+            }
 
             Rectangle {
-                anchors.fill: parent
-                anchors.topMargin: 0
-                topLeftRadius: Theme.radius.large
-                topRightRadius: Theme.radius.large
+                id: card
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: Theme.spacing.medium
+                width: content.implicitWidth + 20
+                height: content.implicitHeight + 20
+                radius: Theme.radius.large
                 color: Theme.color.panel
+                border.width: Theme.depth.rim
+                border.color: Theme.color.depthRim
 
-                ColumnLayout {
-                    id: keys
+                RowLayout {
+                    id: content
 
-                    // one unit is the width of a letter key, the widest row sets it
-                    readonly property real unit: (width - Theme.spacing.xs * 14) / 15
+                    anchors.centerIn: parent
+                    spacing: 5
 
-                    anchors.fill: parent
-                    anchors.margins: Theme.spacing.medium
-                    anchors.bottomMargin: Theme.spacing.medium + Theme.depth.offset
-                    spacing: Theme.spacing.xs
+                    ColumnLayout {
+                        Layout.alignment: Qt.AlignVCenter
+                        spacing: 5
 
-                    Repeater {
-                        model: root.rows
+                        Rectangle {
+                            implicitWidth: 40
+                            implicitHeight: 40
+                            radius: Theme.radius.medium
+                            color: root.pinned ? Theme.color.primary : Theme.color.layer1
 
-                        RowLayout {
-                            id: row
+                            Icon {
+                                anchors.centerIn: parent
+                                name: "keep"
+                                fill: root.pinned ? 1 : 0
+                                color: root.pinned ? Theme.color.fgPrimary : Theme.color.ink
+                            }
 
-                            required property var modelData
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: root.pinned = !root.pinned
+                            }
+                        }
 
-                            Layout.alignment: Qt.AlignHCenter
-                            Layout.fillHeight: true
-                            spacing: Theme.spacing.xs
+                        Rectangle {
+                            implicitWidth: 40
+                            implicitHeight: 40
+                            radius: Theme.radius.medium
+                            color: false ? Theme.color.primary : Theme.color.layer1
 
-                            Repeater {
-                                model: row.modelData
+                            Icon {
+                                anchors.centerIn: parent
+                                name: "keyboard_hide"
+                                fill: false ? 1 : 0
+                                color: false ? Theme.color.fgPrimary : Theme.color.ink
+                            }
 
-                                Rectangle {
-                                    id: key
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: root.close()
+                            }
+                        }
+                    }
 
-                                    required property var modelData
-                                    readonly property var k: root.spec(modelData)
-                                    readonly property bool on: (k.mod === "shift" && root.shift) || (k.mod !== undefined && root.held.includes(k.mod))
-                                    readonly property bool down: touch.pressed
+                    Rectangle {
+                        Layout.fillHeight: true
+                        Layout.topMargin: 20
+                        Layout.bottomMargin: 20
+                        implicitWidth: 1
+                        color: Theme.color.inkFaint
+                        opacity: 0.4
+                    }
 
-                                    Layout.fillHeight: true
-                                    Layout.preferredWidth: keys.unit * k.w + Theme.spacing.xs * (k.w - 1)
-                                    radius: Theme.radius.medium
-                                    color: on ? Theme.color.primary : k.text !== undefined || k.sym === "space" ? Theme.color.layer2 : Theme.color.layer1
-                                    transform: Translate {
-                                        y: ledge.shift
-                                    }
+                    ColumnLayout {
+                        spacing: 5
 
-                                    Depth {
-                                        id: ledge
+                        Repeater {
+                            model: root.rows
 
-                                        sink: key.down ? 1 : 0
-                                    }
+                            RowLayout {
+                                id: row
 
-                                    Label {
-                                        anchors.centerIn: parent
-                                        visible: !key.k.icon
-                                        text: (key.k.text !== undefined ? (root.shift ? key.k.shifted : key.k.text) : key.k.label) ?? ""
-                                        font.pixelSize: key.k.text !== undefined ? Theme.font.large : Theme.font.small
-                                        font.weight: Font.Medium
-                                        color: key.on ? Theme.color.fgPrimary : Theme.color.ink
-                                    }
+                                required property var modelData
 
-                                    Icon {
-                                        anchors.centerIn: parent
-                                        visible: key.k.icon === true
-                                        name: key.k.label ?? ""
-                                        fill: key.on ? 1 : 0
-                                        color: key.on ? Theme.color.fgPrimary : Theme.color.ink
-                                    }
+                                Layout.fillWidth: true
+                                spacing: 5
 
-                                    MouseArea {
-                                        id: touch
+                                Repeater {
+                                    model: row.modelData
 
-                                        anchors.fill: parent
-                                        onPressed: {
-                                            root.press(key.k);
-                                            if (key.k.repeat)
-                                                again.start();
+                                    Rectangle {
+                                        id: button
+
+                                        required property var modelData
+                                        readonly property var key: modelData
+                                        readonly property bool toggled: (key.mod === "shift" && root.shiftMode > 0) || (key.mod === "ctrl" && root.ctrl) || (key.mod === "alt" && root.alt)
+                                        readonly property bool empty: key.shape === "empty"
+
+                                        implicitWidth: root.unit * (root.widths[key.shape] ?? 1)
+                                        implicitHeight: root.unit * (root.heights[key.shape] ?? 1)
+                                        Layout.fillWidth: key.shape === "space" || key.shape === "expand"
+                                        radius: Theme.radius.small
+                                        color: empty ? "transparent" : toggled ? Theme.color.primary : Theme.color.layer1
+
+                                        // the press darkens or lightens the key like a ripple settling
+                                        Rectangle {
+                                            anchors.fill: parent
+                                            radius: parent.radius
+                                            visible: !button.empty
+                                            color: button.toggled ? Theme.color.fgPrimary : Theme.color.ink
+                                            opacity: touch.pressed ? 0.16 : touch.containsMouse ? 0.06 : 0
+
+                                            Behavior on opacity {
+                                                Anim {
+                                                    duration: Theme.anim.fast
+                                                }
+                                            }
                                         }
-                                        onReleased: again.stop()
-                                        onCanceled: again.stop()
-                                    }
 
-                                    // held arrows and backspace keep going
-                                    Timer {
-                                        id: again
-
-                                        interval: 380
-                                        repeat: true
-                                        onTriggered: {
-                                            interval = 60;
-                                            root.press(key.k);
+                                        Label {
+                                            anchors.centerIn: parent
+                                            visible: !button.empty && !button.key.icon
+                                            text: button.key.label === undefined ? "" : root.shiftMode === 2 && button.key.mod === "shift" ? "Caps" : root.shiftMode > 0 ? button.key.shifted : button.key.label
+                                            font.pixelSize: button.key.shape === "fn" ? Theme.font.small : Theme.font.large
+                                            color: button.toggled ? Theme.color.fgPrimary : Theme.color.ink
                                         }
-                                        onRunningChanged: {
-                                            if (!running)
-                                                interval = 380;
+
+                                        Icon {
+                                            anchors.centerIn: parent
+                                            visible: !button.empty && button.key.icon !== undefined
+                                            name: button.key.icon ?? ""
+                                            size: Theme.font.large + 6
+                                            color: button.toggled ? Theme.color.fgPrimary : Theme.color.ink
+                                        }
+
+                                        MouseArea {
+                                            id: touch
+
+                                            anchors.fill: parent
+                                            enabled: !button.empty
+                                            hoverEnabled: true
+                                            onPressed: {
+                                                root.send(button.key);
+                                                if (button.key.repeat)
+                                                    again.start();
+                                            }
+                                            onReleased: again.stop()
+                                            onCanceled: again.stop()
+                                        }
+
+                                        // held backspace and arrows keep going
+                                        Timer {
+                                            id: again
+
+                                            interval: 380
+                                            repeat: true
+                                            onTriggered: {
+                                                interval = 60;
+                                                root.send(button.key);
+                                            }
+                                            onRunningChanged: {
+                                                if (!running)
+                                                    interval = 380;
+                                            }
                                         }
                                     }
                                 }
@@ -343,16 +379,15 @@ Scope {
             exclusionMode: ExclusionMode.Ignore
             anchors.bottom: true
             margins.bottom: Theme.spacing.small
-            implicitWidth: 76
-            implicitHeight: 34
+            implicitWidth: 72
+            implicitHeight: 32
 
             Rectangle {
                 anchors.fill: parent
-                anchors.bottomMargin: Theme.depth.offset
                 radius: height / 2
                 color: Theme.color.panel
-
-                Depth {}
+                border.width: Theme.depth.rim
+                border.color: Theme.color.depthRim
 
                 Icon {
                     anchors.centerIn: parent
