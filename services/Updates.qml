@@ -59,9 +59,9 @@ Singleton {
         Actions.say("download", "Some features need " + missing + ", install them from the launcher.");
     }
 
-    // in a terminal, pacman asks for the password
+    // the same run an update does, the password is asked in the island
     function installMissing(): void {
-        Quickshell.execDetached([Config.options.general.terminal, "-e", "sh", "-c", `"${command}" deps; echo; read -p 'Done, press enter to close. ' _`]);
+        Quickshell.execDetached([command, "update"]);
     }
 
     onMissingChanged: tellMissing()

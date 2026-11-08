@@ -60,7 +60,6 @@ Usage: install.sh [options]
 
   --dry-run        Show what would change without touching anything.
   --no-deps        Skip installing packages.
-  --deps-only      Install the packages and services, then stop.
   --keep-configs   Keep your own Hyprland, kitty, fish and starship configs.
   --uninstall      Remove Sweeteh and put your previous configs back.
   --purge          With --uninstall, also delete Sweeteh settings, backups and cache.
@@ -91,6 +90,18 @@ act() {
     note "Would run: $*"
   else
     "$@"
+  fi
+}
+
+# sudo in a terminal, and without one, as when the shell runs an update, pkexec
+# asks through the shell's own password prompt in the island
+elevate() {
+  if { : </dev/tty; } 2>/dev/null; then
+    sudo "$@"
+  elif command -v pkexec >/dev/null; then
+    pkexec "$@"
+  else
+    sudo -n "$@"
   fi
 }
 
@@ -199,7 +210,7 @@ if [[ $deps -eq 1 ]]; then
     if [[ ${#missing[@]} -eq 0 ]]; then
       say "Everything is already installed."
     elif ask "Install ${missing[*]}?"; then
-      act sudo pacman -S --needed --noconfirm "${missing[@]}"
+      act elevate pacman -S --needed --noconfirm "${missing[@]}" || say "Not installed, some features stay off until they are."
     else
       say "Skipped, some features will stay off until these are installed."
     fi
@@ -217,7 +228,7 @@ if [[ $deps -eq 1 ]]; then
       note "Another network service is running, leaving NetworkManager off."
       continue
     fi
-    act sudo systemctl enable --now "$svc" && say "Enabled $svc."
+    act elevate systemctl enable --now "$svc" && say "Enabled $svc."
   done
 fi
 

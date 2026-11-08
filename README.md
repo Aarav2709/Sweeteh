@@ -51,14 +51,13 @@ sweeteh run        # start the shell
 sweeteh stop       # stop it
 sweeteh restart    # stop and start again
 sweeteh check      # print the newest release if there is one
-sweeteh update     # move to the newest release and restart
-sweeteh deps       # install packages a newer release needs
+sweeteh update     # move to the newest release, with any packages it needs, and restart
 sweeteh ipc launcher toggle   # call anything in the shell
 ```
 
 ## Updates
 
-Sweeteh follows tagged releases. It checks for a new one a minute after login and every six hours after, says so in the island, and Settings, About has an Update button. `sweeteh update` does the same from a terminal. An update cannot ask for your password, so when a release needs new packages the island says which, and `>install missing packages` in the launcher or `sweeteh deps` installs them.
+Sweeteh follows tagged releases. It checks for a new one a minute after login and every six hours after, says so in the island, and Settings, About has an Update button. `sweeteh update` does the same from a terminal. When a release needs new packages the update installs them too, asking for your password in the island. If that is cancelled, the island says what is missing and `>install missing packages` in the launcher tries again.
 
 ## Features
 

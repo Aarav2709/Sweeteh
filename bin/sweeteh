@@ -125,6 +125,8 @@ update() {
   local next
   next="$(check)"
   if [[ -z "$next" ]]; then
+    # still worth a run when an earlier update could not install everything
+    bash "$repo/install.sh" --deps-only --yes >/dev/null || true
     say "Sweeteh $(current_version) is the newest release."
     return
   fi
@@ -138,7 +140,8 @@ update() {
   else
     git -C "$repo" checkout --quiet "$next"
   fi
-  bash "$repo/install.sh" --no-deps --keep-configs >/dev/null
+  # new packages the release needs come in too, the password is asked in the island or the terminal
+  bash "$repo/install.sh" --keep-configs --yes >/dev/null || say "Some packages did not install, sweeteh update tries again."
   restart
   say "Sweeteh is now $next."
 }
@@ -151,8 +154,7 @@ Usage: sweeteh [command]
   stop        Stop the shell, its keybinds go away with it.
   restart     Stop and start again.
   check       Print the newest release if it is newer than this one.
-  update      Move to the newest release and restart.
-  deps        Install packages a newer release needs.
+  update      Move to the newest release with any packages it needs, and restart.
   ipc ARGS    Call the shell, for example sweeteh ipc launcher toggle.
   fingerprint enable|disable|status   Use your finger for sudo and polkit prompts.
 USAGE
@@ -170,7 +172,6 @@ USAGE
     restart) restart ;;
     update) update ;;
     check) check ;;
-    deps) exec bash "$repo/install.sh" --deps-only ;;
     ipc) exec qs -c "$name" ipc call "$@" ;;
     fingerprint) [[ "${1:-status}" == status ]] && exec "$repo/bin/sweeteh-pam" status || exec sudo "$repo/bin/sweeteh-pam" "$@" ;;
     -h|--help|help) usage ;;
