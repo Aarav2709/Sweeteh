@@ -189,6 +189,14 @@ hl.window_rule({
     float = true,
 })
 
+-- render xwayland apps (steam, proton games) at the real resolution instead of stretching them
+-- on a scaled screen, which is what made them look pixelated
+hl.config({
+    xwayland = {
+        force_zero_scaling = true,
+    },
+})
+
 -- sweeteh start
 hl.on("hyprland.start", function() hl.exec_cmd("sweeteh run") end)
 -- sweeteh end
