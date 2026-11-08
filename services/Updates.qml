@@ -59,9 +59,25 @@ Singleton {
         Actions.say("download", "Some features need " + missing + ", install them from the launcher.");
     }
 
-    // the same run an update does, the password is asked in the island
+    // the password is asked in the island, the list is checked again after
     function installMissing(): void {
-        Quickshell.execDetached([command, "update"]);
+        Packages.install(missing.split(" "));
+    }
+
+    Connections {
+        target: Packages
+
+        function onInstalled(): void {
+            if (root.missing !== "")
+                recheck.running = true;
+        }
+    }
+
+    // whatever pacman still cannot find stays in the file, an empty answer removes it
+    Process {
+        id: recheck
+
+        command: ["sh", "-c", 'm=$(pacman -T "$@" | tr "\\n" " "); m=${m% }; if [ -n "$m" ]; then echo "$m" > "$0"; else rm -f "$0"; fi', Paths.state + "/missing-packages"].concat(root.missing.split(" "))
     }
 
     onMissingChanged: tellMissing()

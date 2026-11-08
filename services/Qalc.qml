@@ -13,6 +13,11 @@ Singleton {
     property string answer: ""
     property string answerFor: ""
 
+    // 10 km to mi or 20 usd in eur, worth offering qalc for when it is missing
+    function looksLikeConversion(q: string): bool {
+        return /\d\s*[a-z$€£¥]+\s+(to|in|into)\s+[a-z$€£¥]+$/i.test(q.trim());
+    }
+
     // only questions that look like conversions or functions go out, plain sums stay in the shell
     function ask(query: string): void {
         const q = query.trim();
@@ -24,7 +29,18 @@ Singleton {
         wait.restart();
     }
 
+    // looked for again after the shell installs a package
+    Connections {
+        target: Packages
+
+        function onInstalled(): void {
+            probe.running = true;
+        }
+    }
+
     Process {
+        id: probe
+
         running: true
         command: ["sh", "-c", "command -v qalc"]
         onExited: code => root.installed = code === 0

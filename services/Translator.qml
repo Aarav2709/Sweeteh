@@ -28,7 +28,18 @@ Singleton {
         wait.restart();
     }
 
+    // looked for again after the shell installs a package
+    Connections {
+        target: Packages
+
+        function onInstalled(): void {
+            probe.running = true;
+        }
+    }
+
     Process {
+        id: probe
+
         running: true
         command: ["sh", "-c", "command -v trans"]
         onExited: code => root.installed = code === 0

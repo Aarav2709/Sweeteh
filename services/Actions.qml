@@ -25,6 +25,8 @@ Singleton {
     property bool barWorkspaceHover: false
     // settings asks the island to show a sample moment
     signal momentPreview(string kind)
+    // an island moment from outside the island, clickable when it carries a run
+    signal offered(var moment)
     signal screenshotRequested(string kind)
     signal desktopEditRequested
     signal settingsRequested(string page)
@@ -84,6 +86,11 @@ Singleton {
 
     function say(icon: string, text: string): void {
         message(icon, text);
+    }
+
+    // a feature whose package is missing says so and installs it on a click
+    function needs(packages: list<string>, icon: string, what: string): void {
+        offered({ kind: "needs", icon: icon, title: what + " needs " + packages[0], sub: "Click to install", run: () => Packages.install(packages) });
     }
 
     function lock(): void {

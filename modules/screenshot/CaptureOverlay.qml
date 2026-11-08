@@ -117,7 +117,7 @@ PanelWindow {
             onStreamFinished: {
                 const words = text.trim();
                 if (words === "__none__")
-                    Actions.say("text_fields", "Install tesseract to copy text from the screen");
+                    Actions.needs(["tesseract", "tesseract-data-eng"], "text_fields", "Copying text");
                 else if (words === "")
                     Actions.say("text_fields", "No text found there");
                 else {

@@ -61,6 +61,8 @@ Item {
         else if (Qalc.answer !== "" && Qalc.answerFor === q) {
             const a = Qalc.answer;
             out.push({ kind: "sum", icon: "calculate", title: a, subtitle: "Press enter to copy", run: () => Actions.copy(a.replace(/^.*=\s*/, "")) });
+        } else if (!Qalc.installed && Qalc.looksLikeConversion(q)) {
+            out.push({ kind: "sum", icon: "calculate", title: "Conversions need libqalculate", subtitle: "Press enter to install it", run: () => Packages.install(["libqalculate"]) });
         }
         // > is the command palette, every shell action plus dates to copy, with a shell run as the last resort
         if (q.startsWith(">")) {

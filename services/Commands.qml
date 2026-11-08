@@ -166,7 +166,7 @@ Singleton {
         if (tr) {
             Qt.callLater(() => Translator.ask(tr[1]));
             const a = Translator.answerFor === tr[1].trim() ? Translator.answer : "";
-            out.push({ kind: "copy", icon: "translate", title: !Translator.installed ? "Install translate-shell to translate" : a || (Translator.loading ? "Translating" : "Translate " + tr[1].trim()), subtitle: a ? "Press enter to copy" : "", run: () => a ? Actions.copy(a) : null });
+            out.push({ kind: "copy", icon: "translate", title: !Translator.installed ? "Translating needs translate-shell" : a || (Translator.loading ? "Translating" : "Translate " + tr[1].trim()), subtitle: !Translator.installed ? "Press enter to install it" : a ? "Press enter to copy" : "", run: () => !Translator.installed ? Packages.install(["translate-shell"]) : a ? Actions.copy(a) : null });
         }
         const num = lower.match(/^(volume|vol|brightness|bright|ws|workspace|go)\s+(\d+)%?$/);
         if (num) {
@@ -274,7 +274,7 @@ Singleton {
         }
         onExited: code => {
             if (code === 3)
-                Actions.say("colorize", "Install hyprpicker to pick colors");
+                Actions.needs(["hyprpicker"], "colorize", "The color picker");
         }
     }
 

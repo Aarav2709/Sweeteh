@@ -14,6 +14,37 @@ Singleton {
     property bool checking: false
     // the count last said out loud, so the island only speaks up when more arrive
     property int told: 0
+    property bool installing: false
+
+    // tools the shell uses, put in with the password asked in the island
+    signal installed
+
+    function install(packages: list<string>): void {
+        if (installing || packages.length === 0)
+            return;
+        installing = true;
+        installer.names = packages.join(", ");
+        installer.command = ["sh", "-c", 'command -v pacman >/dev/null || exit 3; pkexec pacman -S --needed --noconfirm "$@"', "sh"].concat(packages);
+        installer.running = true;
+    }
+
+    Process {
+        id: installer
+
+        property string names
+
+        onExited: code => {
+            root.installing = false;
+            if (code === 0) {
+                Actions.say("download_done", "Installed " + names);
+                root.installed();
+            } else if (code === 3) {
+                Actions.say("download", "Install " + names + " with your package manager");
+            } else {
+                Actions.say("download", names + " was not installed");
+            }
+        }
+    }
 
     function check(): void {
         if (!lister.running) {
