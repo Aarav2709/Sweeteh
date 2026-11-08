@@ -11,18 +11,12 @@ Item {
     id: root
 
     readonly property string version: versionFile.text().trim()
-    readonly property var notes: [
-        ["visibility_off", "Out of the way in fullscreen", "The island tucks away over games and videos, the small stuff waits until you are back."],
-        ["search", "A smarter launcher", "Type : for emoji, >tr to translate, 10 km to mi to convert and ? for everything else."],
-        ["colorize", "New tools", "A color picker, text from the screen and system updates, all from >."],
-        ["volume_up", "Sound page", "Pick devices and set each app's volume in quick settings."],
-        ["wallpaper", "Wallhaven in the picker", "Search and set wallpapers without leaving the island."],
-        ["lock", "A calmer lock", "Your password typed as shapes in your wallpaper's colors."]
-    ]
+    // everything since 1.0.0, the same story as the release notes
+    readonly property var notes: [["visibility_off", "Out of the way in fullscreen", "The island tucks away over games and videos, the small stuff waits."], ["search", "A smarter launcher", ": for emoji, >tr to translate, 10 km to mi, app actions and ? for help."], ["colorize", "New tools", "A color picker, text from the screen and system updates, all from >."], ["volume_up", "Sound page", "Pick devices and set each app's volume in quick settings."], ["music_note", "Better media", "Shuffle, repeat, every player and cleaner YouTube titles."], ["timer", "More in the island", "VPN toggles, a running timer and quiet hours for notifications."], ["wallpaper", "Wallhaven in the picker", "Search and set wallpapers without leaving the island."], ["widgets", "New desktop widgets", "Synced lyrics, a live spectrum and a right click menu."], ["push_pin", "Pins and search", "Pin clipboard entries and search every setting."], ["lock", "A nicer lock", "A rolling clock and your password typed as shapes."], ["interests", "Crisper icons", "Sharper glyphs, and moments set in material shapes."], ["download", "Tools that ask", "A missing package says so and installs with a click."], ["speed", "Calmer and lighter", "Motion with no bounces, less drawing and no more freezes."]]
 
     signal done
 
-    implicitWidth: 520
+    implicitWidth: 760
     implicitHeight: column.implicitHeight
 
     focus: true
@@ -57,38 +51,46 @@ Item {
             }
         }
 
-        Repeater {
-            model: root.notes
+        GridLayout {
+            Layout.fillWidth: true
+            columns: 2
+            columnSpacing: Theme.spacing.xl
+            rowSpacing: Theme.spacing.medium
 
-            RowLayout {
-                required property var modelData
+            Repeater {
+                model: root.notes
 
-                Layout.fillWidth: true
-                spacing: Theme.spacing.medium
+                RowLayout {
+                    required property var modelData
 
-                // centered on the title and its line together
-                IconBadge {
-                    Layout.alignment: Qt.AlignVCenter
-                    name: modelData[0]
-                    shape: "cookie9"
-                    size: 30
-                }
-
-                ColumnLayout {
                     Layout.fillWidth: true
-                    spacing: 0
+                    Layout.preferredWidth: 1
+                    spacing: Theme.spacing.medium
 
-                    Label {
-                        text: modelData[1]
-                        font.weight: Font.DemiBold
+                    // centered on the title and its line together
+                    IconBadge {
+                        Layout.alignment: Qt.AlignVCenter
+                        name: modelData[0]
+                        shape: "cookie9"
+                        size: 30
                     }
 
-                    Label {
+                    ColumnLayout {
                         Layout.fillWidth: true
-                        text: modelData[2]
-                        wrapMode: Text.Wrap
-                        font.pixelSize: Theme.font.small
-                        color: Theme.color.inkMeta
+                        spacing: 0
+
+                        Label {
+                            text: modelData[1]
+                            font.weight: Font.DemiBold
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            text: modelData[2]
+                            wrapMode: Text.Wrap
+                            font.pixelSize: Theme.font.small
+                            color: Theme.color.inkMeta
+                        }
                     }
                 }
             }
