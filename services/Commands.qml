@@ -61,6 +61,7 @@ Singleton {
             { icon: "palette", title: "Recolor from wallpaper", keywords: "wallpaper colors matugen theme refresh", run: () => Wallpapers.recolor(Wallpapers.current) },
             { icon: "lock", title: "Lock screen", keywords: "lock", run: () => Actions.lock() },
             { icon: "screenshot_region", title: "Capture a region", keywords: "screenshot capture", run: () => Actions.screenshot("region") },
+            { icon: "image_search", title: "Search the screen", keywords: "lens google search image screen circle find", run: () => Actions.screenshot("lens") },
             { icon: "text_fields", title: "Copy text from the screen", keywords: "ocr text read scan copy tesseract", run: () => Actions.screenshot("text") },
             { icon: "screenshot_monitor", title: "Capture the screen", keywords: "screenshot capture full", run: () => Actions.screenshot("screen") },
             Recorder.recording ? { icon: "stop_circle", title: "Stop recording", keywords: "record recording screen video stop", run: () => Recorder.stop() } : { icon: "screen_record", title: "Record the screen", keywords: "record recording screen video", run: () => Recorder.start("") },

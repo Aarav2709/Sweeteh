@@ -46,6 +46,10 @@ Scope {
             root.start("window");
         }
 
+        function lens(): void {
+            root.start("lens");
+        }
+
         // stops a running recording, otherwise picks what to record
         function record(): void {
             if (Recorder.recording)

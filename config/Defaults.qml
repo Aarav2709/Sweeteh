@@ -406,6 +406,12 @@ Singleton {
                     description: "Start or stop a screen recording"
                 },
                 {
+                    group: "Capture",
+                    keys: "SUPER + SHIFT + G",
+                    action: "screenshot lens",
+                    description: "Search part of the screen with Google Lens"
+                },
+                {
                     group: "Zoom",
                     keys: "SUPER + CTRL + mouse_up",
                     action: "zoom zoomIn",

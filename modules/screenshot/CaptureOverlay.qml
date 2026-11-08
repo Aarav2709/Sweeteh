@@ -13,10 +13,13 @@ PanelWindow {
     id: root
 
     required property string kind
-    property string mode: kind === "screen" || kind === "record" || kind === "text" ? "region" : kind
+    property string mode: kind === "screen" || kind === "record" || kind === "text" || kind === "lens" ? "region" : kind
     property bool record: kind === "record"
     // reads the words in the picked area and copies them instead of saving a picture
     property bool ocr: kind === "text"
+    // looks the picked area up in google lens, the picture goes to the clipboard and lens opens to paste it
+    // nothing is uploaded by the shell itself
+    property bool lens: kind === "lens"
     property rect selection: Qt.rect(0, 0, 0, 0)
     property bool ready: frozen.hasContent
     readonly property real dpr: screen?.devicePixelRatio ?? 1
@@ -85,6 +88,17 @@ PanelWindow {
         crop.sourceRect = r;
         crop.width = r.width;
         crop.height = r.height;
+        if (lens) {
+            const pic = Paths.runtime + "/lens.png";
+            crop.grabToImage(result => {
+                result.saveToFile(pic);
+                Quickshell.execDetached(["sh", "-c", `wl-copy --type image/png < "$0"; rm -f "$0"`, pic]);
+                Qt.openUrlExternally("https://lens.google.com/");
+                Actions.say("image_search", "Copied, paste it into Lens with Ctrl+V");
+                root.finished();
+            }, Qt.size(Math.round(r.width * dpr), Math.round(r.height * dpr)));
+            return;
+        }
         if (ocr) {
             const shot = Paths.runtime + "/ocr.png";
             crop.grabToImage(result => {
