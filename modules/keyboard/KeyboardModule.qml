@@ -19,7 +19,8 @@ Scope {
     property bool ctrl: false
     property bool alt: false
 
-    readonly property real unit: 45
+    // end-4's 45 px keys, smaller on short screens so the keyboard never takes half of one
+    readonly property real unit: Math.min(45, Math.round((Hypr.screenFor(Hypr.focusedScreenName)?.height ?? 1080) * 0.052))
     readonly property var widths: ({
             normal: 1,
             fn: 1,
@@ -260,8 +261,13 @@ Scope {
             implicitHeight: card.height + Theme.spacing.medium * 2
             // windows make room so the field being typed into stays in view
             exclusiveZone: Tablet.keyboard ? implicitHeight : 0
+            // bound to the card's live size, an item region was taken once while the card was still
+            // growing and left the upper rows outside it, so taps there fell through to the window below
             mask: Region {
-                item: card
+                x: Math.round(card.x)
+                y: Math.round(card.y)
+                width: Math.round(card.width)
+                height: Math.round(card.height)
             }
 
             Rectangle {
@@ -452,8 +458,8 @@ Scope {
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
             exclusionMode: ExclusionMode.Ignore
             anchors.bottom: true
-            implicitWidth: 84
-            implicitHeight: 26
+            implicitWidth: 52
+            implicitHeight: 14
 
             Rectangle {
                 id: tab
@@ -469,8 +475,9 @@ Scope {
 
                 Icon {
                     anchors.centerIn: parent
-                    anchors.verticalCenterOffset: -tab.lift * 0.2
+                    anchors.verticalCenterOffset: -tab.lift * 0.1
                     name: "keyboard_arrow_up"
+                    size: 14
                     color: Theme.color.ink
                 }
 
