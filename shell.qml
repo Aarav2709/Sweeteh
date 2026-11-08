@@ -10,6 +10,7 @@ import Quickshell.Io
 import qs.config
 import qs.theme
 import qs.services
+import qs.modules.keyboard
 
 ShellRoot {
     id: root
@@ -32,6 +33,7 @@ ShellRoot {
         Packages.count;
         Zoom.level;
         SongSearch.listening;
+        Tablet.tablet;
     }
 
     // bundled fonts, loaded here so nothing has to be installed
@@ -44,6 +46,8 @@ ShellRoot {
     }
 
     ModuleHost {}
+
+    KeyboardModule {}
 
     // shell wide commands, modules add their own handlers
     IpcHandler {
