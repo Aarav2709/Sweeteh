@@ -38,7 +38,7 @@ PanelWindow {
     // more notifications from the same app folded behind the one on screen
     property int notifGroup: 0
     // panels that live in the island, first match wins
-    readonly property string hosted: ["welcome", "launcher", "clipboard", "monitor", "island", "media", "power", "wallpaper", "overview", "cheatsheet", "modeswitcher", "settings"].find(id => Actions.isOpen(id) && (id === "island" || id === "welcome" || id === "settings" || Modes.enabled(id))) ?? ""
+    readonly property string hosted: ["welcome", "whatsnew", "launcher", "clipboard", "monitor", "island", "media", "power", "wallpaper", "overview", "cheatsheet", "modeswitcher", "settings"].find(id => Actions.isOpen(id) && (id === "island" || id === "welcome" || id === "whatsnew" || id === "settings" || Modes.enabled(id))) ?? ""
     // views driven by the keyboard take it whole, like the panels they replaced
     readonly property bool typing: ["welcome", "launcher", "clipboard", "power", "wallpaper", "overview", "cheatsheet", "modeswitcher", "settings"].includes(hosted) || Auth.active || (Notifs.replying && flashing === "notification")
     readonly property bool expanded: hosted !== "" || Auth.active
@@ -55,7 +55,7 @@ PanelWindow {
     // a colored moment, a notification on screen keeps its turn and a newer moment replaces an older one
     // which moments switch a kind belongs to
     function category(kind: string): string {
-        return ["plugged", "unplugged", "low", "critical", "profile"].includes(kind) ? "battery" : kind === "clipboard" ? "clipboard" : kind === "audio" ? "audio" : kind.startsWith("bluetooth") ? "bluetooth" : kind === "network" ? "network" : kind === "download" ? "downloads" : kind === "welcome" ? "welcome" : kind === "needs" ? "needs" : "toggles";
+        return ["plugged", "unplugged", "low", "critical", "profile"].includes(kind) ? "battery" : kind === "clipboard" ? "clipboard" : kind === "audio" ? "audio" : kind.startsWith("bluetooth") ? "bluetooth" : kind === "network" ? "network" : kind === "download" ? "downloads" : kind === "welcome" ? "welcome" : kind === "needs" || kind === "news" ? kind : "toggles";
     }
 
     function glow(m: var, ms: int): void {
@@ -270,6 +270,31 @@ PanelWindow {
         path: Paths.state + "/welcomed"
         printErrors: false
         onLoadFailed: tour.start()
+    }
+
+    // the first start after an update offers what changed, as a moment so it never takes the keyboard
+    // a fresh install gets the tour instead and only remembers the version
+    Process {
+        running: true
+        command: ["sh", "-c", 'v=$(cat "$0"); s=$(cat "$1" 2>/dev/null); w=; [ -e "$2" ] && w=1; mkdir -p "$(dirname "$1")"; echo "$v" > "$1"; printf "%s|%s|%s" "$v" "$s" "$w"', Quickshell.shellPath("VERSION"), Paths.state + "/seen-version", Paths.state + "/welcomed"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const [v, seen, welcomed] = text.trim().split("|");
+                if (v && welcomed === "1" && v !== seen) {
+                    news.version = v;
+                    news.start();
+                }
+            }
+        }
+    }
+
+    Timer {
+        id: news
+
+        property string version
+
+        interval: 4000
+        onTriggered: root.glow({ kind: "news", icon: "new_releases", title: "Sweeteh " + version, sub: "Click to see what's new", run: () => Actions.open("whatsnew") }, 8000)
     }
 
     Timer {

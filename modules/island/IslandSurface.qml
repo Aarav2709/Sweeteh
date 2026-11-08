@@ -36,7 +36,7 @@ Item {
     // the workspace number, or the workspace peek itself, under the pointer
     readonly property bool wsHovered: idle.wsHovered || (mode === "workspaces" && hover.hovered)
     readonly property color base: Theme.color.island
-    readonly property Item content: ({ idle: idle, peek: peek, workspaces: workspaces, message: message, glow: glow, osd: osd, track: track, notification: notification, media: media, launcher: launcher, clipboard: clipboard, monitor: monitor, dashboard: dashboard, auth: auth, welcome: welcome })[mode] ?? hostedSlot(mode) ?? idle
+    readonly property Item content: ({ idle: idle, peek: peek, workspaces: workspaces, message: message, glow: glow, osd: osd, track: track, notification: notification, media: media, launcher: launcher, clipboard: clipboard, monitor: monitor, dashboard: dashboard, auth: auth, welcome: welcome, whatsnew: whatsnew })[mode] ?? hostedSlot(mode) ?? idle
 
     function hostedSlot(id: string): Item {
         for (let i = 0; i < hostedViews.count; i++) {
@@ -705,6 +705,21 @@ Item {
 
                 path: Paths.state + "/welcomed"
                 printErrors: false
+            }
+        }
+
+        IslandSlot {
+            id: whatsnew
+
+            shown: root.mode === "whatsnew"
+
+            Loader {
+                active: whatsnew.shown || whatsnew.visible
+
+                sourceComponent: IslandWhatsNew {
+                    onDone: Actions.close("whatsnew")
+                }
+                onLoaded: item.forceActiveFocus()
             }
         }
 
