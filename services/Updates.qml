@@ -35,11 +35,24 @@ Singleton {
             onStreamFinished: {
                 root.checking = false;
                 root.available = text.trim();
-                if (root.available !== "" && root.available !== root.announced) {
-                    root.announced = root.available;
-                    Actions.say("system_update", "Sweeteh " + root.available + " is out, update it from settings.");
-                }
+                root.announce();
             }
+        }
+    }
+
+    // never over a fullscreen game or video, it waits until that closes
+    function announce(): void {
+        if (available === "" || available === announced || Perf.fullscreen)
+            return;
+        announced = available;
+        Actions.say("system_update", "Sweeteh " + available + " is out, update it from settings.");
+    }
+
+    Connections {
+        target: Perf
+
+        function onFullscreenChanged(): void {
+            root.announce();
         }
     }
 

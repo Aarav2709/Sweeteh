@@ -25,6 +25,7 @@ PanelWindow {
     property var queue: []
     // moments held back while something is fullscreen
     property var held: []
+    readonly property bool quiet: Perf.fullscreen && Config.options.performance.quietMoments
     // hovering the resting island while music plays opens a small player
     property bool peeking: false
     // hovering the workspace number, here or on the bar, opens previews of the workspaces
@@ -63,7 +64,7 @@ PanelWindow {
         if (m.kind !== "critical" && Config.options.moments[category(m.kind)] === false)
             return;
         // over a fullscreen game or video the small stuff waits until it is gone
-        if (!alert && Perf.fullscreen && Config.options.performance.quietMoments) {
+        if (!alert && quiet) {
             held = held.filter(q => q.moment.kind !== m.kind).concat([{ moment: m, ms: ms }]);
             return;
         }
@@ -100,11 +101,13 @@ PanelWindow {
     }
 
     // the oldest waiting notification goes next, with any others from its app folded into it
+    // over a fullscreen window only critical ones come out, the rest wait for it to close
     function showNext(): void {
-        const oldest = Notifs.popups[Notifs.popups.length - 1];
+        const pool = quiet ? Notifs.popups.filter(n => n.critical) : Notifs.popups;
+        const oldest = pool[pool.length - 1];
         if (!oldest || Notifs.dnd || !Modes.enabled("notifications"))
             return;
-        const same = Config.options.notifications.group ? Notifs.popups.filter(n => n.appName === oldest.appName) : [oldest];
+        const same = Config.options.notifications.group ? pool.filter(n => n.appName === oldest.appName) : [oldest];
         for (const n of same.slice(1))
             Notifs.hide(n);
         notif = same[0];
@@ -494,7 +497,7 @@ PanelWindow {
         target: Media
 
         function onTitleChanged(): void {
-            if (!Media.playing || !armed.ready || root.flashing === "notification")
+            if (!Media.playing || !armed.ready || root.flashing === "notification" || root.quiet)
                 return;
             root.flash("track", 3500);
         }
@@ -504,9 +507,11 @@ PanelWindow {
         target: Perf
 
         function onFullscreenChanged(): void {
-            if (Perf.fullscreen || root.held.length === 0)
+            if (Perf.fullscreen)
                 return;
-            // only the latest few, a long game should not end in a parade
+            // only the latest few, a long game should not end in a parade, the rest stay in the list
+            for (const n of Notifs.popups.slice(3))
+                Notifs.hide(n);
             root.queue = root.queue.concat(root.held.slice(-3));
             root.held = [];
             root.advance();
