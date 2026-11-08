@@ -169,7 +169,7 @@ Item {
         IconBadge {
             visible: !root.battery
             name: root.icon
-            size: 28
+            size: 26
             color: root.accent
             glyph: root.alert ? Theme.color.fgError : Theme.color.fgPrimary
             scale: root.bolt
