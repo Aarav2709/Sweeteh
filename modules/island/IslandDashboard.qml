@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import qs.config
 import qs.theme
 import qs.services
 import qs.components
@@ -65,13 +66,15 @@ Item {
     }
 
     implicitWidth: 290 + 340 + 320 + Theme.spacing.large * 2
-    implicitHeight: 372
+    implicitHeight: Math.max(372, dateColumn.implicitHeight)
 
     RowLayout {
         anchors.fill: parent
         spacing: Theme.spacing.large
 
         ColumnLayout {
+            id: dateColumn
+
             Layout.preferredWidth: 290
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignTop
@@ -105,6 +108,51 @@ Item {
 
                     anchors.fill: parent
                     anchors.margins: Theme.spacing.medium
+                }
+            }
+
+            // what is coming up from the linked calendar, on the same left edge as the date
+            Repeater {
+                model: Events.next
+
+                RowLayout {
+                    required property var modelData
+
+                    Layout.fillWidth: true
+                    Layout.leftMargin: Theme.spacing.medium
+                    Layout.rightMargin: Theme.spacing.medium
+                    spacing: Theme.spacing.small
+
+                    Rectangle {
+                        implicitWidth: 4
+                        implicitHeight: 28
+                        radius: 2
+                        color: Theme.color.primary
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 0
+
+                        Label {
+                            Layout.fillWidth: true
+                            text: modelData.title
+                            elide: Text.ElideRight
+                            font.weight: Font.Medium
+                        }
+
+                        Label {
+                            text: {
+                                const s = modelData.start;
+                                const today = new Date(Time.now.getFullYear(), Time.now.getMonth(), Time.now.getDate());
+                                const d = Math.round((new Date(s.getFullYear(), s.getMonth(), s.getDate()) - today) / 86400000);
+                                const day = d <= 0 ? "Today" : d === 1 ? "Tomorrow" : Qt.formatDate(s, "ddd d MMM");
+                                return modelData.allDay ? day + ", all day" : day + ", " + Qt.formatTime(s, Config.options.clock.use24h ? "HH:mm" : "h:mm ap");
+                            }
+                            font.pixelSize: Theme.font.small
+                            color: Theme.color.inkMeta
+                        }
+                    }
                 }
             }
         }
@@ -153,7 +201,6 @@ Item {
                 value: Brightness.value
                 onMoved: v => Brightness.set(v)
             }
-
         }
 
         ColumnLayout {

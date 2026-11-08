@@ -183,6 +183,18 @@ ColumnLayout {
                     color: day.today ? Theme.color.fgPrimary : day.inMonth ? Theme.color.ink : Theme.color.inkFaint
                     font.weight: day.today ? Font.DemiBold : Font.Medium
                 }
+
+                // a day with an event gets a small dot under its number
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 5
+                    width: 4
+                    height: 4
+                    radius: 2
+                    visible: day.inMonth && Events.days[root.year + "-" + root.month + "-" + day.number] === true
+                    color: day.today ? Theme.color.fgPrimary : Theme.color.primary
+                }
             }
         }
     }

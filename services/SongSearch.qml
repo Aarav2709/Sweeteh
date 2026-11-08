@@ -16,7 +16,13 @@ Singleton {
         if (listening)
             return;
         listening = true;
-        Actions.offered({ kind: "song", icon: "graphic_eq", title: "Listening", sub: "What's this song?", ms: 11000 });
+        Actions.offered({
+            kind: "song",
+            icon: "graphic_eq",
+            title: "Listening",
+            sub: "What's this song?",
+            ms: 11000
+        });
         finder.running = true;
     }
 
@@ -42,11 +48,22 @@ rm -f "$f"`, Paths.runtime]
                     track = JSON.parse(out).track ?? null;
                 } catch (e) {}
                 if (!track) {
-                    Actions.offered({ kind: "song", icon: "music_off", title: "No match", sub: "Try again with the music louder" });
+                    Actions.offered({
+                        kind: "song",
+                        icon: "music_off",
+                        title: "No match",
+                        sub: "Try again with the music louder"
+                    });
                     return;
                 }
                 const url = track.url ?? "";
-                Actions.offered({ kind: "song", icon: "music_note", title: track.title ?? "Unknown", sub: (track.subtitle ?? "") + (url ? "  ·  click to open" : ""), run: url ? () => Qt.openUrlExternally(url) : undefined });
+                Actions.offered({
+                    kind: "song",
+                    icon: "music_note",
+                    title: track.title ?? "Unknown",
+                    sub: (track.subtitle ?? "") + (url ? "  ·  click to open" : ""),
+                    run: url ? () => Qt.openUrlExternally(url) : undefined
+                });
             }
         }
     }

@@ -75,7 +75,9 @@ Singleton {
             },
             clock: {
                 use24h: true,
-                showSeconds: false
+                showSeconds: false,
+                // a calendar's ics link, its events show in the dashboard and as dots in the calendar
+                calendarUrl: ""
             },
             wallpaper: {
                 path: "",
