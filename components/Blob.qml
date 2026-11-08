@@ -62,10 +62,14 @@ Item {
                 pts.push([Math.cos(t), Math.sin(t)]);
             }
         }
-        // centered and scaled so the widest side touches the edges
+        // shapes drawn around their middle stay there, so a glyph on top and a turn both sit true
+        // an odd cookie or a pentagon reaches further on one side, centering its box would shift it
+        // only the heart, which has no middle of its own, is centered by its box
         const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
-        const cx = (Math.max(...xs) + Math.min(...xs)) / 2, cy = (Math.max(...ys) + Math.min(...ys)) / 2;
-        const half = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) / 2;
+        const boxed = shape === "heart";
+        const cx = boxed ? (Math.max(...xs) + Math.min(...xs)) / 2 : 0;
+        const cy = boxed ? (Math.max(...ys) + Math.min(...ys)) / 2 : 0;
+        const half = Math.max(...pts.map(p => Math.max(Math.abs(p[0] - cx), Math.abs(p[1] - cy))));
         return pts.map(p => [(p[0] - cx) / half, (p[1] - cy) / half]);
     }
 
