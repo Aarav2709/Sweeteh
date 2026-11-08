@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.config
 
 // checks the repository for a newer release tag now and then and offers it
 Singleton {
@@ -13,6 +14,9 @@ Singleton {
     property bool checking: false
     property bool updating: false
     property string announced: ""
+    // packages a newer release needs that an update could not install, the installer leaves their names
+    property string missing: ""
+    property string toldMissing: ""
 
     function check(): void {
         if (checking)
@@ -48,11 +52,49 @@ Singleton {
         Actions.say("system_update", "Sweeteh " + available + " is out, update it from settings.");
     }
 
+    function tellMissing(): void {
+        if (missing === "" || missing === toldMissing || Perf.fullscreen || !settled.ready)
+            return;
+        toldMissing = missing;
+        Actions.say("download", "Some features need " + missing + ", install them from the launcher.");
+    }
+
+    // in a terminal, pacman asks for the password
+    function installMissing(): void {
+        Quickshell.execDetached([Config.options.general.terminal, "-e", "sh", "-c", `"${command}" deps; echo; read -p 'Done, press enter to close. ' _`]);
+    }
+
+    onMissingChanged: tellMissing()
+
+    FileView {
+        path: Paths.state + "/missing-packages"
+        watchChanges: true
+        printErrors: false
+        onFileChanged: reload()
+        onLoaded: root.missing = text().trim()
+        onLoadFailed: root.missing = ""
+    }
+
+    // after a restart into a new release the island is still sliding in, the notice waits a little
+    Timer {
+        id: settled
+
+        property bool ready: false
+
+        running: true
+        interval: 8000
+        onTriggered: {
+            ready = true;
+            root.tellMissing();
+        }
+    }
+
     Connections {
         target: Perf
 
         function onFullscreenChanged(): void {
             root.announce();
+            root.tellMissing();
         }
     }
 

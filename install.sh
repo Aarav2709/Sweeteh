@@ -39,6 +39,7 @@ generated=(
 
 dry=0
 deps=1
+deps_only=0
 keep=0
 uninstall=0
 purge=0
@@ -59,6 +60,7 @@ Usage: install.sh [options]
 
   --dry-run        Show what would change without touching anything.
   --no-deps        Skip installing packages.
+  --deps-only      Install the packages and services, then stop.
   --keep-configs   Keep your own Hyprland, kitty, fish and starship configs.
   --uninstall      Remove Sweeteh and put your previous configs back.
   --purge          With --uninstall, also delete Sweeteh settings, backups and cache.
@@ -70,6 +72,7 @@ for arg in "$@"; do
   case "$arg" in
     --dry-run) dry=1 ;;
     --no-deps) deps=0 ;;
+    --deps-only) deps=1; deps_only=1 ;;
     --keep-configs|--keep-hypr) keep=1 ;;
     --uninstall) uninstall=1 ;;
     --purge) purge=1 ;;
@@ -191,10 +194,8 @@ printf '\n%s  Sweeteh  %s %sOne shell, two layouts, all island%s\n' "$accent$bol
 if [[ $deps -eq 1 ]]; then
   step "Packages"
   if command -v pacman >/dev/null; then
-    missing=()
-    for p in "${packages[@]}"; do
-      pacman -Qq "$p" >/dev/null 2>&1 || missing+=("$p")
-    done
+    # deptest knows what other packages provide, a -git build counts as installed
+    mapfile -t missing < <(pacman -T "${packages[@]}" 2>/dev/null || true)
     if [[ ${#missing[@]} -eq 0 ]]; then
       say "Everything is already installed."
     elif ask "Install ${missing[*]}?"; then
@@ -219,6 +220,20 @@ if [[ $deps -eq 1 ]]; then
     act sudo systemctl enable --now "$svc" && say "Enabled $svc."
   done
 fi
+
+# what is still missing goes to a file the shell reads, an update skips packages
+# since it runs without a terminal to ask for a password, so the shell offers them after
+if command -v pacman >/dev/null && [[ $dry -eq 0 ]]; then
+  mapfile -t missing < <(pacman -T "${packages[@]}" 2>/dev/null || true)
+  mkdir -p "$state_home/sweeteh"
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    printf '%s\n' "${missing[*]}" > "$state_home/sweeteh/missing-packages"
+    [[ $deps -eq 0 ]] && note "Some features need ${missing[*]}, run sweeteh deps to install them."
+  else
+    rm -f "$state_home/sweeteh/missing-packages"
+  fi
+fi
+[[ $deps_only -eq 1 ]] && exit 0
 
 step "Shell"
 act mkdir -p "$(dirname "$target")" "$bin_dir"

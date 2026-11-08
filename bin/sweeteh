@@ -129,7 +129,15 @@ update() {
     return
   fi
   say "Updating to $next."
-  git -C "$repo" checkout --quiet "$next"
+  # a checkout on a branch moves the branch forward, so git pull keeps working after
+  if git -C "$repo" symbolic-ref -q HEAD >/dev/null; then
+    if ! git -C "$repo" merge --ff-only --quiet "$next" 2>/dev/null; then
+      say "This branch has its own commits, merge $next into it with git."
+      exit 1
+    fi
+  else
+    git -C "$repo" checkout --quiet "$next"
+  fi
   bash "$repo/install.sh" --no-deps --keep-configs >/dev/null
   restart
   say "Sweeteh is now $next."
@@ -144,6 +152,7 @@ Usage: sweeteh [command]
   restart     Stop and start again.
   check       Print the newest release if it is newer than this one.
   update      Move to the newest release and restart.
+  deps        Install packages a newer release needs.
   ipc ARGS    Call the shell, for example sweeteh ipc launcher toggle.
   fingerprint enable|disable|status   Use your finger for sudo and polkit prompts.
 USAGE
@@ -161,6 +170,7 @@ USAGE
     restart) restart ;;
     update) update ;;
     check) check ;;
+    deps) exec bash "$repo/install.sh" --deps-only ;;
     ipc) exec qs -c "$name" ipc call "$@" ;;
     fingerprint) [[ "${1:-status}" == status ]] && exec "$repo/bin/sweeteh-pam" status || exec sudo "$repo/bin/sweeteh-pam" "$@" ;;
     -h|--help|help) usage ;;
