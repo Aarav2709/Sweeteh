@@ -460,10 +460,9 @@ Item {
             RowLayout {
                 spacing: Theme.spacing.small
 
-                Icon {
+                IconBadge {
                     name: root.messageIcon || "info"
-                    fill: 1
-                    color: Theme.color.primary
+                    size: 24
                 }
 
                 Label {

@@ -165,14 +165,14 @@ Item {
         anchors.centerIn: parent
         spacing: Theme.spacing.small
 
-        Icon {
+        // the glyph sits baked into a shape in the accent, alerts in the error color
+        IconBadge {
             visible: !root.battery
             name: root.icon
-            fill: 1
-            size: 22
+            size: 28
             color: root.accent
+            glyph: root.alert ? Theme.color.fgError : Theme.color.fgPrimary
             scale: root.bolt
-            rotation: (1 - root.bolt) * -40
         }
 
         // a little battery that fills up on the charger, the bolt pops in over it

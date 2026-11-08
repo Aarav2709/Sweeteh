@@ -14,21 +14,20 @@ Item {
     implicitWidth: Math.round(size)
     implicitHeight: Math.round(size)
 
-    // sharp at small sizes: outlined glyphs are hinted onto the pixel grid, filled ones drawn as curves
-    // so they stay smooth while they scale, and a glyph gets bolder as it fills like material 3 asks
+    // drawn the way end-4 draws material symbols: native rendering without hinting, the fill rounded
+    // to a tenth so the font is not remapped every frame, and the glyph turns semibold as it fills
     Text {
-        anchors.fill: parent
+        anchors.centerIn: parent
         text: root.name
         color: root.color
-        renderType: root.fill > 0 ? Text.CurveRendering : Text.NativeRendering
+        renderType: Text.NativeRendering
         font.family: Theme.font.icon
-        font.pixelSize: Math.round(root.size)
-        font.hintingPreference: Font.PreferFullHinting
+        font.pixelSize: root.size
+        font.hintingPreference: Font.PreferNoHinting
+        font.weight: root.weight + (Font.DemiBold - root.weight) * Math.round(root.fill * 10) / 10
         font.variableAxes: ({
-                "FILL": Math.round(root.fill * 100) / 100,
-                "wght": root.weight + Math.max(0, 600 - root.weight) * root.fill,
-                "opsz": Math.max(20, Math.min(48, Math.round(root.size))),
-                "GRAD": 0
+                "FILL": Math.round(root.fill * 10) / 10,
+                "opsz": Math.max(20, Math.min(48, root.size))
             })
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
