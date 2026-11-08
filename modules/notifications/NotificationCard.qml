@@ -91,10 +91,19 @@ Item {
                 implicitWidth: 40
                 implicitHeight: 40
 
+                // without a picture the app icon sits in a material shape, like the island's moments
+                Blob {
+                    anchors.fill: parent
+                    visible: !picture.visible
+                    size: 40
+                    shape: "cookie9"
+                    color: root.critical ? Theme.color.error : Theme.color.secondaryContainer
+                }
+
                 ClippingRectangle {
                     anchors.fill: parent
                     radius: width / 2
-                    color: root.critical ? Theme.color.error : Theme.color.secondaryContainer
+                    color: "transparent"
 
                     Image {
                         id: picture
@@ -118,6 +127,7 @@ Item {
                         visible: !picture.visible && root.iconSource === ""
                         name: root.critical ? "priority_high" : "notifications"
                         fill: 1
+                        size: 22
                         color: root.critical ? Theme.color.fgError : Theme.color.fgSecondaryContainer
                     }
                 }
