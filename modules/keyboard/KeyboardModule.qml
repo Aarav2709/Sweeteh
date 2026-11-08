@@ -18,8 +18,6 @@ Scope {
     property real shiftTapped: 0
     property bool ctrl: false
     property bool alt: false
-    // pinned, windows make room for the keyboard instead of sliding under it
-    property bool pinned: false
 
     readonly property real unit: 45
     readonly property var widths: ({
@@ -208,7 +206,8 @@ Scope {
             anchors.left: true
             anchors.right: true
             implicitHeight: card.height + Theme.spacing.medium * 2
-            exclusiveZone: root.pinned ? implicitHeight : 0
+            // windows make room so the field being typed into stays in view
+            exclusiveZone: Tablet.keyboard ? implicitHeight : 0
             mask: Region {
                 item: card
             }
@@ -220,7 +219,7 @@ Scope {
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: Theme.spacing.medium
                 width: content.implicitWidth + 20
-                height: content.implicitHeight + 34
+                height: content.implicitHeight + 40
                 radius: Theme.radius.large
                 // slides in from below the edge, and follows a finger dragging it down
                 transform: Translate {
@@ -232,7 +231,7 @@ Scope {
                     anchors.top: parent.top
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    height: 24
+                    height: 30
 
                     Rectangle {
                         anchors.centerIn: parent
@@ -246,7 +245,11 @@ Scope {
                         target: null
                         yAxis.enabled: true
                         xAxis.enabled: false
-                        onTranslationChanged: root.pull = Math.max(0, translation.y)
+                        // measured on the screen, the keyboard itself moves with the finger
+                        onCentroidChanged: {
+                            if (active)
+                                root.pull = Math.max(0, centroid.scenePosition.y - centroid.scenePressPosition.y);
+                        }
                         onActiveChanged: {
                             if (active)
                                 return;
@@ -268,58 +271,6 @@ Scope {
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 10
                     spacing: 5
-
-                    ColumnLayout {
-                        Layout.alignment: Qt.AlignVCenter
-                        spacing: 5
-
-                        Rectangle {
-                            implicitWidth: 40
-                            implicitHeight: 40
-                            radius: Theme.radius.medium
-                            color: root.pinned ? Theme.color.primary : Theme.color.layer1
-
-                            Icon {
-                                anchors.centerIn: parent
-                                name: "keep"
-                                fill: root.pinned ? 1 : 0
-                                color: root.pinned ? Theme.color.fgPrimary : Theme.color.ink
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: root.pinned = !root.pinned
-                            }
-                        }
-
-                        Rectangle {
-                            implicitWidth: 40
-                            implicitHeight: 40
-                            radius: Theme.radius.medium
-                            color: false ? Theme.color.primary : Theme.color.layer1
-
-                            Icon {
-                                anchors.centerIn: parent
-                                name: "keyboard_hide"
-                                fill: false ? 1 : 0
-                                color: false ? Theme.color.fgPrimary : Theme.color.ink
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: root.close()
-                            }
-                        }
-                    }
-
-                    Rectangle {
-                        Layout.fillHeight: true
-                        Layout.topMargin: 20
-                        Layout.bottomMargin: 20
-                        implicitWidth: 1
-                        color: Theme.color.inkFaint
-                        opacity: 0.4
-                    }
 
                     ColumnLayout {
                         spacing: 5
