@@ -83,9 +83,9 @@ ColumnLayout {
 
     spacing: Theme.spacing.small
 
+    // the month name shares the grid's left edge, like the date above the card
     RowLayout {
         Layout.fillWidth: true
-        Layout.leftMargin: Theme.spacing.small
         spacing: Theme.spacing.xs
 
         Label {
@@ -116,6 +116,7 @@ ColumnLayout {
         }
     }
 
+    // seven equal columns whatever their labels, so every number sits on the same line as its weekday
     GridLayout {
         id: grid
 
@@ -135,6 +136,8 @@ ColumnLayout {
                 required property int index
 
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                Layout.minimumWidth: 0
                 Layout.bottomMargin: Theme.spacing.xs
                 horizontalAlignment: Text.AlignHCenter
                 text: modelData
@@ -147,7 +150,7 @@ ColumnLayout {
         Repeater {
             model: Math.ceil((root.offset + root.days) / 7) * 7
 
-            Rectangle {
+            Item {
                 id: day
 
                 required property int index
@@ -156,9 +159,19 @@ ColumnLayout {
                 readonly property bool today: inMonth && number === Time.now.getDate() && root.month === Time.now.getMonth() && root.year === Time.now.getFullYear()
 
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                Layout.minimumWidth: 0
                 implicitHeight: 34
-                radius: Theme.radius.full
-                color: today ? Theme.color.primary : "transparent"
+
+                // today is a circle, never stretched into a pill by a wide column
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: Math.min(parent.width, parent.height)
+                    height: width
+                    radius: width / 2
+                    visible: day.today
+                    color: Theme.color.primary
+                }
 
                 Label {
                     anchors.centerIn: parent

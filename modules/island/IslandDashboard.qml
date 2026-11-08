@@ -77,8 +77,9 @@ Item {
             Layout.alignment: Qt.AlignTop
             spacing: Theme.spacing.medium
 
+            // the date lines up with the calendar card's content below it
             ColumnLayout {
-                Layout.leftMargin: Theme.spacing.small
+                Layout.leftMargin: Theme.spacing.medium
                 spacing: 0
 
                 Label {
