@@ -41,6 +41,13 @@ ColumnLayout {
             hint: Updates.updating ? "Updating, the shell restarts by itself when it is done." : "Updates come from tagged releases of the repository."
 
             Button {
+                variant: "neutral"
+                icon: "new_releases"
+                text: "What's new"
+                onClicked: Actions.open("whatsnew")
+            }
+
+            Button {
                 visible: Updates.available === ""
                 variant: "neutral"
                 icon: "refresh"
