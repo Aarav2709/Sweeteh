@@ -55,7 +55,7 @@ PanelWindow {
     // a colored moment, a notification on screen keeps its turn and a newer moment replaces an older one
     // which moments switch a kind belongs to
     function category(kind: string): string {
-        return ["plugged", "unplugged", "low", "critical", "profile"].includes(kind) ? "battery" : kind === "clipboard" ? "clipboard" : kind === "audio" ? "audio" : kind.startsWith("bluetooth") ? "bluetooth" : kind === "network" ? "network" : kind === "download" ? "downloads" : kind === "welcome" ? "welcome" : kind === "needs" || kind === "news" ? kind : "toggles";
+        return ["plugged", "unplugged", "low", "critical", "profile"].includes(kind) ? "battery" : kind === "clipboard" ? "clipboard" : kind === "audio" ? "audio" : kind.startsWith("bluetooth") ? "bluetooth" : kind === "network" ? "network" : kind === "download" ? "downloads" : kind === "welcome" ? "welcome" : kind === "needs" || kind === "news" || kind === "song" ? kind : "toggles";
     }
 
     function glow(m: var, ms: int): void {
@@ -317,7 +317,7 @@ PanelWindow {
         }
 
         function onOffered(m: var): void {
-            root.glow(m, 6000);
+            root.glow(m, m.ms ?? 6000);
         }
     }
 

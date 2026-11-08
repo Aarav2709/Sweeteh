@@ -24,7 +24,7 @@ Singleton {
         "wallpaper toggle", "wallpapers random", "cheatsheet toggle", "modeswitcher toggle", "mode cycle", "settings toggle",
         "monitor toggle", "media toggle", "screenshot region", "screenshot screen", "screenshot window", "screenshot record", "screenshot lens",
         "desktop edit", "notifs clear", "notifs dnd", "player toggle", "player next", "player previous",
-        "brightness up", "brightness down", "zoom zoomIn", "zoom zoomOut", "zoom reset", "mode set islands", "mode set island",
+        "brightness up", "brightness down", "song recognize", "zoom zoomIn", "zoom zoomOut", "zoom reset", "mode set islands", "mode set island",
         "app terminal", "app files", "app browser", "window close", "window float", "window fullscreen", "window maximize",
         "window split", "focus left", "focus right", "focus up", "focus down", "scratchpad toggle", "scratchpad send", "session logout"
     ]

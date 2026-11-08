@@ -31,6 +31,7 @@ ShellRoot {
         Updates.available;
         Packages.count;
         Zoom.level;
+        SongSearch.listening;
     }
 
     // bundled fonts, loaded here so nothing has to be installed

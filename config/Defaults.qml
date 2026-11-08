@@ -406,6 +406,12 @@ Singleton {
                     description: "Start or stop a screen recording"
                 },
                 {
+                    group: "Media",
+                    keys: "SUPER + SHIFT + N",
+                    action: "song recognize",
+                    description: "Name the song that is playing"
+                },
+                {
                     group: "Capture",
                     keys: "SUPER + SHIFT + G",
                     action: "screenshot lens",
