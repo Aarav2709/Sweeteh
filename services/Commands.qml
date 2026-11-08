@@ -80,6 +80,8 @@ Singleton {
             { icon: "system_update", title: "Check for updates", keywords: "updates upgrade packages", run: () => Updates.check() },
             ...(Updates.missing !== "" ? [{ icon: "download", title: "Install missing packages", keywords: "deps dependencies packages missing install " + Updates.missing, run: () => Updates.installMissing() }] : []),
             { icon: "upgrade", title: Packages.count > 0 ? "Update the system, " + Packages.count + " packages" : "Update the system", keywords: "pacman yay paru upgrade packages system update syu", run: () => Packages.upgrade() },
+            { icon: "zoom_in", title: "Zoom in", keywords: "zoom magnify bigger screen", run: () => Zoom.zoomIn() },
+            { icon: "zoom_out", title: Zoom.level > 1 ? "Stop zooming" : "Zoom out", keywords: "zoom magnify reset smaller screen", run: () => Zoom.reset() },
             { icon: "new_releases", title: "What's new", keywords: "whats new changelog release notes update version", run: () => Actions.open("whatsnew") },
             { icon: "waving_hand", title: "Show the welcome tour", keywords: "welcome tour intro help start", run: () => Actions.open("welcome") },
             { icon: "refresh", title: "Reload the shell", keywords: "reload restart shell quickshell", run: () => Quickshell.reload(false) },

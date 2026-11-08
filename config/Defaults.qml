@@ -404,6 +404,36 @@ Singleton {
                     keys: "SUPER + SHIFT + R",
                     action: "screenshot record",
                     description: "Start or stop a screen recording"
+                },
+                {
+                    group: "Zoom",
+                    keys: "SUPER + CTRL + mouse_up",
+                    action: "zoom zoomIn",
+                    description: "Zoom in around the cursor"
+                },
+                {
+                    group: "Zoom",
+                    keys: "SUPER + CTRL + mouse_down",
+                    action: "zoom zoomOut",
+                    description: "Zoom out"
+                },
+                {
+                    group: "Zoom",
+                    keys: "SUPER + equal",
+                    action: "zoom zoomIn",
+                    description: "Zoom in around the cursor"
+                },
+                {
+                    group: "Zoom",
+                    keys: "SUPER + minus",
+                    action: "zoom zoomOut",
+                    description: "Zoom out"
+                },
+                {
+                    group: "Zoom",
+                    keys: "SUPER + CTRL + 0",
+                    action: "zoom reset",
+                    description: "Stop zooming"
                 }
             ]
         })
