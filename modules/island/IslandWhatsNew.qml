@@ -42,28 +42,18 @@ Item {
         width: parent.width
         spacing: Theme.spacing.large
 
-        RowLayout {
-            spacing: Theme.spacing.medium
+        ColumnLayout {
+            spacing: 0
 
-            IconBadge {
-                name: "new_releases"
-                shape: "softburst"
-                size: 40
+            Label {
+                text: "What's new in " + root.version
+                font.pixelSize: Theme.font.headline
+                font.weight: Font.DemiBold
             }
 
-            ColumnLayout {
-                spacing: 0
-
-                Label {
-                    text: "What's new in " + root.version
-                    font.pixelSize: Theme.font.headline
-                    font.weight: Font.DemiBold
-                }
-
-                Label {
-                    text: "Sweeteh just updated, here is what came with it."
-                    color: Theme.color.inkMeta
-                }
+            Label {
+                text: "Sweeteh just updated, here is what came with it."
+                color: Theme.color.inkMeta
             }
         }
 
@@ -76,8 +66,9 @@ Item {
                 Layout.fillWidth: true
                 spacing: Theme.spacing.medium
 
+                // centered on the title and its line together
                 IconBadge {
-                    Layout.alignment: Qt.AlignTop
+                    Layout.alignment: Qt.AlignVCenter
                     name: modelData[0]
                     shape: "cookie9"
                     size: 30
