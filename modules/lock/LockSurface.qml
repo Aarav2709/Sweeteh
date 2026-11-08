@@ -17,21 +17,8 @@ Item {
     property bool ready: false
     // blurred while locked, it clears as the lock lets go
     readonly property bool shown: ready && !context.leaving
-    // the full name from the account, the login name until it is known
-    property string userName: Quickshell.env("USER") ?? ""
     // power off and restart ask for a second click, there may be unsaved work behind the lock
     property string armed: ""
-
-    Process {
-        running: true
-        command: ["sh", "-c", "getent passwd \"$USER\" | cut -d: -f5 | cut -d, -f1"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                if (text.trim() !== "")
-                    root.userName = text.trim();
-            }
-        }
-    }
 
     Timer {
         id: disarm
@@ -182,56 +169,12 @@ Item {
             color: Theme.color.primary
         }
 
-        // who is locked out, the account picture when there is one and the name
-        Row {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: Theme.spacing.xl
-            spacing: Theme.spacing.small
-
-            ClippingRectangle {
-                anchors.verticalCenter: parent.verticalCenter
-                width: 32
-                height: 32
-                radius: 16
-                color: Theme.color.secondaryContainer
-
-                Label {
-                    anchors.centerIn: parent
-                    visible: avatar.status !== Image.Ready
-                    text: root.userName.charAt(0).toUpperCase()
-                    font.weight: Font.DemiBold
-                    color: Theme.color.fgSecondaryContainer
-                }
-
-                Image {
-                    id: avatar
-
-                    anchors.fill: parent
-                    source: "file:///var/lib/AccountsService/icons/" + Quickshell.env("USER")
-                    fillMode: Image.PreserveAspectCrop
-                    sourceSize: Qt.size(64, 64)
-                    asynchronous: true
-                    onStatusChanged: {
-                        if (status === Image.Error && !source.toString().endsWith("/.face"))
-                            source = "file://" + Paths.home + "/.face";
-                    }
-                }
-            }
-
-            Label {
-                anchors.verticalCenter: parent.verticalCenter
-                text: root.userName
-                font.weight: Font.Medium
-                color: Theme.color.ink
-            }
-        }
-
         // keys go straight into the context, no text field, so input methods cannot swallow them
         Rectangle {
             id: field
 
             Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: Theme.spacing.medium
+            Layout.topMargin: Theme.spacing.xl
             implicitWidth: 340
             implicitHeight: Theme.size.buttonLarge
             radius: height / 2
@@ -257,14 +200,21 @@ Item {
 
             Label {
                 anchors.left: lead.right
+                anchors.leftMargin: Theme.spacing.medium
+                anchors.verticalCenter: parent.verticalCenter
+                visible: root.context.password === ""
+                text: root.context.busy ? "Checking" : "Type your password"
+                color: Theme.color.inkFaint
+            }
+
+            PasswordShapes {
+                anchors.left: lead.right
                 anchors.right: parent.right
                 anchors.leftMargin: Theme.spacing.medium
                 anchors.rightMargin: Theme.spacing.large
                 anchors.verticalCenter: parent.verticalCenter
-                text: root.context.password === "" ? (root.context.busy ? "Checking" : "Type your password") : "•".repeat(Math.min(root.context.password.length, 24))
-                color: root.context.password === "" ? Theme.color.inkFaint : Theme.color.ink
-                font.pixelSize: root.context.password === "" ? Theme.font.body : Theme.font.large
-                font.letterSpacing: root.context.password === "" ? 0 : 2
+                count: root.context.password.length
+                size: Theme.font.large
             }
 
             Connections {
