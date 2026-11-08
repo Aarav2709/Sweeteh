@@ -148,6 +148,25 @@ Scope {
         Tablet.keyboard = false;
     }
 
+    // how far the keyboard has slid up out of the edge, and how far a finger is pulling it back down
+    property real reveal: Tablet.keyboard ? 1 : 0
+    property real pull: 0
+
+    Behavior on reveal {
+        enabled: Theme.anim.speed > 0
+
+        NumberAnimation {
+            duration: Theme.anim.slow
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Theme.anim.decel
+        }
+    }
+
+    onRevealChanged: {
+        if (reveal === 0)
+            pull = 0;
+    }
+
     Connections {
         target: Tablet
 
@@ -175,8 +194,9 @@ Scope {
         }
     }
 
+    // stays loaded while it slides away
     LazyLoader {
-        active: Tablet.keyboard
+        active: Tablet.keyboard || root.reveal > 0
 
         PanelWindow {
             screen: Hypr.screenFor(Hypr.focusedScreenName)
@@ -200,8 +220,43 @@ Scope {
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: Theme.spacing.medium
                 width: content.implicitWidth + 20
-                height: content.implicitHeight + 20
+                height: content.implicitHeight + 34
                 radius: Theme.radius.large
+                // slides in from below the edge, and follows a finger dragging it down
+                transform: Translate {
+                    y: (1 - root.reveal) * (card.height + Theme.spacing.medium * 2) + root.pull
+                }
+
+                // the grabber, drag it down to put the keyboard away
+                Item {
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: 24
+
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 40
+                        height: 4
+                        radius: 2
+                        color: Theme.color.inkFaint
+                    }
+
+                    DragHandler {
+                        target: null
+                        yAxis.enabled: true
+                        xAxis.enabled: false
+                        onTranslationChanged: root.pull = Math.max(0, translation.y)
+                        onActiveChanged: {
+                            if (active)
+                                return;
+                            if (root.pull > 60)
+                                root.close();
+                            else
+                                root.pull = 0;
+                        }
+                    }
+                }
                 color: Theme.color.panel
                 border.width: Theme.depth.rim
                 border.color: Theme.color.depthRim
@@ -209,7 +264,9 @@ Scope {
                 RowLayout {
                     id: content
 
-                    anchors.centerIn: parent
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 10
                     spacing: 5
 
                     ColumnLayout {
@@ -366,7 +423,7 @@ Scope {
         }
     }
 
-    // in tablet mode a small handle at the bottom edge brings the keyboard up
+    // in tablet mode a tab joined to the bottom edge, swipe or scroll up on it, or tap it, for the keyboard
     LazyLoader {
         active: Tablet.tablet && !Tablet.keyboard
 
@@ -378,26 +435,48 @@ Scope {
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
             exclusionMode: ExclusionMode.Ignore
             anchors.bottom: true
-            margins.bottom: Theme.spacing.small
-            implicitWidth: 72
-            implicitHeight: 32
+            implicitWidth: 84
+            implicitHeight: 26
 
             Rectangle {
+                id: tab
+
+                property real lift: 0
+
                 anchors.fill: parent
-                radius: height / 2
+                topLeftRadius: height / 2
+                topRightRadius: height / 2
                 color: Theme.color.panel
                 border.width: Theme.depth.rim
                 border.color: Theme.color.depthRim
 
                 Icon {
                     anchors.centerIn: parent
-                    name: "keyboard"
+                    anchors.verticalCenterOffset: -tab.lift * 0.2
+                    name: "keyboard_arrow_up"
                     color: Theme.color.ink
                 }
 
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: Tablet.keyboard = true
+                TapHandler {
+                    onTapped: Tablet.keyboard = true
+                }
+
+                DragHandler {
+                    target: null
+                    xAxis.enabled: false
+                    onTranslationChanged: {
+                        tab.lift = Math.max(0, -translation.y);
+                        if (tab.lift > 24)
+                            Tablet.keyboard = true;
+                    }
+                    onActiveChanged: tab.lift = 0
+                }
+
+                WheelHandler {
+                    onWheel: e => {
+                        if (e.angleDelta.y > 0)
+                            Tablet.keyboard = true;
+                    }
                 }
             }
         }

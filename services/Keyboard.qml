@@ -41,7 +41,8 @@ Singleton {
         target: Hyprland
 
         function onRawEvent(event: HyprlandEvent): void {
-            if (event.name === "activelayout")
+            // virtual keyboards, like the on screen keyboard's wtype, come and go with every key and say error
+            if (event.name === "activelayout" && !/virtual|wtype/i.test(event.data.slice(0, event.data.lastIndexOf(","))) && !/^error$/i.test(event.data.slice(event.data.lastIndexOf(",") + 1)))
                 root.layout = event.data.slice(event.data.lastIndexOf(",") + 1);
         }
     }
