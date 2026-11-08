@@ -46,7 +46,9 @@ Rectangle {
         anchors.leftMargin: lead.visible ? Theme.spacing.medium : Theme.spacing.large
         anchors.rightMargin: Theme.spacing.large
         anchors.verticalCenter: parent.verticalCenter
-        color: Theme.color.ink
+        // a password is typed under the shapes, the field keeps the text and the keys
+        color: root.password ? "transparent" : Theme.color.ink
+        cursorDelegate: root.password ? hiddenCursor : null
         selectionColor: Theme.color.primary
         selectedTextColor: Theme.color.fgPrimary
         font.family: Theme.font.family
@@ -61,6 +63,21 @@ Rectangle {
         selectByMouse: true
         onAccepted: root.accepted()
         onTextEdited: root.edited()
+
+        Component {
+            id: hiddenCursor
+
+            Item {}
+        }
+
+        PasswordShapes {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            visible: root.password
+            count: root.password ? textInput.length : 0
+            size: Theme.font.body + 2
+        }
 
         Label {
             anchors.fill: parent
