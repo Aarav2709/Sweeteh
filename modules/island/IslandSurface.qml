@@ -215,7 +215,7 @@ Item {
 
     implicitWidth: content.implicitWidth + pad * 2
     // short moments stay close to the resting height so they never reach down onto the windows
-    readonly property int vpad: compact ? Math.min(pad, Theme.spacing.xs) : pad
+    readonly property int vpad: mode === "idle" ? 0 : compact ? Theme.spacing.small : pad
     implicitHeight: Math.max(idleHeight, content.implicitHeight + vpad * 2)
     width: implicitWidth
     height: implicitHeight
