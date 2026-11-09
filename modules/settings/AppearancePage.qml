@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import qs.config
 import qs.theme
 import qs.components
+import "../../theme/Presets.js" as Presets
 
 // colors, shape, type and motion
 ColumnLayout {
@@ -10,6 +11,12 @@ ColumnLayout {
 
     readonly property var t: Config.options.theme
     readonly property list<string> swatches: Defaults.choices["theme.accent"]
+    readonly property var presetLabels: {
+        const out = { "": "Wallpaper" };
+        for (const p of Presets.names)
+            out[p] = Presets.label(p);
+        return out;
+    }
     readonly property var schemeNotes: ({
             "scheme-tonal-spot": "Calm, a muted take on the main wallpaper color.",
             "scheme-content": "Stays close to the colors actually in the wallpaper.",
@@ -41,6 +48,19 @@ ColumnLayout {
             Toggle {
                 checked: root.t.dark
                 onToggled: v => Config.set("theme.dark", v)
+            }
+        }
+
+        OptionRow {
+            label: "Theme"
+            hint: "A fixed theme keeps its own colors whatever the wallpaper is. The options below apply while colors follow the wallpaper."
+
+            ChipGroup {
+                Layout.preferredWidth: 420
+                options: Defaults.choices["theme.preset"]
+                labels: root.presetLabels
+                current: root.t.preset
+                onPicked: v => Config.set("theme.preset", v)
             }
         }
 

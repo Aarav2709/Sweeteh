@@ -8,7 +8,8 @@ QtObject {
     // sat is the least color it carries, a grey wallpaper leaves the palette as it is
     function wash(role: string, sat: real): color {
         const base = Colors.pick(role);
-        if (hueSource.hslSaturation < 0.06)
+        // a fixed theme keeps its own colors exactly
+        if (Colors.fixed || hueSource.hslSaturation < 0.06)
             return base;
         return Qt.hsla(Math.max(0, hueSource.hslHue), Math.max(base.hslSaturation, sat), base.hslLightness, base.a);
     }
@@ -74,7 +75,8 @@ QtObject {
     readonly property color tertiaryFixedDim: Colors.pick("tertiary_fixed_dim")
 
     // the wallpaper's real color, never the song's, so the island tints even on the monochrome scheme
-    readonly property color source: Theme.wallpaper
+    // under a fixed theme the accent stands in, so the light under the keys is the theme's own
+    readonly property color source: Colors.fixed ? Colors.pick("primary") : Theme.wallpaper
     // the wallpaper's hue colors everything, a grey wallpaper falls back to the raw palette
     readonly property color hueSource: source.hslSaturation >= 0.06 ? source : Colors.pick("primary")
     // the lightest and darkest shades of the wallpaper, used where white and black would look flat
@@ -104,5 +106,5 @@ QtObject {
     readonly property color depthRim: Qt.alpha(glint, Theme.dark ? 0.22 : 0.7)
     readonly property color sourceTone: Qt.hsla(Math.max(0, source.hslHue), Math.min(1, source.hslSaturation * 1.35), Theme.dark ? Math.max(0.08, Math.min(0.24, source.hslLightness)) : Math.max(0.8, Math.min(0.92, source.hslLightness)), panel.a)
     // the island and the bar pills, the plain panel with the wallpaper seeping in
-    readonly property color island: Theme.mix(panel, sourceTone, Theme.islandTint)
+    readonly property color island: Colors.fixed ? panel : Theme.mix(panel, sourceTone, Theme.islandTint)
 }

@@ -8,6 +8,7 @@ import qs.config
 import qs.theme
 import "Fuzzy.js" as Fuzzy
 import "Calc.js" as Calc
+import "../theme/Presets.js" as Presets
 
 // shell actions for the launcher and the > command palette
 Singleton {
@@ -51,6 +52,20 @@ Singleton {
                 run: () => c.terminal ? Quickshell.execDetached([Config.options.general.terminal, "-e", "sh", "-c", String(c.command)]) : Actions.shell(String(c.command))
             });
         }
+        for (const p of Presets.names)
+            out.push({
+                icon: "palette",
+                title: "Use the " + Presets.label(p) + " theme",
+                keywords: "theme preset colors fixed " + p.replace(/-/g, " "),
+                run: () => Config.set("theme.preset", p)
+            });
+        if (Config.options.theme.preset !== "")
+            out.push({
+                icon: "wallpaper",
+                title: "Take colors from the wallpaper again",
+                keywords: "theme preset colors wallpaper matugen reset",
+                run: () => Config.set("theme.preset", "")
+            });
         const wifi = Network.wifiEnabled;
         const bt = BluetoothState.enabled;
         const playing = Media.active ? [

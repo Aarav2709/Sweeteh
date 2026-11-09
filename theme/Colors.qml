@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.config
+import "Presets.js" as Presets
 
 // material colors from matugen output, falling back to the bundled palette
 Singleton {
@@ -30,7 +31,13 @@ Singleton {
         return entry ? entry[mode].color : "transparent";
     }
 
+    // a fixed theme like Catppuccin stands in for the wallpaper's palette, null while colors follow the wallpaper
+    readonly property var preset: Presets.roles(Config.options.theme.preset, mode)
+    readonly property bool fixed: preset !== null
+
     function pick(name: string): color {
+        if (preset && preset[name])
+            return preset[name];
         const now = raw(palette, name);
         if (blend >= 1 || !previous)
             return now;

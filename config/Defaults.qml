@@ -8,6 +8,7 @@ Singleton {
     // allowed values for options that are a fixed set
     readonly property var choices: ({
             "theme.scheme": ["scheme-tonal-spot", "scheme-content", "scheme-expressive", "scheme-fidelity", "scheme-fruit-salad", "scheme-monochrome", "scheme-neutral", "scheme-rainbow", "scheme-vibrant"],
+            "theme.preset": ["", "catppuccin", "gruvbox", "rose-pine", "nord", "tokyo-night", "everforest"],
             "wallpaper.transition": ["circle", "wipe", "fade", "zoom"],
             "power.sleepAction": ["suspend", "hibernate", "suspend-then-hibernate", "hybrid-sleep"],
             "theme.accent": ["#7c9cff", "#ff8a80", "#ffb74d", "#81c784", "#4dd0e1", "#ba68c8", "#f06292", "#a1887f"]
@@ -48,6 +49,8 @@ Singleton {
             theme: {
                 dark: true,
                 fromWallpaper: true,
+                // a fixed theme like catppuccin or gruvbox in place of the wallpaper's colors, empty follows the wallpaper
+                preset: "",
                 accent: "#7c9cff",
                 scheme: "scheme-tonal-spot",
                 matugenConfig: "",
