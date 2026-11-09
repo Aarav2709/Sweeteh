@@ -106,6 +106,8 @@ Singleton {
                 // a copied link or sum is offered first on an empty search
                 clipboardActions: true,
                 maxResults: 8,
+                // your own rows for the launcher and the palette, like { title: "Sync notes", command: "rclone sync ~/Notes remote:notes", icon: "sync", terminal: true }
+                commands: [],
                 files: true,
                 web: true
             },

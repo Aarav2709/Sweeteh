@@ -43,6 +43,7 @@ ShellRoot {
         Files.query;
         Translator.installed;
         Apps.usage;
+        Recents.files;
     }
 
     // bundled fonts, loaded here so nothing has to be installed

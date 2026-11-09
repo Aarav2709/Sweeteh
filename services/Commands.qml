@@ -40,6 +40,17 @@ Singleton {
                 keywords: "scheme palette colors matugen " + s,
                 run: () => Config.set("theme.scheme", s)
             });
+        // your own commands from the config, each a title and a shell line, in a terminal when it asks for one
+        for (const c of Config.options.launcher.commands) {
+            if (!c || !c.title || !c.command)
+                continue;
+            out.push({
+                icon: c.icon || "terminal",
+                title: String(c.title),
+                keywords: "custom command " + (c.keywords ?? ""),
+                run: () => c.terminal ? Quickshell.execDetached([Config.options.general.terminal, "-e", "sh", "-c", String(c.command)]) : Actions.shell(String(c.command))
+            });
+        }
         const wifi = Network.wifiEnabled;
         const bt = BluetoothState.enabled;
         const playing = Media.active ? [

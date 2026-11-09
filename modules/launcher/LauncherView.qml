@@ -18,8 +18,10 @@ Item {
     property int current: 0
     // an app opened up to show its own actions, like a private window, cleared by typing
     property var expanded: null
-    readonly property var sum: active ? Calc.evaluate(query) : null
-    readonly property var results: active ? build().map(r => Object.assign(r, { key: r.kind + "\u0001" + r.title + "\u0001" + (r.subtitle ?? "") })) : []
+    // a first character that turns the search into the palette, emoji, windows, the clipboard, files or ssh
+    readonly property bool prefixed: /^[>:@"\/$]/.test(query.trim())
+    readonly property var sum: active && !prefixed ? Calc.evaluate(query) : null
+    readonly property var results: active ? build().map(r => Object.assign(r, { key: r.kind + "\u0001" + (r.id ?? r.title) + "\u0001" + (r.subtitle ?? "") })) : []
 
     signal done
 
@@ -53,7 +55,11 @@ Item {
         if (q === "?")
             return [
                 { kind: "prefix", icon: "terminal", title: "> Commands", subtitle: "Every shell action, timers, dates, colors and more", keep: true, run: () => root.setQuery(">") },
-                { kind: "prefix", icon: "mood", title: ": Emoji and symbols", subtitle: "Search by name, Enter copies", keep: true, run: () => root.setQuery(":") }
+                { kind: "prefix", icon: "mood", title: ": Emoji and symbols", subtitle: "Search by name, Enter copies", keep: true, run: () => root.setQuery(":") },
+                { kind: "prefix", icon: "select_window", title: "@ Windows", subtitle: "Switch to an open window, Ctrl Enter closes it", keep: true, run: () => root.setQuery("@") },
+                { kind: "prefix", icon: "content_paste", title: "\" Clipboard", subtitle: "Search what you copied, Enter copies it again", keep: true, run: () => root.setQuery("\"") },
+                { kind: "prefix", icon: "history", title: "/ Files", subtitle: "Opened lately, or type to search your home folder", keep: true, run: () => root.setQuery("/") },
+                { kind: "prefix", icon: "dns", title: "$ SSH", subtitle: "Connect to a host from your ssh config", keep: true, run: () => root.setQuery("$") }
             ];
         if (sum !== null)
             out.push({ kind: "sum", icon: "calculate", title: String(sum), subtitle: "Press enter to copy", run: () => Actions.copy(String(sum)) });
@@ -85,6 +91,50 @@ Item {
                         Emoji.used(e.c);
                         Actions.copy(e.c);
                     } });
+            return out;
+        }
+        // @ switches to an open window, the one in front comes last so Enter goes somewhere else
+        if (q.startsWith("@")) {
+            const want = q.slice(1).trim();
+            out.length = 0;
+            const wins = Hypr.toplevels.values.map(t => {
+                const cls = t.wayland?.appId ?? t.lastIpcObject?.class ?? "";
+                return { t: t, cls: cls, s: want === "" ? (t.activated ? 1 : 2) : Fuzzy.best(want, [t.title ?? "", cls]) };
+            }).filter(w => w.s > 0).sort((a, b) => b.s - a.s);
+            for (const w of wins.slice(0, 20))
+                out.push({ kind: "window", id: w.t.address, image: Apps.icon(w.cls), title: w.t.title || w.cls || "Window", subtitle: (w.cls ? w.cls + ", " : "") + "workspace " + (w.t.workspace?.name ?? w.t.workspace?.id ?? ""), run: () => Hypr.focusWindow(w.t.address), alt: () => Hypr.closeWindow(w.t.address) });
+            return out;
+        }
+        // " searches the clipboard history
+        if (q.startsWith("\"")) {
+            const want = q.slice(1).trim();
+            out.length = 0;
+            const clips = Clipboard.entries.filter(e => !e.image).map(e => ({ e: e, s: want === "" ? 1 : Fuzzy.score(want, e.text) })).filter(x => x.s > 0);
+            if (want !== "")
+                clips.sort((a, b) => b.s - a.s);
+            for (const x of clips.slice(0, 30))
+                out.push({ kind: "clip", id: String(x.e.id), icon: "content_paste", title: x.e.text.replace(/\s+/g, " ").trim().slice(0, 140), run: () => Clipboard.copy(x.e) });
+            return out;
+        }
+        // / lists files opened lately, and searches the home folder once something is typed
+        if (q.startsWith("/")) {
+            const want = q.slice(1).trim();
+            out.length = 0;
+            for (const f of (want === "" ? Recents.files : Files.results).slice(0, 20))
+                out.push({ kind: "file", id: f, icon: want === "" ? "history" : "description", title: f.slice(f.lastIndexOf("/") + 1), subtitle: f.replace(Paths.home, "~"), run: () => Files.open(f), alt: () => Files.reveal(f) });
+            return out;
+        }
+        // $ connects to a host from the ssh config, or to whatever was typed
+        if (q.startsWith("$")) {
+            const want = q.slice(1).trim();
+            out.length = 0;
+            const hosts = Recents.hosts.map(h => ({ h: h, s: want === "" ? 1 : Fuzzy.score(want, h) })).filter(x => x.s > 0);
+            if (want !== "")
+                hosts.sort((a, b) => b.s - a.s);
+            for (const x of hosts.slice(0, 20))
+                out.push({ kind: "host", icon: "dns", title: x.h, subtitle: "From your ssh config", run: () => Recents.connect(x.h) });
+            if (want !== "" && !/\s/.test(want) && !Recents.hosts.includes(want))
+                out.push({ kind: "host", icon: "terminal", title: want, subtitle: "Connect to this host", run: () => Recents.connect(want) });
             return out;
         }
         // with nothing typed, what was just copied can be acted on
@@ -161,9 +211,19 @@ Item {
         current = 0;
         expanded = null;
         Actions.keystroke();
-        if (Config.options.launcher.files)
-            Files.search(query.startsWith(">") || query.startsWith(":") ? "" : query);
-        if (Calc.evaluate(query) === null && !query.startsWith(">") && !query.startsWith(":"))
+        const q = query.trim();
+        // each prefix reads its list as it is first typed, so the rows are fresh
+        if (q === "\"")
+            Clipboard.refresh();
+        else if (q === "/")
+            Recents.refreshFiles();
+        else if (q === "$")
+            Recents.refreshHosts();
+        if (q.startsWith("/"))
+            Files.search(q.slice(1).trim());
+        else if (Config.options.launcher.files)
+            Files.search(prefixed ? "" : query);
+        if (!prefixed && Calc.evaluate(query) === null)
             Qalc.ask(query);
     }
 
@@ -236,7 +296,7 @@ Item {
                 required property var modelData
                 required property int index
                 readonly property bool selected: index === root.current
-                readonly property string hint: modelData.more ? "Ctrl Enter, more" : ({ sum: "Copy", copy: "Copy", emoji: "Copy", run: "Shell", action: "Action", file: "File", web: "Web" })[modelData.kind] ?? ""
+                readonly property string hint: modelData.more ? "Ctrl Enter, more" : ({ sum: "Copy", copy: "Copy", emoji: "Copy", clip: "Copy", window: "Switch", host: "SSH", run: "Shell", action: "Action", file: "File", web: "Web" })[modelData.kind] ?? ""
 
                 width: list.width
                 height: list.rowHeight
