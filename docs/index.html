@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sweeteh, a desktop shell for Hyprland</title>
+<meta name="description" content="Sweeteh is a desktop shell for Hyprland built with Quickshell. One island holds the launcher, quick settings, media, notifications and more, lit in the color of your wallpaper.">
+<link rel="icon" href="sweeteh.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #14121a; --l1: #1b1823; --l2: #24202e; --l3: #2f2a3b;
+  --ink: #ece6f5; --sub: #a79fb8; --line: #3a3447;
+  --accent: #b79cff; --accent2: #ff9ec7;
+  --radius: 16px; --ledge: 3px;
+  color-scheme: dark;
+}
+:root[data-mode="light"] {
+  --bg: #f7f3fb; --l1: #efe9f6; --l2: #e6dff0; --l3: #dad1e8;
+  --ink: #2a2436; --sub: #655c78; --line: #cfc5df;
+  --accent: #6b46d6; --accent2: #c2377f;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 400 16px/1.6 "Google Sans Flex", "Google Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  transition: background .5s ease, color .5s ease;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, pre, kbd { font-family: "JetBrains Mono", ui-monospace, "Cascadia Code", Menlo, monospace; font-size: .86em; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+
+/* a key, raised on a ledge lit from below in the accent */
+.key {
+  background: var(--l1); border-radius: var(--radius);
+  box-shadow: 0 var(--ledge) 0 0 var(--accent), 0 10px 28px -14px var(--accent);
+  transition: background .5s ease, box-shadow .5s ease, transform .2s ease;
+}
+
+/* the island, the one bar on the page */
+header { position: sticky; top: 14px; z-index: 10; display: flex; justify-content: center; padding: 0 12px; }
+.island {
+  display: flex; align-items: center; gap: 4px; padding: 6px; border-radius: 999px;
+  background: color-mix(in srgb, var(--l1) 88%, transparent); backdrop-filter: blur(14px);
+  box-shadow: 0 var(--ledge) 0 0 var(--accent), 0 12px 30px -16px var(--accent);
+  max-width: 100%; overflow-x: auto; scrollbar-width: none;
+}
+.island::-webkit-scrollbar { display: none; }
+.island a, .island button {
+  font: inherit; font-weight: 500; font-size: 14px; color: var(--sub); white-space: nowrap;
+  padding: 7px 14px; border-radius: 999px; border: 0; background: none; cursor: pointer;
+  transition: background .25s ease, color .25s ease;
+}
+.island a:hover, .island button:hover { background: var(--l2); color: var(--ink); text-decoration: none; }
+.island .brand { color: var(--ink); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.island .brand img { width: 20px; height: 20px; }
+
+.hero { padding: 84px 0 40px; text-align: center; }
+.hero h1 { font-size: clamp(40px, 8vw, 76px); line-height: 1.02; letter-spacing: -.03em; margin: 0 0 18px; font-weight: 700; }
+.hero h1 em { font-style: normal; color: var(--accent); transition: color .5s ease; }
+.hero p { max-width: 620px; margin: 0 auto 30px; color: var(--sub); font-size: 18px; }
+.install { display: inline-flex; align-items: center; gap: 12px; padding: 14px 16px 14px 20px; max-width: 100%; text-align: left; }
+.install code { overflow-x: auto; white-space: nowrap; scrollbar-width: none; font-size: 14px; }
+.install button, .btn {
+  font: inherit; font-weight: 600; font-size: 14px; border: 0; cursor: pointer; white-space: nowrap;
+  padding: 8px 16px; border-radius: 999px; background: var(--accent); color: var(--bg);
+  transition: background .5s ease, color .5s ease;
+}
+.hero .links { margin-top: 22px; display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; font-weight: 500; }
+video { display: block; width: 100%; border-radius: var(--radius); background: #000; aspect-ratio: 16 / 9; }
+.stage { padding: 8px; margin-top: 44px; }
+
+section { padding: 56px 0 8px; }
+h2 { font-size: clamp(26px, 4vw, 36px); letter-spacing: -.02em; margin: 0 0 8px; font-weight: 700; }
+h3 { font-size: 17px; margin: 0 0 6px; font-weight: 600; }
+.lede { color: var(--sub); max-width: 680px; margin: 0 0 26px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.card { padding: 20px 22px; }
+.card p { margin: 0; color: var(--sub); font-size: 15px; }
+
+.themes { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+.themes button {
+  font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; color: var(--ink);
+  padding: 9px 16px 9px 12px; border: 0; border-radius: 999px; background: var(--l1);
+  display: flex; align-items: center; gap: 9px;
+  box-shadow: 0 2px 0 0 var(--line); transition: background .5s ease, box-shadow .3s ease, color .5s ease;
+}
+.themes button[aria-pressed="true"] { box-shadow: 0 var(--ledge) 0 0 var(--accent); background: var(--l2); }
+.themes i { width: 16px; height: 16px; border-radius: 50%; display: block; }
+.swatches { display: flex; height: 54px; border-radius: 12px; overflow: hidden; }
+.swatches span { flex: 1; transition: background .5s ease; }
+
+.scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+th { text-align: left; color: var(--sub); font-weight: 500; padding: 8px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 9px 12px; border-bottom: 1px solid color-mix(in srgb, var(--line) 55%, transparent); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td code { white-space: nowrap; }
+kbd {
+  display: inline-block; min-width: 26px; text-align: center; padding: 3px 8px; margin-right: 5px; border-radius: 8px;
+  background: var(--l2); color: var(--ink); box-shadow: 0 2px 0 0 var(--accent); font-size: 12.5px;
+  transition: background .5s ease, box-shadow .5s ease;
+}
+.binds { list-style: none; margin: 8px 0 0; padding: 0; }
+.binds li { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 7px 0; font-size: 14.5px; color: var(--sub); }
+.binds .keys { white-space: nowrap; flex-shrink: 0; }
+.binds li span:last-child { text-align: right; }
+
+details { background: var(--l1); border-radius: 14px; margin-bottom: 10px; transition: background .5s ease; }
+summary { cursor: pointer; padding: 14px 18px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+summary::-webkit-details-marker { display: none; }
+summary span { color: var(--sub); font-weight: 400; font-size: 14px; }
+details[open] summary { border-bottom: 1px solid var(--line); }
+details .scroll { padding: 4px 6px 8px; }
+details .note { margin: 12px 18px 0; color: var(--sub); font-size: 14.5px; }
+pre { background: var(--l1); border-radius: 14px; padding: 16px 18px; overflow-x: auto; margin: 0 0 16px; line-height: 1.55; transition: background .5s ease; }
+.steps { color: var(--sub); padding-left: 20px; margin: 0; }
+.steps li { margin-bottom: 8px; }
+.steps code, p code, td:last-child code { background: var(--l2); padding: 2px 6px; border-radius: 6px; color: var(--ink); }
+footer { padding: 64px 0 48px; color: var(--sub); font-size: 14.5px; text-align: center; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+@media (max-width: 560px) { .hero { padding-top: 56px; } .binds li { flex-direction: column; align-items: flex-start; gap: 4px; } .binds li span:last-child { text-align: left; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<header>
+  <nav class="island" aria-label="Sections">
+    <a class="brand" href="#top"><img src="sweeteh.svg" alt="">Sweeteh</a>
+    <a href="#features">Features</a>
+    <a href="#launcher">Launcher</a>
+    <a href="#themes">Themes</a>
+    <a href="#keys">Keys</a>
+    <a href="#config">Config</a>
+    <a href="#help">Help</a>
+    <button id="mode" type="button" aria-label="Switch between dark and light">Light</button>
+  </nav>
+</header>
+
+<main class="wrap" id="top">
+  <div class="hero">
+    <h1>One island.<br><em>Your whole desktop.</em></h1>
+    <p>Sweeteh is a desktop shell for Hyprland, built with Quickshell. The launcher, quick settings, media, notifications and everything else live in one island, lit from below in the color of your wallpaper.</p>
+    <div class="key install">
+      <code id="cmd">curl -fsSL https://raw.githubusercontent.com/Aarav2709/Sweeteh/main/install.sh | bash</code>
+      <button type="button" id="copy">Copy</button>
+    </div>
+    <div class="links">
+      <a href="https://github.com/Aarav2709/Sweeteh">Source on GitHub</a>
+      <a href="https://github.com/Aarav2709/Sweeteh/releases">Releases, now at 1.1.0</a>
+      <a href="#install">Install options</a>
+    </div>
+    <div class="key stage">
+      <video controls preload="metadata" playsinline src="https://github.com/Aarav2709/Sweeteh/raw/main/Sweeteh.mp4">
+        <a href="https://github.com/Aarav2709/Sweeteh/raw/main/Sweeteh.mp4">Watch the demo video</a>
+      </video>
+    </div>
+  </div>
+
+  <section id="features">
+    <h2>What is in it</h2>
+    <p class="lede">Two layouts share everything below. Islands splits the bar into raised pills around the island, Island shows the island alone.</p>
+    <div class="grid">
+      <div class="key card"><h3>The island</h3><p>Launcher, quick settings with Wi-Fi, VPN, Bluetooth and per app volume, media with synced lyrics, notifications with replies, clipboard, system monitor, overview and settings, all in one surface.</p></div>
+      <div class="key card"><h3>Backlit look</h3><p>Pills, keys and cards sit on a ledge lit from below in the wallpaper's hue, and every move glides into place without bounce.</p></div>
+      <div class="key card"><h3>Moments</h3><p>Charging, downloads, copies, Bluetooth and network changes show for a moment with their icon in a slowly turning shape, and wait while a game is fullscreen.</p></div>
+      <div class="key card"><h3>Wallpapers</h3><p>Images, GIFs and videos, a wallhaven search in the picker, and circle, wipe, fade and zoom transitions. Videos pause under fullscreen windows.</p></div>
+      <div class="key card"><h3>Colors everywhere</h3><p>The shell, window borders, kitty, GTK apps, folder icons, Vesktop and Zed follow the wallpaper, or one of six fixed themes.</p></div>
+      <div class="key card"><h3>Desktop widgets</h3><p>Analog clock, weather, calendar, media, system load, synced lyrics and a live spectrum, arranged with Super Shift E.</p></div>
+      <div class="key card"><h3>Lock and idle</h3><p>A lockscreen with a blurred wallpaper and media controls, fingerprint beside the password, idle lock, a slow dim and then sleep, shorter on battery.</p></div>
+      <div class="key card"><h3>Capture</h3><p>Screenshots and recordings of a region, a window or a screen, text copied off the screen, a Google Lens search and a song finder.</p></div>
+      <div class="key card"><h3>Every screen</h3><p>The bar, wallpaper, desktop widgets, lockscreen and screen corners appear on each monitor. The island and its panels open on the one in focus.</p></div>
+    </div>
+  </section>
+
+  <section id="launcher">
+    <h2>The launcher</h2>
+    <p class="lede">Press Super and type. Apps, files, sums and unit conversions answer straight away. One first character turns the search into something else, and <code>?</code> lists them.</p>
+    <div class="key card">
+      <div class="scroll"><table>
+        <thead><tr><th>Type</th><th>For</th><th>Enter</th><th>Ctrl Enter</th></tr></thead>
+        <tbody>
+          <tr><td><kbd>&gt;</kbd></td><td>Every shell action, plus <code>&gt;timer 5m</code>, <code>&gt;date -3d</code>, <code>&gt;vol 40</code>, <code>&gt;ws 3</code>, <code>&gt;tr hola</code>, <code>&gt;#ff8800</code>, <code>&gt;uuid</code></td><td>Runs or copies</td><td></td></tr>
+          <tr><td><kbd>:</kbd></td><td>Emoji and symbols by name</td><td>Copies</td><td></td></tr>
+          <tr><td><kbd>@</kbd></td><td>Open windows, by title or app</td><td>Switches to it</td><td>Closes it</td></tr>
+          <tr><td><kbd>"</kbd></td><td>Clipboard history</td><td>Copies it again</td><td></td></tr>
+          <tr><td><kbd>/</kbd></td><td>Files opened lately, or a search of your home folder once you type</td><td>Opens</td><td>Shows its folder</td></tr>
+          <tr><td><kbd>$</kbd></td><td>Hosts from <code>~/.ssh/config</code>, or any host you type</td><td>Connects in a terminal</td><td></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <h3 style="margin-top:28px">Your own commands</h3>
+    <p class="lede">Add rows to <code>launcher.commands</code> in <code>~/.config/sweeteh/config.json</code>. They show in the launcher and in the <code>&gt;</code> palette. Only <code>title</code> and <code>command</code> are needed.</p>
+<pre><code>{
+  "launcher": {
+    "commands": [
+      { "title": "Sync notes", "command": "rclone sync ~/Notes remote:notes", "icon": "sync", "terminal": true },
+      { "title": "Toggle VPN", "command": "nmcli connection up work", "keywords": "work network" }
+    ]
+  }
+}</code></pre>
+  </section>
+
+  <section id="themes">
+    <h2>Themes</h2>
+    <p class="lede">Colors come from the wallpaper through matugen, in nine schemes. Or pick a fixed theme in Settings, Appearance, or with <code>&gt;use the nord theme</code>. Try them on this page.</p>
+    <div class="themes" id="themes-list" role="group" aria-label="Preview a theme"></div>
+    <div class="key card"><div class="swatches" id="swatches"></div></div>
+  </section>
+
+  <section id="keys">
+    <h2>Keys</h2>
+    <p class="lede">The defaults. Change any of them in Settings, Keybinds, and Super period shows this list on your desktop.</p>
+    <div class="grid">
+<div class="card"><h3>Apps</h3><ul class="binds"><li><span class="keys"><kbd>Super</kbd></span><span>Open the launcher</span></li><li><span class="keys"><kbd>Super</kbd><kbd>T</kbd></span><span>Open the terminal</span></li><li><span class="keys"><kbd>Super</kbd><kbd>E</kbd></span><span>Open the file manager</span></li><li><span class="keys"><kbd>Super</kbd><kbd>W</kbd></span><span>Open the browser</span></li></ul></div>
+<div class="card"><h3>Windows</h3><ul class="binds"><li><span class="keys"><kbd>Super</kbd><kbd>Q</kbd></span><span>Close the window</span></li><li><span class="keys"><kbd>Super</kbd><kbd>V</kbd></span><span>Float or tile the window</span></li><li><span class="keys"><kbd>Super</kbd><kbd>F</kbd></span><span>Make the window fullscreen</span></li><li><span class="keys"><kbd>Super</kbd><kbd>D</kbd></span><span>Maximize the window</span></li><li><span class="keys"><kbd>Super</kbd><kbd>J</kbd></span><span>Flip the split direction</span></li><li><span class="keys"><kbd>Super</kbd><kbd>←</kbd></span><span>Focus the window on the left</span></li><li><span class="keys"><kbd>Super</kbd><kbd>→</kbd></span><span>Focus the window on the right</span></li><li><span class="keys"><kbd>Super</kbd><kbd>↑</kbd></span><span>Focus the window above</span></li><li><span class="keys"><kbd>Super</kbd><kbd>↓</kbd></span><span>Focus the window below</span></li><li><span class="keys"><kbd>Super</kbd><kbd>S</kbd></span><span>Show the scratchpad</span></li><li><span class="keys"><kbd>Super</kbd><kbd>Shift</kbd><kbd>S</kbd></span><span>Send the window to the scratchpad</span></li></ul></div>
+<div class="card"><h3>Shell</h3><ul class="binds"><li><span class="keys"><kbd>Super</kbd><kbd>A</kbd></span><span>Open the island</span></li><li><span class="keys"><kbd>Super</kbd><kbd>Tab</kbd></span><span>Open the workspace overview</span></li><li><span class="keys"><kbd>Super</kbd><kbd>Shift</kbd><kbd>V</kbd></span><span>Open clipboard history</span></li><li><span class="keys"><kbd>Ctrl</kbd><kbd>Shift</kbd><kbd>Esc</kbd></span><span>Open the system monitor</span></li><li><span class="keys"><kbd>Super</kbd><kbd>.</kbd></span><span>Show keybinds</span></li><li><span class="keys"><kbd>Super</kbd><kbd>,</kbd></span><span>Open settings</span></li><li><span class="keys"><kbd>Super</kbd><kbd>Shift</kbd><kbd>W</kbd></span><span>Pick a wallpaper</span></li><li><span class="keys"><kbd>Super</kbd><kbd>Shift</kbd><kbd>M</kbd></span><span>Switch the layout</span></li><li><span class="keys"><kbd>Super</kbd><kbd>Shift</kbd><kbd>E</kbd></span><span>Edit desktop widgets</span></li></ul></div>
+<div class="card"><h3>Session</h3><ul class="binds"><li><span class="keys"><kbd>Super</kbd><kbd>Esc</kbd></span><span>Open the power menu</span></li><li><span class="keys"><kbd>Super</kbd><kbd>L</kbd></span><span>Lock the screen</span></li><li><span class="keys"><kbd>Super</kbd><kbd>M</kbd></span><span>Log out of Hyprland</span></li></ul></div>
+<div class="card"><h3>Capture</h3><ul class="binds"><li><span class="keys"><kbd>Screenshot key</kbd></span><span>Capture a region</span></li><li><span class="keys"><kbd>Print</kbd></span><span>Capture a region</span></li><li><span class="keys"><kbd>Super</kbd><kbd>Screenshot key</kbd></span><span>Capture the whole screen</span></li><li><span class="keys"><kbd>Super</kbd><kbd>Shift</kbd><kbd>R</kbd></span><span>Start or stop a screen recording</span></li><li><span class="keys"><kbd>Super</kbd><kbd>Shift</kbd><kbd>G</kbd></span><span>Search part of the screen with Google Lens</span></li></ul></div>
+<div class="card"><h3>Media</h3><ul class="binds"><li><span class="keys"><kbd>Super</kbd><kbd>Shift</kbd><kbd>N</kbd></span><span>Name the song that is playing</span></li></ul></div>
+<div class="card"><h3>Zoom</h3><ul class="binds"><li><span class="keys"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>Scroll up</kbd></span><span>Zoom in around the cursor</span></li><li><span class="keys"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>Scroll down</kbd></span><span>Zoom out</span></li><li><span class="keys"><kbd>Super</kbd><kbd>=</kbd></span><span>Zoom in around the cursor</span></li><li><span class="keys"><kbd>Super</kbd><kbd>-</kbd></span><span>Zoom out</span></li><li><span class="keys"><kbd>Super</kbd><kbd>Ctrl</kbd><kbd>0</kbd></span><span>Stop zooming</span></li></ul></div>
+    </div>
+  </section>
+
+  <section id="install">
+    <h2>Install</h2>
+    <p class="lede">On Arch and Arch based distros the one line at the top does everything, and asks before installing packages. You do not need Hyprland first.</p>
+    <div class="key card"><div class="scroll"><table>
+      <thead><tr><th>Option</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>--keep-configs</code></td><td>Keep your own Hyprland, kitty, fish and starship configs</td></tr>
+        <tr><td><code>--no-deps</code></td><td>Skip installing packages, for other distros</td></tr>
+        <tr><td><code>--dry-run</code></td><td>Show what would change without changing anything</td></tr>
+        <tr><td><code>--uninstall</code></td><td>Remove Sweeteh and put your previous configs back</td></tr>
+        <tr><td><code>--purge</code></td><td>With <code>--uninstall</code>, also delete settings, backups and cache</td></tr>
+        <tr><td><code>-y</code></td><td>Do not ask before installing packages</td></tr>
+      </tbody>
+    </table></div></div>
+    <p class="lede" style="margin-top:22px">Pass options through curl with <code>bash -s -- --keep-configs</code>. Every file the installer replaces is moved to <code>~/.local/state/sweeteh/backups/</code> first.</p>
+<pre><code>sweeteh run        # start the shell
+sweeteh stop       # stop it
+sweeteh restart    # stop and start again
+sweeteh update     # move to the newest release and restart
+sweeteh ipc launcher toggle   # call anything in the shell</code></pre>
+  </section>
+
+  <section id="config">
+    <h2>Config</h2>
+    <p class="lede">Settings covers every option and is searchable. The same options live in <code>~/.config/sweeteh/config.json</code>, which reloads as you save it. Only write what you change, the rest keeps its default.</p>
+<details><summary>General <span>5 options</span></summary><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>general.terminal</code></td><td><code>&quot;kitty&quot;</code></td><td>Terminal</td></tr><tr><td><code>general.fileManager</code></td><td><code>&quot;nautilus&quot;</code></td><td>File manager</td></tr><tr><td><code>general.webSearch</code></td><td><code>&quot;https://duckduckgo.com/?q=&quot;</code></td><td>Web search</td></tr><tr><td><code>general.screenshotDir</code></td><td><code>&quot;~/Pictures/Screenshots&quot;</code></td><td>Screenshot dir</td></tr><tr><td><code>general.wallpaperDir</code></td><td><code>&quot;~/Pictures/Wallpapers&quot;</code></td><td>Wallpaper dir</td></tr></tbody></table></div></details>
+<details><summary>Theme <span>18 options</span></summary><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>theme.dark</code></td><td><code>true</code></td><td>Dark</td></tr><tr><td><code>theme.fromWallpaper</code></td><td><code>true</code></td><td>From wallpaper</td></tr><tr><td><code>theme.preset</code></td><td><code>&quot;&quot;</code></td><td>A fixed theme like catppuccin or gruvbox in place of the wallpaper&#x27;s colors, empty follows the wallpaper</td></tr><tr><td><code>theme.accent</code></td><td><code>&quot;#7c9cff&quot;</code></td><td>Accent</td></tr><tr><td><code>theme.scheme</code></td><td><code>&quot;scheme-tonal-spot&quot;</code></td><td>Scheme</td></tr><tr><td><code>theme.matugenConfig</code></td><td><code>&quot;&quot;</code></td><td>Matugen config</td></tr><tr><td><code>theme.roundness</code></td><td><code>1</code></td><td>Roundness</td></tr><tr><td><code>theme.spacing</code></td><td><code>1</code></td><td>Spacing</td></tr><tr><td><code>theme.fontFamily</code></td><td><code>&quot;Google Sans Flex&quot;</code></td><td>Font family</td></tr><tr><td><code>theme.monoFamily</code></td><td><code>&quot;monospace&quot;</code></td><td>Mono family</td></tr><tr><td><code>theme.fontScale</code></td><td><code>1</code></td><td>Font scale</td></tr><tr><td><code>theme.fontRound</code></td><td><code>40</code></td><td>Font round</td></tr><tr><td><code>theme.animationSpeed</code></td><td><code>1</code></td><td>Animation speed</td></tr><tr><td><code>theme.motionBlur</code></td><td><code>true</code></td><td>Motion blur</td></tr><tr><td><code>theme.panelOpacity</code></td><td><code>1</code></td><td>Panel opacity</td></tr><tr><td><code>theme.windowBorders</code></td><td><code>true</code></td><td>Window borders</td></tr><tr><td><code>theme.appTheming</code></td><td><code>true</code></td><td>App theming</td></tr><tr><td><code>theme.screenCorners</code></td><td><code>true</code></td><td>Screen corners</td></tr></tbody></table></div></details>
+<details><summary>Bar <span>3 options</span></summary><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>bar.size</code></td><td><code>40</code></td><td>Size</td></tr><tr><td><code>bar.workspaceCount</code></td><td><code>10</code></td><td>Workspace count</td></tr><tr><td><code>bar.showAppIcons</code></td><td><code>true</code></td><td>Show app icons</td></tr></tbody></table></div></details>
+<details><summary>Recording <span>2 options</span></summary><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>recording.dir</code></td><td><code>&quot;~/Videos/Recordings&quot;</code></td><td>Dir</td></tr><tr><td><code>recording.audio</code></td><td><code>false</code></td><td>Audio</td></tr></tbody></table></div></details>
+<details><summary>Clock <span>3 options</span></summary><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>clock.use24h</code></td><td><code>true</code></td><td>Use 24h</td></tr><tr><td><code>clock.showSeconds</code></td><td><code>false</code></td><td>Show seconds</td></tr><tr><td><code>clock.calendarUrl</code></td><td><code>&quot;&quot;</code></td><td>A calendar&#x27;s ics link, its events show in the dashboard and as dots in the calendar</td></tr></tbody></table></div></details>
+<details><summary>Wallpaper <span>4 options</span></summary><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>wallpaper.path</code></td><td><code>&quot;&quot;</code></td><td>Path</td></tr><tr><td><code>wallpaper.transition</code></td><td><code>&quot;circle&quot;</code></td><td>Transition</td></tr><tr><td><code>wallpaper.duration</code></td><td><code>900</code></td><td>Duration</td></tr><tr><td><code>wallpaper.pauseWithWindows</code></td><td><code>false</code></td><td>Live wallpapers also rest while tiled windows cover the workspace, not only under fullscreen</td></tr></tbody></table></div></details>
+<details><summary>Notifications <span>7 options</span></summary><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>notifications.group</code></td><td><code>true</code></td><td>Notifications from one app stack in the dashboard</td></tr><tr><td><code>notifications.timeout</code></td><td><code>6000</code></td><td>Timeout</td></tr><tr><td><code>notifications.historyLimit</code></td><td><code>100</code></td><td>History limit</td></tr><tr><td><code>notifications.dnd</code></td><td><code>false</code></td><td>Dnd</td></tr><tr><td><code>notifications.quietHours</code></td><td><code>false</code></td><td>Quiet hours, do not disturb turns itself on between these times</td></tr><tr><td><code>notifications.quietFrom</code></td><td><code>&quot;23:00&quot;</code></td><td>Quiet from</td></tr><tr><td><code>notifications.quietTo</code></td><td><code>&quot;07:00&quot;</code></td><td>Quiet to</td></tr></tbody></table></div></details>
+<details><summary>Osd <span>1 options</span></summary><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>osd.timeout</code></td><td><code>1500</code></td><td>Timeout</td></tr></tbody></table></div></details>
+<details><summary>Launcher <span>6 options</span></summary><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>launcher.smartRanking</code></td><td><code>true</code></td><td>Apps you open at this hour and lately rise to the top</td></tr><tr><td><code>launcher.clipboardActions</code></td><td><code>true</code></td><td>A copied link or sum is offered first on an empty search</td></tr><tr><td><code>launcher.maxResults</code></td><td><code>8</code></td><td>Max results</td></tr><tr><td><code>launcher.commands</code></td><td><code>[]</code></td><td>Your own rows for the launcher and the palette, like { title: &quot;sync notes&quot;, command: &quot;rclone sync ~/notes remote:notes&quot;, icon: &quot;sync&quot;, terminal: true }</td></tr><tr><td><code>launcher.files</code></td><td><code>true</code></td><td>Files</td></tr><tr><td><code>launcher.web</code></td><td><code>true</code></td><td>Web</td></tr></tbody></table></div></details>
+<details><summary>Island <span>12 options</span></summary><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>island.height</code></td><td><code>34</code></td><td>Height</td></tr><tr><td><code>island.workspacePeek</code></td><td><code>true</code></td><td>Hover the workspace number for previews of your workspaces</td></tr><tr><td><code>island.intro</code></td><td><code>true</code></td><td>The island grows out of the edge and the pills drop in at start</td></tr><tr><td><code>island.hideFullscreen</code></td><td><code>true</code></td><td>The island tucks away over a fullscreen game or video, panels and alerts still come out</td></tr><tr><td><code>island.peek</code></td><td><code>true</code></td><td>Hover the island during music for a small player, with the sung line in it</td></tr><tr><td><code>island.peekDelay</code></td><td><code>3000</code></td><td>How long the pointer rests on the island before the player peeks, in ms</td></tr><tr><td><code>island.peekLyrics</code></td><td><code>true</code></td><td>Peek lyrics</td></tr><tr><td><code>island.gestures</code></td><td><code>true</code></td><td>Swipe to skip, pull down for the dashboard, double click to play or pause</td></tr><tr><td><code>island.squash</code></td><td><code>false</code></td><td>A little squash and stretch as the island changes shape</td></tr><tr><td><code>island.downloads</code></td><td><code>true</code></td><td>Browser downloads, their progress across the island</td></tr><tr><td><code>island.wallpaperTint</code></td><td><code>0.35</code></td><td>How much the wallpaper color shows through the island, 0 keeps it plain</td></tr><tr><td><code>island.messageTime</code></td><td><code>3000</code></td><td>Message time</td></tr></tbody></table></div></details>
+<details><summary>Media <span>4 options</span></summary><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>media.pauseOnDisconnect</code></td><td><code>true</code></td><td>Pause when headphones go away, offer to resume when they come back</td></tr><tr><td><code>media.visualizer</code></td><td><code>false</code></td><td>Live level meter through cava instead of the dance, livelier but jumpier</td></tr><tr><td><code>media.history</code></td><td><code>true</code></td><td>Recently played tracks in the player</td></tr><tr><td><code>media.lyrics</code></td><td><code>true</code></td><td>Lyrics</td></tr></tbody></table></div></details>
+<details><summary>Lock <span>4 options</span></summary><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>lock.fingerprint</code></td><td><code>true</code></td><td>Fingerprint beside the password when fprintd has a finger</td></tr><tr><td><code>lock.showNotifications</code></td><td><code>true</code></td><td>A count and app icons of what came in while locked</td></tr><tr><td><code>lock.idleMinutes</code></td><td><code>0</code></td><td>Idle minutes</td></tr><tr><td><code>lock.showMedia</code></td><td><code>true</code></td><td>Show media</td></tr></tbody></table></div></details>
+<details><summary>Power <span>9 options</span></summary><p class="note">Idle sleep, 0 turns it off, the lid itself is handled by logind.</p><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>power.dimBeforeSleep</code></td><td><code>true</code></td><td>Fade the screens over the last half minute before idle sleep</td></tr><tr><td><code>power.smartTime</code></td><td><code>true</code></td><td>Time left from the average draw of the last ten minutes</td></tr><tr><td><code>power.sleepMinutes</code></td><td><code>15</code></td><td>Sleep minutes</td></tr><tr><td><code>power.sleepMinutesPlugged</code></td><td><code>30</code></td><td>Sleep minutes plugged</td></tr><tr><td><code>power.sleepAction</code></td><td><code>&quot;suspend&quot;</code></td><td>Sleep action</td></tr><tr><td><code>power.lockOnSleep</code></td><td><code>true</code></td><td>Lock on sleep</td></tr><tr><td><code>power.autoSaver</code></td><td><code>true</code></td><td>Switch to battery saver at the low step and back on the charger</td></tr><tr><td><code>power.lowBattery</code></td><td><code>20</code></td><td>Low battery</td></tr><tr><td><code>power.criticalBattery</code></td><td><code>10</code></td><td>Critical battery</td></tr></tbody></table></div></details>
+<details><summary>Performance <span>2 options</span></summary><p class="note">Pause the level meter, the camera check and other busy work while something is fullscreen.</p><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>performance.quietMoments</code></td><td><code>true</code></td><td>Hold minor moments while something is fullscreen, they show after</td></tr><tr><td><code>performance.auto</code></td><td><code>true</code></td><td>Auto</td></tr></tbody></table></div></details>
+<details><summary>Moments <span>8 options</span></summary><p class="note">Colored moments in the island, one switch per kind.</p><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>moments.battery</code></td><td><code>true</code></td><td>Battery</td></tr><tr><td><code>moments.bluetooth</code></td><td><code>true</code></td><td>Bluetooth</td></tr><tr><td><code>moments.network</code></td><td><code>true</code></td><td>Network</td></tr><tr><td><code>moments.toggles</code></td><td><code>true</code></td><td>Toggles</td></tr><tr><td><code>moments.downloads</code></td><td><code>true</code></td><td>Downloads</td></tr><tr><td><code>moments.welcome</code></td><td><code>true</code></td><td>Welcome</td></tr><tr><td><code>moments.clipboard</code></td><td><code>true</code></td><td>Clipboard</td></tr><tr><td><code>moments.audio</code></td><td><code>true</code></td><td>Audio</td></tr></tbody></table></div></details>
+<details><summary>Night light <span>5 options</span></summary><p class="note">Warmer colors through hyprsunset between the two times.</p><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>nightLight.brightness</code></td><td><code>0</code></td><td>Lower the screen to this percent while night light is on, 0 leaves it alone</td></tr><tr><td><code>nightLight.auto</code></td><td><code>true</code></td><td>Auto</td></tr><tr><td><code>nightLight.from</code></td><td><code>&quot;19:00&quot;</code></td><td>From</td></tr><tr><td><code>nightLight.to</code></td><td><code>&quot;06:30&quot;</code></td><td>To</td></tr><tr><td><code>nightLight.temperature</code></td><td><code>4000</code></td><td>Temperature</td></tr></tbody></table></div></details>
+<details><summary>Clipboard <span>1 options</span></summary><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>clipboard.maxItems</code></td><td><code>200</code></td><td>Max items</td></tr></tbody></table></div></details>
+<details><summary>Overview <span>3 options</span></summary><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>overview.rows</code></td><td><code>2</code></td><td>Rows</td></tr><tr><td><code>overview.columns</code></td><td><code>5</code></td><td>Columns</td></tr><tr><td><code>overview.scale</code></td><td><code>0.16</code></td><td>Scale</td></tr></tbody></table></div></details>
+<details><summary>Desktop <span>2 options</span></summary><div class="scroll"><table><thead><tr><th>Key</th><th>Default</th><th>What it does</th></tr></thead><tbody><tr><td><code>desktop.fahrenheit</code></td><td><code>false</code></td><td>Fahrenheit</td></tr><tr><td><code>desktop.weatherPlace</code></td><td><code>&quot;&quot;</code></td><td>Weather place</td></tr></tbody></table></div></details>
+  </section>
+
+  <section id="help">
+    <h2>Help</h2>
+    <div class="grid">
+      <div class="key card"><h3>The shell went away</h3><p>It restarts itself after a crash. If it stays gone, run <code>sweeteh run</code> from a terminal and read what it prints. <code>qs -c sweeteh log</code> shows the last run.</p></div>
+      <div class="key card"><h3>Something is missing</h3><p>When a feature needs a package, the island says which. <code>&gt;install missing packages</code> in the launcher installs them.</p></div>
+      <div class="key card"><h3>Colors did not change</h3><p>Run <code>&gt;recolor from wallpaper</code>. A fixed theme overrides the wallpaper until you pick Wallpaper again in Settings, Appearance.</p></div>
+      <div class="key card"><h3>More than one monitor</h3><p>Nothing to set up. Arrange and scale monitors in your <code>hyprland.lua</code>, the shell follows as they come and go.</p></div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <p>Sweeteh is free software under GPL 3.0. Made by <a href="https://github.com/Aarav2709">Aarav2709</a>, standing on the shells credited in the <a href="https://github.com/Aarav2709/Sweeteh#credits">README</a>.</p>
+</footer>
+
+<script>
+const presets = {"catppuccin":{"name":"Catppuccin","dark":["#1e1e2e","#181825","#313244","#45475a","#cdd6f4","#a6adc8","#4f5165","#cba6f7","#f5c2e7"],"light":["#eff1f5","#e6e9ef","#dce0e8","#ccd0da","#4c4f69","#6c6f85","#bec0cb","#8839ef","#ea76cb"]},"gruvbox":{"name":"Gruvbox","dark":["#282828","#32302f","#3c3836","#504945","#ebdbb2","#bdae93","#5d564e","#fabd2f","#8ec07c"],"light":["#fbf1c7","#f2e5bc","#ebdbb2","#d5c4a1","#3c3836","#665c54","#c7ba9e","#b57614","#427b58"]},"rose-pine":{"name":"Rosé Pine","dark":["#191724","#1f1d2e","#26233a","#403d52","#e0def4","#908caa","#444155","#c4a7e7","#ebbcba"],"light":["#faf4ed","#f4ede8","#f2e9e1","#dfdad9","#575279","#797593","#c9c4c9","#907aa9","#d7827e"]},"nord":{"name":"Nord","dark":["#2e3440","#363b47","#3d434e","#474c57","#eceff4","#d8dee9","#595e69","#88c0d0","#b48ead"],"light":["#eceff4","#e4e8ed","#dde0e6","#d3d7dd","#2e3440","#4c566a","#c2c5cc","#5e81ac","#b48ead"]},"tokyo-night":{"name":"Tokyo Night","dark":["#1a1b26","#1f2335","#24283b","#292e42","#c0caf5","#a9b1d6","#383d58","#7aa2f7","#bb9af7"],"light":["#e1e2e7","#dadde5","#d3d8e4","#cbd1e2","#3760bf","#6172b0","#b3b7ce","#2e7de9","#9854f1"]},"everforest":{"name":"Everforest","dark":["#2d353b","#343f44","#3d484d","#475258","#d3c6aa","#9da9a0","#596462","#a7c080","#83c092"],"light":["#fdf6e3","#f4f0d9","#efebd4","#e6e2cc","#5c6a72","#829181","#c8cbba","#8da101","#35a77c"]}};
+const root = document.documentElement;
+const vars = ["--bg", "--l1", "--l2", "--l3", "--ink", "--sub", "--line", "--accent", "--accent2"];
+let theme = "", mode = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+
+function apply() {
+  root.dataset.mode = mode;
+  const colors = theme ? presets[theme][mode] : null;
+  vars.forEach((v, i) => colors ? root.style.setProperty(v, colors[i]) : root.style.removeProperty(v));
+  document.getElementById("mode").textContent = mode === "dark" ? "Light" : "Dark";
+  document.querySelectorAll("#themes-list button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.theme === theme)));
+  const style = getComputedStyle(root);
+  document.getElementById("swatches").innerHTML = vars.map(v => `<span style="background:${style.getPropertyValue(v)}"></span>`).join("");
+}
+
+const list = document.getElementById("themes-list");
+[["", "Wallpaper"]].concat(Object.keys(presets).map(k => [k, presets[k].name])).forEach(([id, name]) => {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.dataset.theme = id;
+  const dot = document.createElement("i");
+  dot.style.background = id ? presets[id].dark[7] : "linear-gradient(135deg, #b79cff, #ff9ec7)";
+  b.append(dot, name);
+  b.onclick = () => { theme = id; apply(); };
+  list.append(b);
+});
+document.getElementById("mode").onclick = () => { mode = mode === "dark" ? "light" : "dark"; apply(); };
+document.getElementById("copy").onclick = async e => {
+  try {
+    await navigator.clipboard.writeText(document.getElementById("cmd").textContent);
+    e.target.textContent = "Copied";
+  } catch (err) {
+    e.target.textContent = "Select it";
+  }
+  setTimeout(() => e.target.textContent = "Copy", 1600);
+};
+apply();
+</script>
+</body>
+</html>

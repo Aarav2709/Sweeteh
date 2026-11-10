@@ -4,6 +4,8 @@ A desktop shell for Hyprland, built with Quickshell.
 
 https://github.com/user-attachments/assets/47775564-aa10-4187-a838-3ff012cb136e
 
+Docs, keys and the full config reference are at [aarav2709.github.io/Sweeteh](https://aarav2709.github.io/Sweeteh/).
+
 ## Install
 
 On Arch or any Arch based distro:
@@ -64,12 +66,14 @@ Sweeteh follows tagged releases. It checks for a new one a minute after login an
 - **Two layouts.** Islands splits the bar into raised pills around the island. Island shows only the island.
 - **The island.** Launcher, quick settings with Wifi and VPN, Bluetooth and Sound pages, where each app gets its own volume, media with synced lyrics, notifications, volume and brightness, clipboard, system monitor, wallpaper picker, workspace overview, keybind cheat sheet, power menu, settings, a polkit password prompt and a recording indicator, all in one surface. It flares as you type, breathes with the bass of your music and shows moments like charging, downloads and copies with their icon in a slowly turning Material shape. Over fullscreen games and videos it tucks away.
 - **Backlit look.** Pills, keys and cards sit on a ledge lit from below in the wallpaper's hue, and every move glides into place.
-- **Command palette.** Type `>` in the launcher for every shell action, then things like `>wifi`, `>date -3d`, `>time +4h`, `>timer 5m`, `>vol 40`, `>ws 3`, `>close firefox`, `>#ff8800`, `>uuid` or `>pick a color` from the screen, `>tr hola` or `>tr good morning in japanese` to translate. Enter runs or copies, Ctrl and a number picks a row, Tab completes a word, and what you use most comes first. Type `:` to pick an emoji or symbol to copy.
+- **Command palette.** Type `>` in the launcher for every shell action, then things like `>wifi`, `>date -3d`, `>time +4h`, `>timer 5m`, `>vol 40`, `>ws 3`, `>close firefox`, `>#ff8800`, `>uuid` or `>pick a color` from the screen, `>tr hola` or `>tr good morning in japanese` to translate. Enter runs or copies, Ctrl and a number picks a row, Tab completes a word, and what you use most comes first. Type `:` to pick an emoji or symbol to copy. `@` switches to an open window, `"` searches the clipboard, `/` lists files opened lately and `$` connects to a host from your ssh config. `?` lists them all, and `launcher.commands` in the config adds rows of your own.
 - **A welcome tour** on first start, and again any time with `>welcome`.
 - **Wallpapers.** Images, GIFs and videos, plus a search of [wallhaven](https://wallhaven.cc) right in the picker, with circle, wipe, fade and zoom transitions. Video wallpapers pause under fullscreen windows, and can also pause behind tiled ones.
 - **A themed terminal.** Kitty runs fish with a starship prompt, both colored from the wallpaper.
 - **Tray menus** drawn by the shell instead of plain app menus.
 - **Colors from the wallpaper.** Matugen builds the palette. The shell, window borders, kitty, Nautilus and other GTK apps, folder icons, Vesktop and Zed all follow it. Pick the Sweeteh theme in Zed to use it.
+- **Fixed themes.** Catppuccin, Gruvbox, Rosé Pine, Nord, Tokyo Night and Everforest, in dark and light, for when the colors should not follow the wallpaper. Pick one in Settings, Appearance.
+- **Every monitor.** The bar, wallpaper, widgets and lockscreen appear on each screen, the island opens on the one in focus.
 - **Desktop widgets.** Analog clock, weather, calendar, media, system load, synced lyrics and a live spectrum, arranged with Super Shift E.
 - **Lockscreen** with a blurred wallpaper, clock and media controls, and your password typed as Material shapes.
 - **Password prompts** from apps that need admin rights appear in the island.
