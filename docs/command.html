@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The sweeteh command · Sweeteh</title>
+  <meta name="description" content="Start, stop and update the shell from a terminal, and call anything inside it from a script or a keybind.">
+  <link rel="icon" href="img/sweeteh.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" href="css/site.css">
+  <script src="js/theme.js"></script>
+</head>
+<body class="docs">
+  <div class="layout">
+    <nav class="sidebar"></nav>
+
+    <main class="content">
+      <h1>The sweeteh command</h1>
+      <p class="lede">Start, stop and update the shell from a terminal, and call anything inside it from a script or a keybind.</p>
+      <h2>Commands</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Command</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>sweeteh run</code></td><td>Start the shell. If it crashes it starts again by itself, and gives up after five crashes in a minute.</td></tr>
+          <tr><td class="fit"><code>sweeteh stop</code></td><td>Stop it.</td></tr>
+          <tr><td class="fit"><code>sweeteh restart</code></td><td>Stop and start again.</td></tr>
+          <tr><td class="fit"><code>sweeteh check</code></td><td>Print the newest release if there is one.</td></tr>
+          <tr><td class="fit"><code>sweeteh update</code></td><td>Move to the newest release, with any packages it needs, and restart.</td></tr>
+          <tr><td class="fit"><code>sweeteh fingerprint</code></td><td>Show whether fingerprint unlock is set up for the lockscreen.</td></tr>
+          <tr><td class="fit"><code>sweeteh ipc …</code></td><td>Call a function inside the running shell.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Updates</h2>
+      <p>Sweeteh follows tagged releases. It checks for a new one a minute after login and every six hours after, says so in the island, and Settings, About has an Update button. <code>sweeteh update</code> does the same from a terminal.</p>
+      <p>When a release needs new packages the update installs them too, asking for your password in the island. If that is cancelled, the island says what is missing and <code>&gt;install missing packages</code> in the launcher tries again.</p>
+
+      <h2>Calling the shell</h2>
+      <p><code>sweeteh ipc</code> takes a target, a function and its arguments. Bind these to keys in Hyprland or use them in scripts.</p>
+      <pre><code>sweeteh ipc launcher toggle
+sweeteh ipc wallpapers random
+sweeteh ipc mode set island
+sweeteh ipc config set theme.preset nord
+sweeteh ipc island message "Build finished"</code></pre>
+
+      <h3>Panels</h3>
+      <p>Every panel has <code>open</code>, <code>close</code> and <code>toggle</code>.</p>
+      <p><code>launcher</code> <code>island</code> <code>controlcenter</code> <code>media</code> <code>notifications</code> <code>clipboard</code> <code>overview</code> <code>monitor</code> <code>wallpaper</code> <code>cheatsheet</code> <code>modeswitcher</code> <code>power</code> <code>settings</code></p>
+
+      <h3>Other targets</h3>
+      <div class="table">
+        <table>
+          <thead><tr><th>Target</th><th>Functions</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>shell</code></td><td><code>reload</code> <code>ping</code> <code>theme</code> <code>mode</code></td></tr>
+          <tr><td class="fit"><code>config</code></td><td><code>get key</code> <code>set key value</code> <code>reset key</code></td></tr>
+          <tr><td class="fit"><code>mode</code></td><td><code>get</code> <code>set name</code> <code>cycle</code> <code>list</code></td></tr>
+          <tr><td class="fit"><code>wallpapers</code></td><td><code>get</code> <code>set path</code> <code>random</code> <code>recolor</code></td></tr>
+          <tr><td class="fit"><code>island</code></td><td><code>message text</code> <code>moment kind</code></td></tr>
+          <tr><td class="fit"><code>player</code></td><td><code>toggle</code> <code>next</code> <code>previous</code> <code>cycle</code> <code>current</code></td></tr>
+          <tr><td class="fit"><code>notifs</code></td><td><code>clear</code> <code>count</code> <code>dnd</code></td></tr>
+          <tr><td class="fit"><code>brightness</code></td><td><code>up</code> <code>down</code> <code>get</code> <code>set percent</code></td></tr>
+          <tr><td class="fit"><code>screenshot</code></td><td><code>region</code> <code>window</code> <code>screen</code> <code>record</code></td></tr>
+          <tr><td class="fit"><code>recorder</code></td><td><code>start geometry</code> <code>stop</code> <code>file</code></td></tr>
+          <tr><td class="fit"><code>lock</code></td><td><code>lock</code> <code>isLocked</code></td></tr>
+          <tr><td class="fit"><code>zoom</code></td><td><code>zoomIn</code> <code>zoomOut</code> <code>reset</code></td></tr>
+          <tr><td class="fit"><code>nightlight</code></td><td><code>toggle</code></td></tr>
+          <tr><td class="fit"><code>song</code></td><td><code>recognize</code></td></tr>
+          <tr><td class="fit"><code>modules</code></td><td><code>list</code> <code>enable id</code> <code>disable id</code> <code>toggle id</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The running shell lists everything it answers to:</p>
+      <pre><code>qs -c sweeteh ipc show</code></pre>
+    </main>
+
+    <nav class="toc"></nav>
+  </div>
+
+  <noscript><p style="padding: 0 24px"><a href="index.html">Home</a> · <a href="install.html">Getting started</a> · <a href="command.html">The sweeteh command</a> · <a href="launcher.html">Launcher</a> · <a href="themes.html">Themes</a> · <a href="keys.html">Keys</a> · <a href="config.html">Config</a> · <a href="troubleshooting.html">Troubleshooting</a></p></noscript>
+  <script src="js/site.js" defer></script>
+</body>
+</html>

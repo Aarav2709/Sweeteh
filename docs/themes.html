@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Themes · Sweeteh</title>
+  <meta name="description" content="Colors follow your wallpaper by default. A fixed theme keeps its own colors whatever the wallpaper is.">
+  <link rel="icon" href="img/sweeteh.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" href="css/site.css">
+  <script src="js/theme.js"></script>
+</head>
+<body class="docs">
+  <div class="layout">
+    <nav class="sidebar"></nav>
+
+    <main class="content">
+      <h1>Themes</h1>
+      <p class="lede">Colors follow your wallpaper by default. A fixed theme keeps its own colors whatever the wallpaper is.</p>
+      <h2>From the wallpaper</h2>
+      <p>Matugen builds a palette from the current wallpaper each time it changes. The shell, window borders, kitty, GTK apps, folder icons, Vesktop and Zed all take it. Pick the Sweeteh theme in Zed to use it there.</p>
+      <p>Settings, Appearance has nine schemes that decide how the palette is drawn from the wallpaper, from Tonal spot, calm and muted, to Vibrant, the loudest. Or turn off Colors from wallpaper and choose one accent color.</p>
+
+      <h2>Fixed themes</h2>
+      <p>Six themes come with the shell, each in dark and light. The dark and light switch at the top of this page flips the preview.</p>
+      <div class="swatch-row" role="group" aria-label="Preview a theme"></div>
+      <div class="preview wide">
+        <div class="preview-island"><i></i>Sweeteh</div>
+        <div class="preview-grid">
+          <div class="preview-card"><b>Wi-Fi</b><span>Connected</span></div>
+          <div class="preview-card accent"><b>Dark theme</b><span>On</span></div>
+          <div class="preview-card"><b>Bluetooth</b><span>Off</span></div>
+          <div class="preview-card"><b>Power</b><span>Balanced</span></div>
+        </div>
+        <div class="preview-palette"></div>
+      </div>
+
+      <h3>Picking one</h3>
+      <ul>
+        <li>In Settings, Appearance, choose a name in the Theme row. Wallpaper goes back to wallpaper colors.</li>
+        <li>In the launcher, type <code>&gt;use the nord theme</code>.</li>
+        <li>In the config, set <code>theme.preset</code>.</li>
+      </ul>
+      <pre><code>{
+  "theme": {
+    "preset": "catppuccin",
+    "dark": true
+  }
+}</code></pre>
+      <div class="table">
+        <table>
+          <thead><tr><th>Theme</th><th><code>theme.preset</code></th></tr></thead>
+          <tbody>
+          <tr><td>Catppuccin, Mocha and Latte</td><td class="fit"><code>catppuccin</code></td></tr>
+          <tr><td>Gruvbox</td><td class="fit"><code>gruvbox</code></td></tr>
+          <tr><td>Rosé Pine, with Dawn as its light side</td><td class="fit"><code>rose-pine</code></td></tr>
+          <tr><td>Nord</td><td class="fit"><code>nord</code></td></tr>
+          <tr><td>Tokyo Night, with Day as its light side</td><td class="fit"><code>tokyo-night</code></td></tr>
+          <tr><td>Everforest</td><td class="fit"><code>everforest</code></td></tr>
+          <tr><td>Follow the wallpaper</td><td class="fit"><code>""</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <aside class="note">
+        <strong>What a fixed theme changes</strong>
+        Surfaces and text use the theme's exact colors, and the light under every key takes its accent. The scheme and accent options do nothing until you go back to Wallpaper.
+      </aside>
+
+      <h2>Shape, type and motion</h2>
+      <p>Settings, Appearance also holds roundness, spacing, the font and its size, animation speed, panel opacity and how much of the wallpaper's color seeps into the island. They are listed under <a href="config.html#theme"><code>theme</code> in the config</a>.</p>
+    </main>
+
+    <nav class="toc"></nav>
+  </div>
+
+  <noscript><p style="padding: 0 24px"><a href="index.html">Home</a> · <a href="install.html">Getting started</a> · <a href="command.html">The sweeteh command</a> · <a href="launcher.html">Launcher</a> · <a href="themes.html">Themes</a> · <a href="keys.html">Keys</a> · <a href="config.html">Config</a> · <a href="troubleshooting.html">Troubleshooting</a></p></noscript>
+  <script src="js/site.js" defer></script>
+  <script src="js/themes.js" defer></script>
+</body>
+</html>

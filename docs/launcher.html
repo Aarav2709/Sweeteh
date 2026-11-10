@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Launcher · Sweeteh</title>
+  <meta name="description" content="Press Super and type. Apps, files, sums and conversions answer straight away, and one first character turns the search into something else.">
+  <link rel="icon" href="img/sweeteh.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" href="css/site.css">
+  <script src="js/theme.js"></script>
+</head>
+<body class="docs">
+  <div class="layout">
+    <nav class="sidebar"></nav>
+
+    <main class="content">
+      <h1>Launcher</h1>
+      <p class="lede">Press Super and type. Apps, files, sums and conversions answer straight away, and one first character turns the search into something else.</p>
+      <h2>Searching</h2>
+      <p>With nothing but a name typed, the launcher looks through:</p>
+      <ul>
+        <li><strong>Apps.</strong> The ones you open at this hour and lately rise to the top. <kbd>Ctrl</kbd><kbd>Enter</kbd> or a right click shows an app's own actions, like a private window.</li>
+        <li><strong>Shell actions.</strong> Toggle Wi-Fi, lock, pick a wallpaper and the rest of the palette.</li>
+        <li><strong>Files</strong> in your home folder. <kbd>Ctrl</kbd><kbd>Enter</kbd> shows the file in its folder.</li>
+        <li><strong>The web</strong>, as the last row.</li>
+      </ul>
+      <p>Sums like <code>12 * 4.5</code> are answered as you type, and conversions like <code>10 km to mi</code> or <code>20 usd in eur</code> a moment later. <kbd>Enter</kbd> copies the answer.</p>
+      <p>On an empty search, a link, a sum or a path you just copied is offered first.</p>
+
+      <h2>Prefixes</h2>
+      <p>Type <code>?</code> to see this list in the launcher itself.</p>
+      <div class="table">
+        <table>
+          <thead><tr><th>Type</th><th>For</th><th>Enter</th><th>Ctrl Enter</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><kbd>&gt;</kbd></td><td>The command palette</td><td>Runs or copies</td><td></td></tr>
+          <tr><td class="fit"><kbd>:</kbd></td><td>Emoji and symbols, by name</td><td>Copies</td><td></td></tr>
+          <tr><td class="fit"><kbd>@</kbd></td><td>Open windows, by title or app</td><td>Switches to it</td><td>Closes it</td></tr>
+          <tr><td class="fit"><kbd>"</kbd></td><td>Clipboard history</td><td>Copies it again</td><td></td></tr>
+          <tr><td class="fit"><kbd>/</kbd></td><td>Files opened lately, or a search of your home folder once you type</td><td>Opens</td><td>Shows its folder</td></tr>
+          <tr><td class="fit"><kbd>$</kbd></td><td>Hosts from <code>~/.ssh/config</code>, or any host you type</td><td>Connects in a terminal</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Command palette</h2>
+      <p><code>&gt;</code> alone lists every shell action, with what you use most first. <kbd>Tab</kbd> completes a word and <kbd>Ctrl</kbd> with a number picks a row. It also answers these:</p>
+      <div class="table">
+        <table>
+          <thead><tr><th>Type</th><th>And get</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>&gt;timer 5m</code></td><td>A countdown in the island</td></tr>
+          <tr><td class="fit"><code>&gt;date -3d</code> <code>&gt;time +4h</code></td><td>A date or time to copy, shifted by days, hours or weeks</td></tr>
+          <tr><td class="fit"><code>&gt;vol 40</code></td><td>The volume set to 40</td></tr>
+          <tr><td class="fit"><code>&gt;ws 3</code></td><td>Workspace 3</td></tr>
+          <tr><td class="fit"><code>&gt;close firefox</code></td><td>That app closed</td></tr>
+          <tr><td class="fit"><code>&gt;tr hola</code> <code>&gt;tr good morning in japanese</code></td><td>A translation</td></tr>
+          <tr><td class="fit"><code>&gt;#ff8800</code></td><td>That color in other formats</td></tr>
+          <tr><td class="fit"><code>&gt;uuid</code></td><td>A new id to copy</td></tr>
+          <tr><td class="fit"><code>&gt;pick a color</code></td><td>A color picked from the screen</td></tr>
+          <tr><td class="fit"><code>&gt;anything else</code></td><td>Run in a shell, as the last row</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Your own commands</h2>
+      <p>Add rows to <code>launcher.commands</code> in <code>~/.config/sweeteh/config.json</code>. They show in the launcher and in the palette.</p>
+      <pre><code>{
+  "launcher": {
+    "commands": [
+      { "title": "Sync notes", "command": "rclone sync ~/Notes remote:notes", "icon": "sync", "terminal": true },
+      { "title": "Work VPN", "command": "nmcli connection up work", "keywords": "network office" }
+    ]
+  }
+}</code></pre>
+      <div class="table">
+        <table>
+          <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>title</code></td><td>The row's name. Needed.</td></tr>
+          <tr><td class="fit"><code>command</code></td><td>A shell line. Needed.</td></tr>
+          <tr><td class="fit"><code>icon</code></td><td>A <a href="https://fonts.google.com/icons">Material Symbols</a> name. A terminal icon when left out.</td></tr>
+          <tr><td class="fit"><code>keywords</code></td><td>Extra words the row can be found by.</td></tr>
+          <tr><td class="fit"><code>terminal</code></td><td><code>true</code> runs the command in your terminal so you can see it.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Options</h2>
+      <p>The launcher's switches are in Settings, General, and under <a href="config.html#launcher"><code>launcher</code> in the config</a>.</p>
+    </main>
+
+    <nav class="toc"></nav>
+  </div>
+
+  <noscript><p style="padding: 0 24px"><a href="index.html">Home</a> · <a href="install.html">Getting started</a> · <a href="command.html">The sweeteh command</a> · <a href="launcher.html">Launcher</a> · <a href="themes.html">Themes</a> · <a href="keys.html">Keys</a> · <a href="config.html">Config</a> · <a href="troubleshooting.html">Troubleshooting</a></p></noscript>
+  <script src="js/site.js" defer></script>
+</body>
+</html>

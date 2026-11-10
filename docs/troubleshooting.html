@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Troubleshooting · Sweeteh</title>
+  <meta name="description" content="What to check when something does not look or work right.">
+  <link rel="icon" href="img/sweeteh.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" href="css/site.css">
+  <script src="js/theme.js"></script>
+</head>
+<body class="docs">
+  <div class="layout">
+    <nav class="sidebar"></nav>
+
+    <main class="content">
+      <h1>Troubleshooting</h1>
+      <p class="lede">What to check when something does not look or work right.</p>
+      <h2>The shell is gone</h2>
+      <p>The shell restarts itself after a crash. If it stays gone, start it from a terminal and read what it prints:</p>
+      <pre><code>sweeteh run</code></pre>
+      <p>The log of the last run, and any crash the system recorded:</p>
+      <pre><code>qs -c sweeteh log
+coredumpctl list quickshell</code></pre>
+
+      <h2>A feature says something is missing</h2>
+      <p>When a feature needs a package that is not installed, the island names it. Type <code>&gt;install missing packages</code> in the launcher to install what is missing, or run <code>sweeteh update</code>.</p>
+
+      <h2>Colors did not change</h2>
+      <ul>
+        <li>Type <code>&gt;recolor from wallpaper</code> in the launcher.</li>
+        <li>A <a href="themes.html#fixed-themes">fixed theme</a> overrides the wallpaper. Pick Wallpaper in Settings, Appearance to follow it again.</li>
+        <li>Apps pick up new colors when they start. Kitty and GTK apps that are already open may need a restart.</li>
+      </ul>
+
+      <h2>Keybinds do nothing</h2>
+      <p>Keybinds are handed to Hyprland when the shell starts. If you installed with <code>--keep-configs</code>, check that your own config does not bind the same keys, and that it <a href="install.html#keeping-your-own-hyprland-config">starts the shell</a>.</p>
+
+      <h2>More than one monitor</h2>
+      <p>There is nothing to set up. The bar, wallpaper, desktop widgets, lockscreen and screen corners appear on every monitor, and the island and its panels open on the one in focus. Arrange and scale monitors in your <code>hyprland.lua</code>, the shell follows as they come and go.</p>
+
+      <h2>Fingerprint unlock</h2>
+      <p>The lockscreen takes a fingerprint beside the password once fprintd has a finger enrolled. Check the state with:</p>
+      <pre><code>sweeteh fingerprint</code></pre>
+
+      <h2>Reporting a bug</h2>
+      <p>Open an issue on <a href="https://github.com/Aarav2709/Sweeteh/issues">GitHub</a> with what you did, what happened, and the output of <code>qs -c sweeteh log</code>.</p>
+    </main>
+
+    <nav class="toc"></nav>
+  </div>
+
+  <noscript><p style="padding: 0 24px"><a href="index.html">Home</a> · <a href="install.html">Getting started</a> · <a href="command.html">The sweeteh command</a> · <a href="launcher.html">Launcher</a> · <a href="themes.html">Themes</a> · <a href="keys.html">Keys</a> · <a href="config.html">Config</a> · <a href="troubleshooting.html">Troubleshooting</a></p></noscript>
+  <script src="js/site.js" defer></script>
+</body>
+</html>

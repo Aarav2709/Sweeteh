@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Getting started · Sweeteh</title>
+  <meta name="description" content="Install Sweeteh on Arch or an Arch based distro with one line. You do not need Hyprland first.">
+  <link rel="icon" href="img/sweeteh.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" href="css/site.css">
+  <script src="js/theme.js"></script>
+</head>
+<body class="docs">
+  <div class="layout">
+    <nav class="sidebar"></nav>
+
+    <main class="content">
+      <h1>Getting started</h1>
+      <p class="lede">Install Sweeteh on Arch or an Arch based distro with one line. You do not need Hyprland first.</p>
+      <h2>Install</h2>
+      <pre><code>curl -fsSL https://raw.githubusercontent.com/Aarav2709/Sweeteh/main/install.sh | bash</code></pre>
+      <p>The installer asks before it installs packages, then:</p>
+      <ul>
+        <li>installs Hyprland, Quickshell and everything else Sweeteh needs with pacman</li>
+        <li>turns on NetworkManager, Bluetooth and power profiles</li>
+        <li>puts the newest release in <code>~/.local/share/sweeteh</code> and a <code>sweeteh</code> command in <code>~/.local/bin</code></li>
+        <li>sets up Hyprland, kitty, fish and the starship prompt with the Sweeteh configs</li>
+        <li>starts Hyprland when you log into tty1 if you have no login screen</li>
+        <li>adds a few wallpapers to <code>~/Pictures/Wallpapers</code> if it is empty</li>
+      </ul>
+      <aside class="note">
+        <strong>Your old configs are kept</strong>
+        Every file the installer replaces is moved to <code>~/.local/state/sweeteh/backups/</code> first, and uninstalling puts them back.
+      </aside>
+
+      <h2>Options</h2>
+      <p>Pass options through curl by adding <code>-s --</code> after <code>bash</code>.</p>
+      <pre><code>curl -fsSL https://raw.githubusercontent.com/Aarav2709/Sweeteh/main/install.sh | bash -s -- --keep-configs</code></pre>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>--keep-configs</code></td><td>Keep your own Hyprland, kitty, fish and starship configs. See below for the one line your Hyprland config then needs.</td></tr>
+          <tr><td class="fit"><code>--no-deps</code></td><td>Skip installing packages.</td></tr>
+          <tr><td class="fit"><code>--dry-run</code></td><td>Show what would change without changing anything.</td></tr>
+          <tr><td class="fit"><code>--uninstall</code></td><td>Remove Sweeteh and put your previous configs back.</td></tr>
+          <tr><td class="fit"><code>--purge</code></td><td>With <code>--uninstall</code>, also delete Sweeteh settings, backups and cache.</td></tr>
+          <tr><td class="fit"><code>-y</code></td><td>Do not ask before installing packages.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Keeping your own Hyprland config</h3>
+      <p>With <code>--keep-configs</code> nothing starts the shell for you. Add this to your <code>hyprland.lua</code>:</p>
+      <pre><code>hl.on("hyprland.start", function() hl.exec_cmd("sweeteh run") end)</code></pre>
+
+      <h2>From a clone</h2>
+      <p>Run the installer inside a clone and the shell runs straight from that folder, so your edits show up live.</p>
+      <pre><code>git clone https://github.com/Aarav2709/Sweeteh
+cd Sweeteh
+./install.sh</code></pre>
+
+      <h2>Other distros</h2>
+      <p>Install these yourself, then run the installer with <code>--no-deps</code>. You also need a Nerd Font such as JetBrains Mono Nerd Font.</p>
+      <pre><code>hyprland xdg-desktop-portal-hyprland xdg-desktop-portal-gtk qt5-wayland qt6-wayland
+polkit quickshell matugen qt6-multimedia ffmpeg pipewire wireplumber playerctl
+brightnessctl upower power-profiles-daemon networkmanager bluez cliphist wl-clipboard
+wf-recorder hyprpicker tesseract tesseract-data-eng libqalculate translate-shell
+libnotify curl git songrec wtype kitty nautilus fish starship eza fd</code></pre>
+
+      <h2>First steps</h2>
+      <p>A short tour opens on first start. After it, these get you around:</p>
+      <div class="table">
+        <table>
+          <thead><tr><th>Press</th><th>To</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><kbd>Super</kbd></td><td>Open the launcher</td></tr>
+          <tr><td class="fit"><kbd>Super</kbd><kbd>A</kbd></td><td>Open the island, with quick settings, the calendar and notifications</td></tr>
+          <tr><td class="fit"><kbd>Super</kbd><kbd>,</kbd></td><td>Open settings</td></tr>
+          <tr><td class="fit"><kbd>Super</kbd><kbd>.</kbd></td><td>Show every keybind</td></tr>
+          <tr><td class="fit"><kbd>Super</kbd><kbd>Shift</kbd><kbd>W</kbd></td><td>Pick a wallpaper</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Everything works from the keyboard. <kbd>Tab</kbd> moves between controls, <kbd>Enter</kbd> or <kbd>Space</kbd> presses them and <kbd>Esc</kbd> closes whatever is open. Type <code>&gt;welcome</code> in the launcher to see the tour again.</p>
+
+      <h2>Uninstall</h2>
+      <pre><code>curl -fsSL https://raw.githubusercontent.com/Aarav2709/Sweeteh/main/install.sh | bash -s -- --uninstall</code></pre>
+      <p>Add <code>--purge</code> to also delete your Sweeteh settings, backups and cache.</p>
+    </main>
+
+    <nav class="toc"></nav>
+  </div>
+
+  <noscript><p style="padding: 0 24px"><a href="index.html">Home</a> · <a href="install.html">Getting started</a> · <a href="command.html">The sweeteh command</a> · <a href="launcher.html">Launcher</a> · <a href="themes.html">Themes</a> · <a href="keys.html">Keys</a> · <a href="config.html">Config</a> · <a href="troubleshooting.html">Troubleshooting</a></p></noscript>
+  <script src="js/site.js" defer></script>
+</body>
+</html>

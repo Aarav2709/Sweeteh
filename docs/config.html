@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Config · Sweeteh</title>
+  <meta name="description" content="Every option, with its default. Settings covers all of them too, and is searchable.">
+  <link rel="icon" href="img/sweeteh.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" href="css/site.css">
+  <script src="js/theme.js"></script>
+</head>
+<body class="docs">
+  <div class="layout">
+    <nav class="sidebar"></nav>
+
+    <main class="content">
+      <h1>Config</h1>
+      <p class="lede">Every option, with its default. Settings covers all of them too, and is searchable.</p>
+      <p>Options live in <code>~/.config/sweeteh/config.json</code>, which reloads as you save it. Write only what you change, everything else keeps its default.</p>
+      <pre><code>{
+  "theme": { "roundness": 0.8 },
+  "launcher": { "maxResults": 10 }
+}</code></pre>
+      <p>From a terminal, <code>sweeteh ipc config set theme.roundness 0.8</code> does the same, and <code>sweeteh ipc config reset theme.roundness</code> puts a default back.</p>
+      <input class="filter" type="search" placeholder="Filter options, like sleep or wallpaper" aria-label="Filter options">
+      <p class="empty" hidden>No option matches.</p>
+
+      <h2 id="general">general</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>terminal</code></td><td class="fit"><code>&quot;kitty&quot;</code></td><td>The terminal the shell opens.</td></tr>
+          <tr><td class="fit"><code>fileManager</code></td><td class="fit"><code>&quot;nautilus&quot;</code></td><td>The file manager the shell opens.</td></tr>
+          <tr><td class="fit"><code>webSearch</code></td><td class="fit"><code>&quot;https://duckduckgo.com/?q=&quot;</code></td><td>The address a web search from the launcher is added to.</td></tr>
+          <tr><td class="fit"><code>screenshotDir</code></td><td class="fit"><code>&quot;~/Pictures/Screenshots&quot;</code></td><td>Where screenshots are saved.</td></tr>
+          <tr><td class="fit"><code>wallpaperDir</code></td><td class="fit"><code>&quot;~/Pictures/Wallpapers&quot;</code></td><td>The folder the wallpaper picker shows.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="theme">theme</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>dark</code></td><td class="fit"><code>true</code></td><td>Dark or light.</td></tr>
+          <tr><td class="fit"><code>fromWallpaper</code></td><td class="fit"><code>true</code></td><td>Build the palette from the wallpaper. Off uses the accent.</td></tr>
+          <tr><td class="fit"><code>preset</code></td><td class="fit"><code>&quot;&quot;</code></td><td>A fixed theme, see <a href="themes.html#fixed-themes">Fixed themes</a>. Empty follows the wallpaper.</td></tr>
+          <tr><td class="fit"><code>accent</code></td><td class="fit"><code>&quot;#7c9cff&quot;</code></td><td>The color the palette is built from when it does not follow the wallpaper.</td></tr>
+          <tr><td class="fit"><code>scheme</code></td><td class="fit"><code>&quot;scheme-tonal-spot&quot;</code></td><td>How matugen draws the palette from its source.</td></tr>
+          <tr><td class="fit"><code>matugenConfig</code></td><td class="fit"><code>&quot;&quot;</code></td><td>A matugen config of your own to run after each recolor, for your own templates.</td></tr>
+          <tr><td class="fit"><code>roundness</code></td><td class="fit"><code>1</code></td><td>How round corners are, 0 is square.</td></tr>
+          <tr><td class="fit"><code>spacing</code></td><td class="fit"><code>1</code></td><td>How much room sits between things.</td></tr>
+          <tr><td class="fit"><code>fontFamily</code></td><td class="fit"><code>&quot;Google Sans Flex&quot;</code></td><td>The font of the shell.</td></tr>
+          <tr><td class="fit"><code>monoFamily</code></td><td class="fit"><code>&quot;monospace&quot;</code></td><td>The font for code and numbers.</td></tr>
+          <tr><td class="fit"><code>fontScale</code></td><td class="fit"><code>1</code></td><td>Text size, as a multiple.</td></tr>
+          <tr><td class="fit"><code>fontRound</code></td><td class="fit"><code>40</code></td><td>How soft letter ends are, on fonts with a round axis.</td></tr>
+          <tr><td class="fit"><code>animationSpeed</code></td><td class="fit"><code>1</code></td><td>How fast things move, as a multiple.</td></tr>
+          <tr><td class="fit"><code>motionBlur</code></td><td class="fit"><code>true</code></td><td>A slight blur on things that move fast.</td></tr>
+          <tr><td class="fit"><code>panelOpacity</code></td><td class="fit"><code>1</code></td><td>How solid panels are, from 0.3 to 1.</td></tr>
+          <tr><td class="fit"><code>windowBorders</code></td><td class="fit"><code>true</code></td><td>Color window borders from the palette.</td></tr>
+          <tr><td class="fit"><code>appTheming</code></td><td class="fit"><code>true</code></td><td>Color kitty, GTK apps, folders, Vesktop and Zed too.</td></tr>
+          <tr><td class="fit"><code>screenCorners</code></td><td class="fit"><code>true</code></td><td>Round the corners of the screen.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="bar">bar</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>size</code></td><td class="fit"><code>40</code></td><td>Height of the bar in pixels.</td></tr>
+          <tr><td class="fit"><code>workspaceCount</code></td><td class="fit"><code>10</code></td><td>How many workspaces the bar shows.</td></tr>
+          <tr><td class="fit"><code>showAppIcons</code></td><td class="fit"><code>true</code></td><td>Show the icons of open apps on each workspace.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="recording">recording</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>dir</code></td><td class="fit"><code>&quot;~/Videos/Recordings&quot;</code></td><td>Where recordings are saved.</td></tr>
+          <tr><td class="fit"><code>audio</code></td><td class="fit"><code>false</code></td><td>Record the system sound too.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="clock">clock</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>use24h</code></td><td class="fit"><code>true</code></td><td>A 24 hour clock.</td></tr>
+          <tr><td class="fit"><code>showSeconds</code></td><td class="fit"><code>false</code></td><td>Show seconds.</td></tr>
+          <tr><td class="fit"><code>calendarUrl</code></td><td class="fit"><code>&quot;&quot;</code></td><td>A calendar&#x27;s ics link, its events show in the dashboard and as dots in the calendar.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="wallpaper">wallpaper</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>path</code></td><td class="fit"><code>&quot;&quot;</code></td><td>The current wallpaper.</td></tr>
+          <tr><td class="fit"><code>transition</code></td><td class="fit"><code>&quot;circle&quot;</code></td><td>How one wallpaper gives way to the next.</td></tr>
+          <tr><td class="fit"><code>duration</code></td><td class="fit"><code>900</code></td><td>How long that takes, in ms.</td></tr>
+          <tr><td class="fit"><code>pauseWithWindows</code></td><td class="fit"><code>false</code></td><td>Live wallpapers also rest while tiled windows cover the workspace, not only under fullscreen.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="notifications">notifications</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>group</code></td><td class="fit"><code>true</code></td><td>Notifications from one app stack in the dashboard.</td></tr>
+          <tr><td class="fit"><code>timeout</code></td><td class="fit"><code>6000</code></td><td>How long a notification stays in the island, in ms.</td></tr>
+          <tr><td class="fit"><code>historyLimit</code></td><td class="fit"><code>100</code></td><td>How many the dashboard remembers.</td></tr>
+          <tr><td class="fit"><code>dnd</code></td><td class="fit"><code>false</code></td><td>Do not disturb.</td></tr>
+          <tr><td class="fit"><code>quietHours</code></td><td class="fit"><code>false</code></td><td>Quiet hours, do not disturb turns itself on between these times.</td></tr>
+          <tr><td class="fit"><code>quietFrom</code></td><td class="fit"><code>&quot;23:00&quot;</code></td><td>When quiet hours start.</td></tr>
+          <tr><td class="fit"><code>quietTo</code></td><td class="fit"><code>&quot;07:00&quot;</code></td><td>When quiet hours end.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="osd">osd</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>timeout</code></td><td class="fit"><code>1500</code></td><td>How long the volume and brightness display stays, in ms.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="launcher">launcher</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>smartRanking</code></td><td class="fit"><code>true</code></td><td>Apps you open at this hour and lately rise to the top.</td></tr>
+          <tr><td class="fit"><code>clipboardActions</code></td><td class="fit"><code>true</code></td><td>A copied link or sum is offered first on an empty search.</td></tr>
+          <tr><td class="fit"><code>maxResults</code></td><td class="fit"><code>8</code></td><td>How many rows show before the list scrolls.</td></tr>
+          <tr><td class="fit"><code>commands</code></td><td class="fit"><code>[]</code></td><td>Rows of your own, see <a href="launcher.html#your-own-commands">Your own commands</a>.</td></tr>
+          <tr><td class="fit"><code>files</code></td><td class="fit"><code>true</code></td><td>Search files in your home folder.</td></tr>
+          <tr><td class="fit"><code>web</code></td><td class="fit"><code>true</code></td><td>Offer a web search as the last row.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="island">island</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>height</code></td><td class="fit"><code>34</code></td><td>Height of the resting island in pixels.</td></tr>
+          <tr><td class="fit"><code>workspacePeek</code></td><td class="fit"><code>true</code></td><td>Hover the workspace number for previews of your workspaces.</td></tr>
+          <tr><td class="fit"><code>intro</code></td><td class="fit"><code>true</code></td><td>The island grows out of the edge and the pills drop in at start.</td></tr>
+          <tr><td class="fit"><code>hideFullscreen</code></td><td class="fit"><code>true</code></td><td>The island tucks away over a fullscreen game or video, panels and alerts still come out.</td></tr>
+          <tr><td class="fit"><code>peek</code></td><td class="fit"><code>true</code></td><td>Hover the island during music for a small player, with the sung line in it.</td></tr>
+          <tr><td class="fit"><code>peekDelay</code></td><td class="fit"><code>3000</code></td><td>How long the pointer rests on the island before the player peeks, in ms.</td></tr>
+          <tr><td class="fit"><code>peekLyrics</code></td><td class="fit"><code>true</code></td><td>Show the sung line in the small player.</td></tr>
+          <tr><td class="fit"><code>gestures</code></td><td class="fit"><code>true</code></td><td>Swipe to skip, pull down for the dashboard, double click to play or pause.</td></tr>
+          <tr><td class="fit"><code>squash</code></td><td class="fit"><code>false</code></td><td>A little squash and stretch as the island changes shape.</td></tr>
+          <tr><td class="fit"><code>downloads</code></td><td class="fit"><code>true</code></td><td>Browser downloads, their progress across the island.</td></tr>
+          <tr><td class="fit"><code>wallpaperTint</code></td><td class="fit"><code>0.35</code></td><td>How much the wallpaper color shows through the island, 0 keeps it plain.</td></tr>
+          <tr><td class="fit"><code>messageTime</code></td><td class="fit"><code>3000</code></td><td>How long a message stays, in ms.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="media">media</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>pauseOnDisconnect</code></td><td class="fit"><code>true</code></td><td>Pause when headphones go away, offer to resume when they come back.</td></tr>
+          <tr><td class="fit"><code>visualizer</code></td><td class="fit"><code>false</code></td><td>Live level meter through cava instead of the dance, livelier but jumpier.</td></tr>
+          <tr><td class="fit"><code>history</code></td><td class="fit"><code>true</code></td><td>Recently played tracks in the player.</td></tr>
+          <tr><td class="fit"><code>lyrics</code></td><td class="fit"><code>true</code></td><td>Synced lyrics in the player.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="lock">lock</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>fingerprint</code></td><td class="fit"><code>true</code></td><td>Fingerprint beside the password when fprintd has a finger.</td></tr>
+          <tr><td class="fit"><code>showNotifications</code></td><td class="fit"><code>true</code></td><td>A count and app icons of what came in while locked.</td></tr>
+          <tr><td class="fit"><code>idleMinutes</code></td><td class="fit"><code>0</code></td><td>Lock after this many idle minutes, 0 never.</td></tr>
+          <tr><td class="fit"><code>showMedia</code></td><td class="fit"><code>true</code></td><td>Media controls on the lockscreen.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="power">power</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>dimBeforeSleep</code></td><td class="fit"><code>true</code></td><td>Fade the screens over the last half minute before idle sleep.</td></tr>
+          <tr><td class="fit"><code>smartTime</code></td><td class="fit"><code>true</code></td><td>Time left from the average draw of the last ten minutes.</td></tr>
+          <tr><td class="fit"><code>sleepMinutes</code></td><td class="fit"><code>15</code></td><td>Idle minutes before sleep on battery, 0 never.</td></tr>
+          <tr><td class="fit"><code>sleepMinutesPlugged</code></td><td class="fit"><code>30</code></td><td>Idle minutes before sleep on the charger, 0 never.</td></tr>
+          <tr><td class="fit"><code>sleepAction</code></td><td class="fit"><code>&quot;suspend&quot;</code></td><td>What sleep means.</td></tr>
+          <tr><td class="fit"><code>lockOnSleep</code></td><td class="fit"><code>true</code></td><td>Lock before the machine sleeps.</td></tr>
+          <tr><td class="fit"><code>autoSaver</code></td><td class="fit"><code>true</code></td><td>Switch to battery saver at the low step and back on the charger.</td></tr>
+          <tr><td class="fit"><code>lowBattery</code></td><td class="fit"><code>20</code></td><td>The percent that counts as low.</td></tr>
+          <tr><td class="fit"><code>criticalBattery</code></td><td class="fit"><code>10</code></td><td>The percent that counts as critical.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="performance">performance</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>quietMoments</code></td><td class="fit"><code>true</code></td><td>Hold minor moments while something is fullscreen, they show after.</td></tr>
+          <tr><td class="fit"><code>auto</code></td><td class="fit"><code>true</code></td><td>Pause busy work while something is fullscreen.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="moments">moments</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>battery</code></td><td class="fit"><code>true</code></td><td>Charging, unplugged, low and critical.</td></tr>
+          <tr><td class="fit"><code>bluetooth</code></td><td class="fit"><code>true</code></td><td>A device connecting or leaving.</td></tr>
+          <tr><td class="fit"><code>network</code></td><td class="fit"><code>true</code></td><td>Wi-Fi joining or dropping.</td></tr>
+          <tr><td class="fit"><code>toggles</code></td><td class="fit"><code>true</code></td><td>A quick setting changing.</td></tr>
+          <tr><td class="fit"><code>downloads</code></td><td class="fit"><code>true</code></td><td>A browser download.</td></tr>
+          <tr><td class="fit"><code>welcome</code></td><td class="fit"><code>true</code></td><td>A greeting after login.</td></tr>
+          <tr><td class="fit"><code>clipboard</code></td><td class="fit"><code>true</code></td><td>Something copied.</td></tr>
+          <tr><td class="fit"><code>audio</code></td><td class="fit"><code>true</code></td><td>The sound output changing.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="nightlight">nightLight</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>brightness</code></td><td class="fit"><code>0</code></td><td>Lower the screen to this percent while night light is on, 0 leaves it alone.</td></tr>
+          <tr><td class="fit"><code>auto</code></td><td class="fit"><code>true</code></td><td>Turn on and off at the two times.</td></tr>
+          <tr><td class="fit"><code>from</code></td><td class="fit"><code>&quot;19:00&quot;</code></td><td>When night light turns on.</td></tr>
+          <tr><td class="fit"><code>to</code></td><td class="fit"><code>&quot;06:30&quot;</code></td><td>When it turns off.</td></tr>
+          <tr><td class="fit"><code>temperature</code></td><td class="fit"><code>4000</code></td><td>How warm, in kelvin. Lower is warmer.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="clipboard">clipboard</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>maxItems</code></td><td class="fit"><code>200</code></td><td>How many copies the history keeps.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="overview">overview</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>rows</code></td><td class="fit"><code>2</code></td><td>Rows of workspaces.</td></tr>
+          <tr><td class="fit"><code>columns</code></td><td class="fit"><code>5</code></td><td>Columns of workspaces.</td></tr>
+          <tr><td class="fit"><code>scale</code></td><td class="fit"><code>0.16</code></td><td>How large each workspace is drawn, as a share of the screen.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="desktop">desktop</h2>
+      <div class="table">
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>What it does</th></tr></thead>
+          <tbody>
+          <tr><td class="fit"><code>fahrenheit</code></td><td class="fit"><code>false</code></td><td>Weather in Fahrenheit.</td></tr>
+          <tr><td class="fit"><code>weatherPlace</code></td><td class="fit"><code>&quot;&quot;</code></td><td>A city for the weather, found from your address when empty.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+
+    <nav class="toc"></nav>
+  </div>
+
+  <noscript><p style="padding: 0 24px"><a href="index.html">Home</a> · <a href="install.html">Getting started</a> · <a href="command.html">The sweeteh command</a> · <a href="launcher.html">Launcher</a> · <a href="themes.html">Themes</a> · <a href="keys.html">Keys</a> · <a href="config.html">Config</a> · <a href="troubleshooting.html">Troubleshooting</a></p></noscript>
+  <script src="js/site.js" defer></script>
+  <script src="js/config.js" defer></script>
+</body>
+</html>
