@@ -1082,13 +1082,43 @@ a.card:hover,
   margin: 0 auto;
 }
 
+/* the command and its button sit side by side in one bar, so the button never covers the text */
 .install-box .code {
+  display: flex;
   max-width: none;
   margin-bottom: 14px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-sunken);
+}
+
+.install-box pre {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  text-align: left;
 }
 
 .install-box .copy {
+  position: static;
+  flex-shrink: 0;
+  padding: 0 22px;
+  border: 0;
+  border-left: 1px solid var(--border);
+  border-radius: 0;
+  background: var(--bg-raised);
+  color: var(--text);
+  font-size: 14px;
   opacity: 1;
+  transition: background 0.2s, color 0.2s;
+}
+
+.install-box .copy:hover {
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .install-box p {
