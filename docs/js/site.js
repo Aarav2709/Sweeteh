@@ -22,7 +22,6 @@ const NAV = [
 const ICONS = {
   menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
   github: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.3 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg>',
-  search: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
   sun: '<svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
   moon: '<svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>'
 };
@@ -49,8 +48,7 @@ function buildBar() {
   bar.className = "bar";
   bar.innerHTML = `
     ${isDocs ? `<button class="icon-button menu-button" type="button" aria-label="Open the menu" aria-expanded="false">${ICONS.menu}</button>` : ""}
-    <a class="brand" href="index.html"><img src="img/sweeteh.svg" alt="">Sweeteh</a>
-    <button class="search-button" type="button" aria-label="Search the docs">${ICONS.search}<span>Search</span><kbd>Ctrl K</kbd></button>
+    <a class="brand" href="index.html">Sweeteh</a>
     <a class="bar-link${isDocs ? " optional" : ""}" href="install.html">Docs</a>
     <a class="bar-link optional" href="${REPO}/releases">Releases</a>
     <a class="icon-button" href="${REPO}" aria-label="Sweeteh on GitHub">${ICONS.github}</a>
@@ -59,7 +57,6 @@ function buildBar() {
 
   bar.querySelector(".theme-button").onclick = () => setTheme(root.dataset.theme === "light" ? "dark" : "light");
 
-  bar.querySelector(".search-button").onclick = openSearch;
   const menu = bar.querySelector(".menu-button");
   if (menu)
     menu.onclick = () => menu.setAttribute("aria-expanded", String(document.body.classList.toggle("menu-open")));
@@ -130,113 +127,6 @@ function buildPager() {
   document.querySelector(".content").append(pager);
 }
 
-// ---------- search ----------
-// every docs page is read once, on the first search, and split into its sections
-
-let searchIndex = null;
-
-async function loadSearchIndex() {
-  const entries = [];
-  await Promise.all(NAV.flatMap(g => g.pages).map(async ([href, label]) => {
-    try {
-      const doc = new DOMParser().parseFromString(await (await fetch(href)).text(), "text/html");
-      const content = doc.querySelector(".content");
-      if (!content)
-        return;
-      let entry = { href, title: label, page: "", text: "" };
-      entries.push(entry);
-      for (const node of content.children) {
-        if (node.tagName === "H2" || node.tagName === "H3") {
-          entry = { href: href + "#" + (node.id || slug(node.textContent)), title: node.textContent, page: label, text: "" };
-          entries.push(entry);
-        } else if (node.tagName !== "H1") {
-          entry.text += " " + node.textContent.replace(/\s+/g, " ");
-        }
-      }
-    } catch (e) {}
-  }));
-  return entries;
-}
-
-function searchFor(query) {
-  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
-  if (!words.length)
-    return [];
-  return searchIndex.map(entry => {
-    const title = entry.title.toLowerCase(), text = entry.text.toLowerCase();
-    let score = 0;
-    for (const w of words) {
-      if (title.includes(w))
-        score += 10;
-      else if (text.includes(w))
-        score += 1;
-      else
-        return null;
-    }
-    return { entry, score, at: text.indexOf(words[0]) };
-  }).filter(Boolean).sort((a, b) => b.score - a.score).slice(0, 8);
-}
-
-function escapeHtml(text) {
-  return text.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-}
-
-let searchDialog = null;
-
-async function openSearch() {
-  if (!searchDialog) {
-    searchDialog = document.createElement("dialog");
-    searchDialog.className = "search";
-    searchDialog.innerHTML = '<input type="search" placeholder="Search the docs" aria-label="Search the docs" autocomplete="off"><div class="search-results"></div>';
-    document.body.append(searchDialog);
-    const input = searchDialog.querySelector("input"), results = searchDialog.querySelector(".search-results");
-    let selected = 0;
-    const render = () => {
-      const hits = searchFor(input.value);
-      selected = Math.min(selected, Math.max(0, hits.length - 1));
-      results.innerHTML = hits.length ? hits.map((h, i) => {
-        const from = Math.max(0, h.at - 30);
-        const excerpt = h.at >= 0 ? h.entry.text.slice(from, from + 110).trim() : h.entry.page;
-        return `<a href="${h.entry.href}"${i === selected ? ' class="selected"' : ""}>${escapeHtml(h.entry.title)}<small>${escapeHtml((h.entry.page ? h.entry.page + " · " : "") + excerpt)}</small></a>`;
-      }).join("") : `<p>${input.value.trim() ? "Nothing found." : "Type to search every page."}</p>`;
-    };
-    input.oninput = () => { selected = 0; render(); };
-    input.onkeydown = e => {
-      const links = results.querySelectorAll("a");
-      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-        e.preventDefault();
-        selected = Math.max(0, Math.min(links.length - 1, selected + (e.key === "ArrowDown" ? 1 : -1)));
-        render();
-      } else if (e.key === "Enter" && links[selected]) {
-        searchDialog.close();
-        location.href = links[selected].href;
-      }
-    };
-    // a click on the dimmed page around the box closes it
-    searchDialog.onclick = e => {
-      if (e.target === searchDialog || e.target.closest("a"))
-        searchDialog.close();
-    };
-    searchDialog.render = render;
-  }
-  searchDialog.showModal();
-  const input = searchDialog.querySelector("input");
-  input.value = "";
-  if (!searchIndex) {
-    searchDialog.querySelector(".search-results").innerHTML = "<p>Reading the docs.</p>";
-    searchIndex = await loadSearchIndex();
-  }
-  searchDialog.render();
-  input.focus();
-}
-
-addEventListener("keydown", e => {
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
-    e.preventDefault();
-    openSearch();
-  }
-});
-
 // ---------- code blocks ----------
 
 function buildCopyButtons() {
@@ -265,7 +155,50 @@ function buildCopyButtons() {
   }
 }
 
+// ---------- motion ----------
+// sections rise into place as they are scrolled to, and the clips only play while they can be seen
+
+function buildMotion() {
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const groups = [[".feature", 0], [".home section > h2, .home section > .sub, .install-box", 0], [".home .card", 0.06]];
+  const reveal = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting)
+        continue;
+      entry.target.classList.add("seen");
+      reveal.unobserve(entry.target);
+    }
+  }, { rootMargin: "0px 0px -10% 0px" });
+  for (const [selector, step] of groups) {
+    document.querySelectorAll(selector).forEach(el => {
+      // cards in one grid follow each other in, a beat apart
+      const at = [...el.parentElement.children].indexOf(el);
+      el.style.setProperty("--delay", (at % 3) * step + "s");
+      el.classList.add("reveal");
+      reveal.observe(el);
+    });
+  }
+
+  const clips = document.querySelectorAll("video.clip");
+  if (still) {
+    clips.forEach(clip => clip.controls = true);
+    return;
+  }
+  const play = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      if (entry.isIntersecting)
+        entry.target.play().catch(() => {});
+      else
+        entry.target.pause();
+    }
+  }, { threshold: 0.35 });
+  clips.forEach(clip => play.observe(clip));
+}
+
 buildBar();
+if (!isDocs)
+  buildMotion();
 if (isDocs) {
   buildSidebar();
   buildOutline();

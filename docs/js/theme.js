@@ -7,4 +7,6 @@
   if (!theme)
     theme = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
   document.documentElement.dataset.theme = theme;
+  // lets the stylesheet hide what scripts will reveal, and nothing when scripts are off
+  document.documentElement.classList.add("js");
 })();

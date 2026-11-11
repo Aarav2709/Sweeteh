@@ -1,20 +1,22 @@
 /* Sweeteh docs. One stylesheet for the landing page and every docs page. */
 
 :root {
-  --bg: #111014;
-  --bg-raised: #17161b;
-  --bg-sunken: #0c0b0f;
-  --border: #2a2830;
-  --text: #e8e6ed;
-  --text-soft: #a5a1b0;
-  --text-faint: #77737f;
-  --accent: #b9a3ff;
-  --accent-soft: rgba(185, 163, 255, 0.12);
-  --on-accent: #17122b;
+  --bg: #120b0c;
+  --bg-raised: #1a1011;
+  --bg-sunken: #0c0707;
+  --border: #33201f;
+  --text: #f3e9e7;
+  --text-soft: #b9a5a2;
+  --text-faint: #86706d;
+  --accent: #ff6b6b;
+  --accent-soft: rgba(255, 107, 107, 0.11);
+  --on-accent: #240606;
+  --glow: rgba(214, 40, 48, 0.28);
 
   --font: "Google Sans Flex", "Google Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
   --radius: 10px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --bar: 60px;
   --side: 264px;
   --toc: 216px;
@@ -22,16 +24,17 @@
 }
 
 :root[data-theme="light"] {
-  --bg: #ffffff;
-  --bg-raised: #f7f6fa;
-  --bg-sunken: #f2f1f6;
-  --border: #e3e0ea;
-  --text: #1d1b22;
-  --text-soft: #595463;
-  --text-faint: #8a8594;
-  --accent: #5b3fd0;
-  --accent-soft: rgba(91, 63, 208, 0.08);
+  --bg: #fffbfa;
+  --bg-raised: #fbf1ef;
+  --bg-sunken: #f6e8e6;
+  --border: #eed8d5;
+  --text: #261415;
+  --text-soft: #6d5151;
+  --text-faint: #9c8280;
+  --accent: #c81e2b;
+  --accent-soft: rgba(200, 30, 43, 0.07);
   --on-accent: #ffffff;
+  --glow: rgba(200, 30, 43, 0.12);
   color-scheme: light;
 }
 
@@ -70,6 +73,14 @@ a:hover {
   border-radius: 4px;
 }
 
+pre,
+.table,
+.sidebar,
+.toc {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
 img,
 video {
   display: block;
@@ -106,11 +117,6 @@ video {
 
 .brand:hover {
   text-decoration: none;
-}
-
-.brand img {
-  width: 24px;
-  height: 24px;
 }
 
 .bar-link {
@@ -388,13 +394,11 @@ pre .dim {
   color: var(--text);
 }
 
-/* the one flourish, a key lit from below like the shell's own */
 kbd {
   display: inline-block;
   min-width: 26px;
   padding: 1px 7px;
   border: 1px solid var(--border);
-  border-bottom: 2px solid var(--accent);
   border-radius: 6px;
   background: var(--bg-raised);
   font: 500 12.5px/1.7 var(--mono);
@@ -454,7 +458,6 @@ td.muted {
   margin: 0 0 20px;
   padding: 14px 18px;
   border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
   border-radius: var(--radius);
   background: var(--accent-soft);
   font-size: 15px;
@@ -543,7 +546,6 @@ td.muted {
 
 a.card {
   color: inherit;
-  transition: border-color 0.15s;
 }
 
 a.card:hover {
@@ -634,6 +636,7 @@ a.card:hover {
 .shot video {
   width: 100%;
   aspect-ratio: 16 / 9;
+  object-fit: cover;
 }
 
 .home section {
@@ -722,10 +725,10 @@ a.card:hover {
   padding: 8px 18px;
   border-radius: 999px;
   background: var(--p-layer1);
-  box-shadow: 0 3px 0 var(--p-accent);
+  border: 1px solid var(--p-line);
   font-size: 14px;
   font-weight: 500;
-  transition: background 0.4s, box-shadow 0.4s;
+  transition: background 0.4s, border-color 0.4s;
 }
 
 .preview-island i {
@@ -849,40 +852,146 @@ a.card:hover {
   }
 }
 
+/* ---------- motion ---------- */
+/* everything eases in and settles, nothing bounces. The js class is set before paint, so without scripts nothing is hidden. */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translate(-6%, -2%) scale(1);
+  }
+  to {
+    transform: translate(6%, 3%) scale(1.12);
+  }
+}
+
+.landing {
+  overflow-x: hidden;
+}
+
+.hero {
+  position: relative;
+}
+
+/* a slow red light behind the headline, like the one under the island */
+.hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -80px;
+  left: 50%;
+  width: min(900px, 120vw);
+  height: 520px;
+  margin-left: calc(min(900px, 120vw) / -2);
+  background: radial-gradient(closest-side, var(--glow), transparent);
+  animation: drift 14s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.hero > * {
+  animation: rise 0.8s var(--ease) both;
+}
+
+.hero > :nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.hero > :nth-child(3) {
+  animation-delay: 0.16s;
+}
+
+.hero > :nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.docs .content {
+  animation: fade 0.45s ease both;
+}
+
+.js .reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+  transition-delay: var(--delay, 0s);
+}
+
+.js .reveal.seen {
+  opacity: 1;
+  transform: none;
+}
+
+.button,
+.card,
+.pager a,
+.chip {
+  transition: transform 0.25s var(--ease), border-color 0.25s, background 0.25s, filter 0.25s, box-shadow 0.25s;
+}
+
+.button:hover,
+a.card:hover,
+.pager a:hover {
+  transform: translateY(-2px);
+}
+
+.home .card:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+}
+
+.button.primary:hover {
+  box-shadow: 0 10px 30px -10px var(--accent);
+}
+
+.shot {
+  transition: border-color 0.4s, box-shadow 0.4s;
+}
+
+.feature .shot:hover {
+  border-color: var(--accent);
+  box-shadow: 0 24px 60px -30px var(--accent);
+}
+
+.nav-group a,
+.toc a,
+.bar-link,
+.icon-button {
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.icon-button svg {
+  transition: transform 0.5s var(--ease);
+}
+
+.theme-button:hover svg {
+  transform: rotate(40deg);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before {
+    animation: none !important;
     transition: none !important;
+  }
+
+  .js .reveal {
+    opacity: 1;
+    transform: none;
   }
 }
 
 /* ---------- landing page sections ---------- */
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 24px;
-  padding: 5px 14px 5px 6px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  color: var(--text-soft);
-  font-size: 13.5px;
-  font-weight: 500;
-}
-
-.badge:hover {
-  border-color: var(--accent);
-  color: var(--text);
-  text-decoration: none;
-}
-
-.badge b {
-  padding: 1px 9px;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-weight: 600;
-}
 
 .hero h1 span {
   display: block;
@@ -1001,102 +1110,6 @@ a.card:hover {
   margin-bottom: 14px;
 }
 
-/* ---------- search ---------- */
-
-.search-button {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 36px;
-  padding: 0 8px 0 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg-raised);
-  color: var(--text-faint);
-  font: 400 14px var(--font);
-  cursor: pointer;
-}
-
-.search-button:hover {
-  color: var(--text-soft);
-  border-color: var(--text-faint);
-}
-
-.search-button kbd {
-  border-bottom-width: 1px;
-  border-bottom-color: var(--border);
-  font-size: 11.5px;
-}
-
-.search {
-  width: min(600px, calc(100vw - 32px));
-  max-height: min(520px, calc(100vh - 120px));
-  margin-top: 88px;
-  padding: 0;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: var(--bg);
-  color: var(--text);
-}
-
-.search[open] {
-  display: flex;
-  flex-direction: column;
-}
-
-.search::backdrop {
-  background: rgba(0, 0, 0, 0.55);
-}
-
-.search input {
-  flex-shrink: 0;
-  width: 100%;
-  padding: 16px 20px;
-  border: 0;
-  border-bottom: 1px solid var(--border);
-  outline: 0;
-  background: none;
-  color: var(--text);
-  font: inherit;
-  font-size: 16.5px;
-}
-
-.search-results {
-  overflow-y: auto;
-  padding: 8px;
-}
-
-.search-results a {
-  display: block;
-  padding: 9px 12px;
-  border-radius: 8px;
-  color: var(--text);
-  font-size: 15px;
-}
-
-.search-results a small {
-  display: block;
-  overflow: hidden;
-  color: var(--text-faint);
-  font-size: 13px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.search-results a:hover,
-.search-results a.selected {
-  background: var(--accent-soft);
-  text-decoration: none;
-}
-
-.search-results p {
-  margin: 0;
-  padding: 16px 12px;
-  color: var(--text-faint);
-  font-size: 14.5px;
-}
-
 @media (max-width: 800px) {
   .feature,
   .feature:nth-of-type(even) {
@@ -1107,16 +1120,5 @@ a.card:hover {
 
   .feature:nth-of-type(even) .feature-text {
     order: 0;
-  }
-
-  .search-button span,
-  .search-button kbd {
-    display: none;
-  }
-
-  .search-button {
-    padding: 0 10px;
-    border: 0;
-    background: none;
   }
 }
