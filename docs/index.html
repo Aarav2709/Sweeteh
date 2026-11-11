@@ -14,14 +14,16 @@
 <body class="landing">
   <main class="home">
     <div class="hero">
-      <h1>One island. <span>Your whole desktop.</span></h1>
-      <p>Sweeteh is a desktop shell for Hyprland, built with Quickshell. Everything lives in one island, lit from below in the color of your wallpaper.</p>
-      <div class="actions">
-        <a class="button primary" href="install.html">Get started</a>
-        <a class="button" href="https://github.com/Aarav2709/Sweeteh">Source on GitHub</a>
+      <div class="hero-text">
+        <h1>Sweeteh</h1>
+        <p>A desktop shell for Hyprland. The launcher, quick settings, music and notifications all open from one island at the top of your screen, in the color of your wallpaper.</p>
+        <div class="install-box">
+          <pre><code>curl -fsSL https://raw.githubusercontent.com/Aarav2709/Sweeteh/main/install.sh | bash</code></pre>
+        </div>
+        <p class="hero-links"><a href="install.html">Read the docs</a><a href="https://github.com/Aarav2709/Sweeteh">Source on GitHub</a><a href="https://github.com/Aarav2709/Sweeteh/raw/main/Sweeteh.mp4">Watch the full demo</a></p>
       </div>
       <div class="shot">
-        <video controls preload="none" playsinline poster="img/poster.webp" src="https://github.com/Aarav2709/Sweeteh/raw/main/Sweeteh.mp4"></video>
+        <video class="clip" muted loop playsinline preload="metadata" poster="img/poster.webp" src="img/hero.mp4" width="1280" height="720" aria-label="The launcher, the dashboard and the music player opening from the island"></video>
       </div>
     </div>
 

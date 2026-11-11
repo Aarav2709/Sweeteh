@@ -573,57 +573,89 @@ a.card:hover {
   padding: 0 24px 40px;
 }
 
+/* the page opens like the desktop does: a name, what it is, how to get it, and the shell itself */
 .hero {
-  padding: 88px 0 56px;
-  text-align: center;
+  padding: 72px 0 0;
+}
+
+.hero-text {
+  margin-bottom: 48px;
+}
+
+.hero-text > p {
+  max-width: 660px;
 }
 
 .hero h1 {
-  margin: 0 auto 16px;
-  max-width: 760px;
-  font-size: clamp(36px, 6vw, 58px);
-  line-height: 1.08;
-  letter-spacing: -0.03em;
+  margin: 0 0 20px;
+  font-size: clamp(64px, 13vw, 148px);
+  line-height: 0.9;
+  font-weight: 700;
+  letter-spacing: -0.055em;
 }
 
 .hero p {
-  max-width: 600px;
-  margin: 0 auto 28px;
+  margin: 0 0 28px;
   color: var(--text-soft);
-  font-size: 18.5px;
+  font-size: 19px;
   line-height: 1.6;
 }
 
-.actions {
+.hero .install-box {
+  max-width: 880px;
+  margin: 0 0 18px;
+}
+
+.hero .install-box pre {
+  font-size: 13.5px;
+  scrollbar-width: none;
+}
+
+.hero .hero-links {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-}
-
-.button {
-  display: inline-block;
-  padding: 10px 22px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  color: var(--text);
+  gap: 6px 26px;
+  margin: 0;
   font-size: 15.5px;
-  font-weight: 550;
+  font-weight: 500;
 }
 
-.button:hover {
-  border-color: var(--text-faint);
+.hero-links a::after {
+  content: " \2192";
+  display: inline-block;
+  margin-left: 5px;
+  transition: transform 0.25s var(--ease);
+}
+
+.hero-links a:hover {
   text-decoration: none;
 }
 
-.button.primary {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--on-accent);
+.hero-links a:hover::after {
+  transform: translateX(4px);
 }
 
-.button.primary:hover {
-  filter: brightness(1.08);
+/* on the landing page the top bar is an island of its own, a pill that floats over the page */
+.landing .bar {
+  top: 14px;
+  width: fit-content;
+  max-width: calc(100% - 24px);
+  height: 46px;
+  margin: 14px auto 0;
+  padding: 0 6px 0 20px;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.landing .brand {
+  margin-right: 14px;
+  font-size: 15.5px;
+}
+
+.landing .bar-link,
+.landing .icon-button {
+  border-radius: 999px;
 }
 
 .shot {
@@ -840,7 +872,11 @@ a.card:hover {
   }
 
   .hero {
-    padding: 56px 0 40px;
+    padding-top: 48px;
+  }
+
+  .hero p {
+    font-size: 17px;
   }
 
   .bar-link.optional {
@@ -868,52 +904,8 @@ a.card:hover {
   }
 }
 
-@keyframes drift {
-  from {
-    transform: translate(-6%, -2%) scale(1);
-  }
-  to {
-    transform: translate(6%, 3%) scale(1.12);
-  }
-}
-
 .landing {
   overflow-x: hidden;
-}
-
-.hero {
-  position: relative;
-}
-
-/* a slow red light behind the headline, like the one under the island */
-.hero::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  top: -80px;
-  left: 50%;
-  width: min(900px, 120vw);
-  height: 520px;
-  margin-left: calc(min(900px, 120vw) / -2);
-  background: radial-gradient(closest-side, var(--glow), transparent);
-  animation: drift 14s ease-in-out infinite alternate;
-  pointer-events: none;
-}
-
-.hero > * {
-  animation: rise 0.8s var(--ease) both;
-}
-
-.hero > :nth-child(2) {
-  animation-delay: 0.08s;
-}
-
-.hero > :nth-child(3) {
-  animation-delay: 0.16s;
-}
-
-.hero > :nth-child(4) {
-  animation-delay: 0.3s;
 }
 
 .docs .content {
@@ -948,10 +940,6 @@ a.card:hover,
 .home .card:hover {
   border-color: var(--accent);
   transform: translateY(-3px);
-}
-
-.button.primary:hover {
-  box-shadow: 0 10px 30px -10px var(--accent);
 }
 
 .shot {
@@ -992,15 +980,6 @@ a.card:hover,
 }
 
 /* ---------- landing page sections ---------- */
-
-.hero h1 span {
-  display: block;
-  color: var(--accent);
-}
-
-.hero .shot {
-  margin-top: 56px;
-}
 
 .feature {
   display: grid;
@@ -1080,6 +1059,27 @@ a.card:hover,
 .install-box {
   max-width: 760px;
   margin: 0 auto;
+}
+
+.hero-text > *,
+.hero > .shot {
+  animation: rise 0.8s var(--ease) both;
+}
+
+.hero-text > :nth-child(2) {
+  animation-delay: 0.07s;
+}
+
+.hero-text > :nth-child(3) {
+  animation-delay: 0.14s;
+}
+
+.hero-text > :nth-child(4) {
+  animation-delay: 0.21s;
+}
+
+.hero > .shot {
+  animation-delay: 0.3s;
 }
 
 /* the command and its button sit side by side in one bar, so the button never covers the text */
