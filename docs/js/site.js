@@ -182,7 +182,8 @@ function buildMotion() {
 
   const clips = document.querySelectorAll("video.clip");
   if (still) {
-    clips.forEach(clip => clip.controls = true);
+    // the clip behind the name stays a still picture, controls would sit on top of the text
+    clips.forEach(clip => clip.controls = !clip.closest(".hero"));
     return;
   }
   const play = new IntersectionObserver(entries => {

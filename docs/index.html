@@ -8,48 +8,41 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&amp;icon_names=apps,calculate,content_paste,dark_mode,description,desktop_windows,dns,history,lock,mood,overview,palette,restart_alt,screenshot_region,search,select_window,settings,terminal,timer,travel_explore,wallpaper,widgets,wifi_off&amp;display=block">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&amp;icon_names=desktop_windows,lock,overview,screenshot_region,settings,widgets&amp;display=block">
   <link rel="stylesheet" href="css/site.css">
   <script src="js/theme.js"></script>
 </head>
 <body class="landing">
   <main class="home">
     <div class="hero">
+      <video class="clip" muted loop playsinline preload="metadata" poster="img/poster.webp" src="img/hero.mp4" aria-label="The launcher, the dashboard and the music player opening from the island"></video>
       <div class="hero-text">
         <h1>Sweeteh</h1>
-        <p>A desktop shell for Hyprland. The launcher, quick settings, music and notifications all open from one island at the top of your screen, in the color of your wallpaper.</p>
-        <div class="install-box">
-          <pre><code>curl -fsSL https://raw.githubusercontent.com/Aarav2709/Sweeteh/main/install.sh | bash</code></pre>
+        <p>A desktop shell for Hyprland. Everything opens from one island at the top of your screen, in the color of your wallpaper.</p>
+        <div class="hero-actions">
+          <a class="primary" href="install.html">Install</a>
+          <a href="https://github.com/Aarav2709/Sweeteh/raw/main/Sweeteh.mp4">Watch the demo</a>
+          <a href="https://github.com/Aarav2709/Sweeteh">GitHub</a>
         </div>
-        <p class="hero-links"><a href="install.html">Read the docs</a><a href="https://github.com/Aarav2709/Sweeteh">Source on GitHub</a><a href="https://github.com/Aarav2709/Sweeteh/raw/main/Sweeteh.mp4">Watch the full demo</a></p>
-      </div>
-      <div class="shot">
-        <video class="clip" muted loop playsinline preload="metadata" poster="img/poster.webp" src="img/hero.mp4" width="1280" height="720" aria-label="The launcher, the dashboard and the music player opening from the island"></video>
       </div>
     </div>
 
-    <section class="try">
-      <div>
-        <p class="eyebrow">Launcher</p>
-        <h2>Go on, type in it</h2>
-        <p>Apps, files and sums answer as you type. One first character turns the search into a command palette, an emoji picker or a window switcher.</p>
-        <div class="swatch-row">
-          <button class="chip" type="button" data-fill="&gt;">&gt; commands</button>
-          <button class="chip" type="button" data-fill=":">: emoji</button>
-          <button class="chip" type="button" data-fill="@">@ windows</button>
-          <button class="chip" type="button" data-fill="&quot;">" clipboard</button>
-          <button class="chip" type="button" data-fill="/">/ files</button>
-          <button class="chip" type="button" data-fill="$">$ ssh</button>
-          <button class="chip" type="button" data-fill="12 * 4.5">12 * 4.5</button>
-        </div>
-      </div>
-      <div class="mock">
-        <label class="mock-field"><span class="symbol" aria-hidden="true">search</span><input type="text" placeholder="Search apps, files and sums, or ? for more" aria-label="Try the launcher" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
-        <div class="mock-rows" aria-live="polite"></div>
-      </div>
-    </section>
-
     <section>
+
+      <div class="feature">
+        <div class="feature-text">
+          <p class="eyebrow">Launcher</p>
+          <h3>Type, and it is there</h3>
+          <p>Apps, files, sums and unit conversions answer as you type. One first character turns the search into a command palette, an emoji picker or a window switcher.</p>
+          <ul>
+          <li>Commands, timers, dates and translations</li>
+          <li>Windows, the clipboard, recent files and ssh hosts</li>
+          <li>Your own commands from the config</li>
+          </ul>
+        </div>
+        <div class="shot"><video class="clip" muted loop playsinline preload="none" poster="img/launcher.webp" src="img/launcher.mp4" width="960" height="540" aria-label="The launcher listing apps that match what was typed"></video></div>
+      </div>
+
 
       <div class="feature">
         <div class="feature-text">
@@ -145,6 +138,5 @@
   </footer>
 
   <script src="js/site.js" defer></script>
-  <script src="js/launcher.js" defer></script>
 </body>
 </html>

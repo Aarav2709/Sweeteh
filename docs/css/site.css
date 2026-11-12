@@ -586,66 +586,96 @@ a.card:hover {
   padding: 0 24px 40px;
 }
 
-/* the page opens like the desktop does: a name, what it is, how to get it, and the shell itself */
+/* the first thing on the page is the shell itself: the desktop fills a frame, the island works at its top and the name sits at its foot */
 .hero {
-  padding: 72px 0 0;
+  position: relative;
+  height: min(80vh, 780px);
+  min-height: 520px;
+  margin: 20px calc(50% - min(660px, 50vw - 16px)) 0;
+  overflow: hidden;
+  border-radius: 28px;
+  background: #1a0708;
+  color: #fff;
+  animation: frame-in 0.9s var(--ease) both;
+}
+
+.hero video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+}
+
+/* the wallpaper darkens toward the foot so the name reads on it */
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(14, 3, 4, 0.94) 0%, rgba(14, 3, 4, 0.6) 30%, rgba(14, 3, 4, 0) 62%);
+  pointer-events: none;
 }
 
 .hero-text {
-  margin-bottom: 48px;
-}
-
-.hero-text > p {
-  max-width: 660px;
+  position: absolute;
+  z-index: 1;
+  left: clamp(22px, 5vw, 64px);
+  right: clamp(22px, 5vw, 64px);
+  bottom: clamp(26px, 5vw, 60px);
 }
 
 .hero h1 {
-  margin: 0 0 20px;
-  font-size: clamp(64px, 13vw, 148px);
-  line-height: 0.9;
+  margin: 0 0 14px -0.04em;
+  font-size: clamp(56px, 10.5vw, 140px);
+  line-height: 0.86;
   font-weight: 700;
   letter-spacing: -0.055em;
 }
 
 .hero p {
-  margin: 0 0 28px;
-  color: var(--text-soft);
-  font-size: 19px;
-  line-height: 1.6;
+  max-width: 540px;
+  margin: 0 0 26px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: clamp(16px, 1.6vw, 19px);
+  line-height: 1.55;
 }
 
-.hero .install-box {
-  max-width: 880px;
-  margin: 0 0 18px;
-}
-
-.hero .install-box pre {
-  font-size: 13.5px;
-  scrollbar-width: none;
-}
-
-.hero .hero-links {
+.hero-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 26px;
-  margin: 0;
+  gap: 10px;
+}
+
+.hero-actions a {
+  padding: 11px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(20, 6, 7, 0.35);
+  backdrop-filter: blur(10px);
+  color: #fff;
   font-size: 15.5px;
-  font-weight: 500;
+  font-weight: 550;
+  transition: background 0.25s, border-color 0.25s, transform 0.25s var(--ease);
 }
 
-.hero-links a::after {
-  content: " \2192";
-  display: inline-block;
-  margin-left: 5px;
-  transition: transform 0.25s var(--ease);
-}
-
-.hero-links a:hover {
+.hero-actions a:hover {
+  border-color: rgba(255, 255, 255, 0.7);
   text-decoration: none;
+  transform: translateY(-2px);
 }
 
-.hero-links a:hover::after {
-  transform: translateX(4px);
+.hero-actions a.primary {
+  border-color: #fff;
+  background: #fff;
+  color: #230809;
+}
+
+@keyframes frame-in {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
 }
 
 /* on the landing page the top bar is an island of its own, a pill that floats over the page */
@@ -885,11 +915,8 @@ a.card:hover {
   }
 
   .hero {
-    padding-top: 48px;
-  }
-
-  .hero p {
-    font-size: 17px;
+    height: 76vh;
+    border-radius: 22px;
   }
 
   .bar-link.optional {
@@ -1074,25 +1101,17 @@ a.card:hover,
   margin: 0 auto;
 }
 
-.hero-text > *,
-.hero > .shot {
-  animation: rise 0.8s var(--ease) both;
+.hero-text > * {
+  animation: rise 0.9s var(--ease) both;
+  animation-delay: 0.25s;
 }
 
 .hero-text > :nth-child(2) {
-  animation-delay: 0.07s;
+  animation-delay: 0.33s;
 }
 
 .hero-text > :nth-child(3) {
-  animation-delay: 0.14s;
-}
-
-.hero-text > :nth-child(4) {
-  animation-delay: 0.21s;
-}
-
-.hero > .shot {
-  animation-delay: 0.3s;
+  animation-delay: 0.41s;
 }
 
 /* the command and its button sit side by side in one bar, so the button never covers the text */
@@ -1166,7 +1185,7 @@ a.card:hover,
   }
 }
 
-/* ---------- the launcher you can type in ---------- */
+/* ---------- icons on the cards ---------- */
 
 .symbol {
   font-family: "Material Symbols Rounded";
@@ -1180,166 +1199,9 @@ a.card:hover,
   -webkit-font-smoothing: antialiased;
 }
 
-.try {
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  align-items: center;
-  gap: 48px;
-}
-
-.try h2 {
-  margin-bottom: 10px;
-}
-
-.try p {
-  margin: 0 0 20px;
-  color: var(--text-soft);
-}
-
-.try .swatch-row {
-  margin: 0;
-}
-
-.try .chip {
-  padding: 5px 14px;
-  font-family: var(--mono);
-  font-size: 13.5px;
-}
-
-.mock {
-  min-height: 396px;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 22px;
-  background: var(--bg-raised);
-  transition: border-color 0.4s;
-}
-
-.mock:focus-within {
-  border-color: var(--accent);
-}
-
-.mock-field {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
-  padding: 0 16px;
-  border-radius: 14px;
-  background: var(--bg-sunken);
-  color: var(--text-faint);
-}
-
-.mock-field .symbol {
-  font-size: 21px;
-}
-
-.mock input {
-  flex: 1;
-  min-width: 0;
-  padding: 14px 0;
-  border: 0;
-  outline: 0;
-  background: none;
-  color: var(--text);
-  font: 500 16px var(--font);
-  caret-color: var(--accent);
-}
-
-.mock input::placeholder {
-  color: var(--text-faint);
-}
-
-.mock-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-  padding: 9px 12px;
-  border: 0;
-  border-radius: 12px;
-  background: none;
-  color: var(--text);
-  font: inherit;
-  text-align: left;
-  animation: row-in 0.3s var(--ease) both;
-  animation-delay: calc(var(--i) * 0.03s);
-}
-
-@keyframes row-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-}
-
-.mock-row.first {
-  background: var(--accent-soft);
-}
-
-button.mock-row {
-  cursor: pointer;
-}
-
-button.mock-row:hover {
-  background: var(--accent-soft);
-}
-
-.mock-icon {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--bg-sunken);
-  color: var(--text-soft);
-  font-size: 19px;
-}
-
-.mock-text {
-  flex: 1;
-  min-width: 0;
-  line-height: 1.35;
-}
-
-.mock-text b,
-.mock-text small {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.mock-text b {
-  font-size: 15px;
-  font-weight: 500;
-}
-
-.mock-text small {
-  color: var(--text-faint);
-  font-size: 13px;
-}
-
-.mock-hint {
-  color: var(--text-faint);
-  font-size: 12.5px;
-}
-
 .card .symbol {
   display: block;
   margin-bottom: 12px;
   color: var(--accent);
   font-size: 24px;
-}
-
-@media (max-width: 800px) {
-  .try {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
-  .mock {
-    min-height: 380px;
-  }
 }
