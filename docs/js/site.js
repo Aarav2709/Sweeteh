@@ -19,6 +19,9 @@ const NAV = [
   ] }
 ];
 
+// the clips on the landing page, its top bar scrolls to each
+const SECTIONS = [["launcher", "Launcher"], ["island", "Island"], ["media", "Media"], ["wallpapers", "Wallpapers"]];
+
 const ICONS = {
   menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
   github: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.3 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg>',
@@ -48,9 +51,7 @@ function buildBar() {
   bar.className = "bar";
   bar.innerHTML = `
     ${isDocs ? `<button class="icon-button menu-button" type="button" aria-label="Open the menu" aria-expanded="false">${ICONS.menu}</button>` : ""}
-    <a class="brand" href="index.html">Sweeteh</a>
-    <a class="bar-link${isDocs ? " optional" : ""}" href="install.html">Docs</a>
-    <a class="bar-link optional" href="${REPO}/releases">Releases</a>
+    ${isDocs ? '<a class="brand" href="index.html">Sweeteh</a>' : SECTIONS.map(([id, label]) => `<a class="bar-link" href="#${id}">${label}</a>`).join("") + '<a class="bar-link" href="install.html">Docs</a>'}
     <a class="icon-button" href="${REPO}" aria-label="Sweeteh on GitHub">${ICONS.github}</a>
     <button class="icon-button theme-button" type="button" aria-label="Switch between dark and light">${ICONS.sun}${ICONS.moon}</button>`;
   document.body.prepend(bar);

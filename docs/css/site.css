@@ -45,6 +45,7 @@
 }
 
 html {
+  scroll-behavior: smooth;
   scroll-padding-top: calc(var(--bar) + 20px);
   -webkit-text-size-adjust: 100%;
 }
@@ -606,15 +607,25 @@ a.card:hover {
   height: 100%;
   object-fit: cover;
   object-position: top center;
+  /* the clip is there for the feel, soft and a little dim, scaled so the blur has no pale edge */
+  filter: blur(3px) brightness(0.82) saturate(1.05);
+  transform: scale(1.03);
 }
 
-/* the wallpaper darkens toward the foot so the name reads on it */
+/* a vignette closes in from every side and deepens toward the foot, so the name reads on it */
 .hero::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(14, 3, 4, 0.94) 0%, rgba(14, 3, 4, 0.6) 30%, rgba(14, 3, 4, 0) 62%);
+  background:
+    linear-gradient(to top, rgba(10, 2, 3, 0.96) 0%, rgba(10, 2, 3, 0.78) 28%, rgba(10, 2, 3, 0.3) 58%, rgba(10, 2, 3, 0) 80%),
+    radial-gradient(120% 90% at 50% 30%, rgba(10, 2, 3, 0) 35%, rgba(10, 2, 3, 0.7) 100%);
   pointer-events: none;
+}
+
+.hero h1,
+.hero p {
+  text-shadow: 0 2px 24px rgba(10, 2, 3, 0.6);
 }
 
 .hero-text {
@@ -636,7 +647,7 @@ a.card:hover {
 .hero p {
   max-width: 540px;
   margin: 0 0 26px;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   font-size: clamp(16px, 1.6vw, 19px);
   line-height: 1.55;
 }
@@ -685,15 +696,38 @@ a.card:hover {
   max-width: calc(100% - 24px);
   height: 46px;
   margin: 14px auto 0;
-  padding: 0 6px 0 20px;
+  padding: 0 6px;
   gap: 2px;
   border: 1px solid var(--border);
   border-radius: 999px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  white-space: nowrap;
 }
 
-.landing .brand {
-  margin-right: 14px;
-  font-size: 15.5px;
+.landing .bar-link,
+.landing .icon-button {
+  flex-shrink: 0;
+}
+
+/* a clip scrolled to from the bar lands in the middle of the screen */
+.feature {
+  scroll-margin-top: calc(50vh - 200px);
+}
+
+@media (max-width: 560px) {
+  .landing .bar-link {
+    padding: 6px;
+    font-size: 13px;
+  }
+
+  .landing .icon-button {
+    width: 32px;
+  }
+
+  .landing .bar a.icon-button {
+    display: none;
+  }
 }
 
 .landing .bar-link,
@@ -919,10 +953,6 @@ a.card:hover {
     border-radius: 22px;
   }
 
-  .bar-link.optional {
-    display: none;
-  }
-
   .copy {
     opacity: 1;
   }
@@ -1007,6 +1037,10 @@ a.card:hover,
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before {
     animation: none !important;
