@@ -12,7 +12,7 @@ Item {
 
     readonly property string version: versionFile.text().trim()
     // what 1.1.1 brought, the same story as the release notes
-    readonly property var notes: [["healing", "No more sudden exits", "The crash while typing in the launcher is gone, : included."], ["restart_alt", "Back by itself", "If the shell ever does crash, it restarts without a dialog in the way."], ["select_window", "Windows in the launcher", "@ switches to an open window, Ctrl Enter closes it."], ["content_paste", "Clipboard, files and ssh", "\" searches what you copied, / lists recent files, $ connects to a host."], ["terminal", "Your own commands", "Add rows to launcher.commands in the config, they show in > too."], ["palette", "Fixed themes", "Catppuccin, Gruvbox, Rosé Pine, Nord, Tokyo Night and Everforest."], ["menu_book", "A docs site", "Keys, the launcher and every option, linked from the README."]]
+    readonly property var notes: [["healing", "No more sudden exits", "The crash while typing in the launcher is gone, : included."], ["restart_alt", "Back by itself", "If the shell ever does crash, it restarts without a dialog in the way."], ["select_window", "Windows in the launcher", "@ switches to an open window, Ctrl Enter closes it."], ["content_paste", "Clipboard, files and ssh", "\" searches what you copied, / lists recent files, $ connects to a host."], ["terminal", "Your own commands", "Add rows to launcher.commands in the config, they show in > too."], ["palette", "Fixed themes", "Catppuccin, Gruvbox, Rosé Pine, Nord, Tokyo Night and Everforest."]]
 
     signal done
 
