@@ -57,6 +57,19 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* nothing on the page selects by accident, only commands and code, which are there to be copied */
+body {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+pre,
+code,
+input {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 a {
   color: var(--accent);
   text-decoration: none;
@@ -1150,5 +1163,183 @@ a.card:hover,
 
   .feature:nth-of-type(even) .feature-text {
     order: 0;
+  }
+}
+
+/* ---------- the launcher you can type in ---------- */
+
+.symbol {
+  font-family: "Material Symbols Rounded";
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+}
+
+.try {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  align-items: center;
+  gap: 48px;
+}
+
+.try h2 {
+  margin-bottom: 10px;
+}
+
+.try p {
+  margin: 0 0 20px;
+  color: var(--text-soft);
+}
+
+.try .swatch-row {
+  margin: 0;
+}
+
+.try .chip {
+  padding: 5px 14px;
+  font-family: var(--mono);
+  font-size: 13.5px;
+}
+
+.mock {
+  min-height: 396px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--bg-raised);
+  transition: border-color 0.4s;
+}
+
+.mock:focus-within {
+  border-color: var(--accent);
+}
+
+.mock-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 0 16px;
+  border-radius: 14px;
+  background: var(--bg-sunken);
+  color: var(--text-faint);
+}
+
+.mock-field .symbol {
+  font-size: 21px;
+}
+
+.mock input {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  color: var(--text);
+  font: 500 16px var(--font);
+  caret-color: var(--accent);
+}
+
+.mock input::placeholder {
+  color: var(--text-faint);
+}
+
+.mock-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  animation: row-in 0.3s var(--ease) both;
+  animation-delay: calc(var(--i) * 0.03s);
+}
+
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.mock-row.first {
+  background: var(--accent-soft);
+}
+
+button.mock-row {
+  cursor: pointer;
+}
+
+button.mock-row:hover {
+  background: var(--accent-soft);
+}
+
+.mock-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-sunken);
+  color: var(--text-soft);
+  font-size: 19px;
+}
+
+.mock-text {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.mock-text b,
+.mock-text small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mock-text b {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.mock-text small {
+  color: var(--text-faint);
+  font-size: 13px;
+}
+
+.mock-hint {
+  color: var(--text-faint);
+  font-size: 12.5px;
+}
+
+.card .symbol {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--accent);
+  font-size: 24px;
+}
+
+@media (max-width: 800px) {
+  .try {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .mock {
+    min-height: 380px;
   }
 }

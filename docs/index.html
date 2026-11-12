@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&amp;icon_names=apps,calculate,content_paste,dark_mode,description,desktop_windows,dns,history,lock,mood,overview,palette,restart_alt,screenshot_region,search,select_window,settings,terminal,timer,travel_explore,wallpaper,widgets,wifi_off&amp;display=block">
   <link rel="stylesheet" href="css/site.css">
   <script src="js/theme.js"></script>
 </head>
@@ -27,22 +28,28 @@
       </div>
     </div>
 
-    <section>
-
-      <div class="feature">
-        <div class="feature-text">
-          <p class="eyebrow">Launcher</p>
-          <h3>Type, and it is there</h3>
-          <p>Apps, files, sums and unit conversions answer as you type. One first character turns the search into a command palette, an emoji picker or a window switcher.</p>
-          <ul>
-          <li><code>&gt;</code> for every shell action, timers, dates and translations</li>
-          <li><code>@</code> windows, <code>"</code> clipboard, <code>/</code> recent files, <code>$</code> ssh hosts</li>
-          <li>Your own commands from the config</li>
-          </ul>
+    <section class="try">
+      <div>
+        <p class="eyebrow">Launcher</p>
+        <h2>Go on, type in it</h2>
+        <p>Apps, files and sums answer as you type. One first character turns the search into a command palette, an emoji picker or a window switcher.</p>
+        <div class="swatch-row">
+          <button class="chip" type="button" data-fill="&gt;">&gt; commands</button>
+          <button class="chip" type="button" data-fill=":">: emoji</button>
+          <button class="chip" type="button" data-fill="@">@ windows</button>
+          <button class="chip" type="button" data-fill="&quot;">" clipboard</button>
+          <button class="chip" type="button" data-fill="/">/ files</button>
+          <button class="chip" type="button" data-fill="$">$ ssh</button>
+          <button class="chip" type="button" data-fill="12 * 4.5">12 * 4.5</button>
         </div>
-        <div class="shot"><video class="clip" muted loop playsinline preload="none" poster="img/launcher.webp" src="img/launcher.mp4" width="960" height="540" aria-label="The launcher listing apps that match what was typed"></video></div>
       </div>
+      <div class="mock">
+        <label class="mock-field"><span class="symbol" aria-hidden="true">search</span><input type="text" placeholder="Search apps, files and sums, or ? for more" aria-label="Try the launcher" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+        <div class="mock-rows" aria-live="polite"></div>
+      </div>
+    </section>
 
+    <section>
 
       <div class="feature">
         <div class="feature-text">
@@ -94,12 +101,12 @@
       <h2>And the rest of a desktop</h2>
       <p class="sub">Two layouts share all of it. Islands splits the bar into pills around the island, Island shows the island alone.</p>
       <div class="cards" style="text-align: left">
-        <div class="card"><h3>Lock and idle</h3><p>A lockscreen with media controls and fingerprint unlock, idle lock, a slow dim and then sleep.</p></div>
-        <div class="card"><h3>Capture</h3><p>Screenshots and recordings of a region, window or screen, text copied off the screen and a Google Lens search.</p></div>
-        <div class="card"><h3>Desktop widgets</h3><p>Clock, weather, calendar, media, system load, lyrics and a live spectrum, placed where you like.</p></div>
-        <div class="card"><h3>Overview</h3><p>Every workspace with live window previews. Drag windows between them.</p></div>
-        <div class="card"><h3>Settings</h3><p>Every option in the island, searchable, with a keybind editor. The same options in one JSON file.</p></div>
-        <div class="card"><h3>Every monitor</h3><p>The bar, wallpaper, widgets and lockscreen on each screen. The island opens where you are looking.</p></div>
+        <div class="card"><span class="symbol" aria-hidden="true">lock</span><h3>Lock and idle</h3><p>A lockscreen with media controls and fingerprint unlock, idle lock, a slow dim and then sleep.</p></div>
+        <div class="card"><span class="symbol" aria-hidden="true">screenshot_region</span><h3>Capture</h3><p>Screenshots and recordings of a region, window or screen, text copied off the screen and a Google Lens search.</p></div>
+        <div class="card"><span class="symbol" aria-hidden="true">widgets</span><h3>Desktop widgets</h3><p>Clock, weather, calendar, media, system load, lyrics and a live spectrum, placed where you like.</p></div>
+        <div class="card"><span class="symbol" aria-hidden="true">overview</span><h3>Overview</h3><p>Every workspace with live window previews. Drag windows between them.</p></div>
+        <div class="card"><span class="symbol" aria-hidden="true">settings</span><h3>Settings</h3><p>Every option in the island, searchable, with a keybind editor. The same options in one JSON file.</p></div>
+        <div class="card"><span class="symbol" aria-hidden="true">desktop_windows</span><h3>Every monitor</h3><p>The bar, wallpaper, widgets and lockscreen on each screen. The island opens where you are looking.</p></div>
       </div>
     </section>
 
@@ -138,5 +145,6 @@
   </footer>
 
   <script src="js/site.js" defer></script>
+  <script src="js/launcher.js" defer></script>
 </body>
 </html>
