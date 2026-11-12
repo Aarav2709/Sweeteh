@@ -4,7 +4,7 @@ A desktop shell for Hyprland, built with Quickshell.
 
 https://github.com/user-attachments/assets/47775564-aa10-4187-a838-3ff012cb136e
 
-Docs, keys and the full config reference are at [aarav2709.github.io/Sweeteh](https://aarav2709.github.io/Sweeteh/).
+Docs, keys and the full config reference are at [sweeteh.vercel.app](https://sweeteh.vercel.app/).
 
 ## Install
 
